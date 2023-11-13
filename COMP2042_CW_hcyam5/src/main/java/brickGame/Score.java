@@ -82,7 +82,7 @@ public class Score {
                 label.setScaleX(2);
                 label.setScaleY(2);
 
-                Button restart = new Button("Restart");
+                Button restart = new Button("Back");
                 restart.setTranslateX(220);
                 restart.setTranslateY(300);
                 restart.setOnAction(new EventHandler<ActionEvent>() {

@@ -9,6 +9,10 @@ public class GameEngine {
     private Thread physicsThread;
     public boolean isStopped = true;
 
+    /**
+     *
+     * @param onAction
+     */
     public void setOnAction(OnAction onAction) {
         this.onAction = onAction;
     }
@@ -29,7 +33,8 @@ public class GameEngine {
                         onAction.onUpdate();
                         Thread.sleep(fps);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        return; // remove if error
+                        //e.printStackTrace();
                     }
                 }
             }
@@ -50,7 +55,8 @@ public class GameEngine {
                         onAction.onPhysicsUpdate();
                         Thread.sleep(fps);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        return;
+                        //e.printStackTrace();
                     }
                 }
             }
@@ -69,14 +75,16 @@ public class GameEngine {
         isStopped = false;
     }
 
+
     public void stop() {
         if (!isStopped) {
             isStopped = true;
-            updateThread.stop();
-            physicsThread.stop();
-            timeThread.stop();
+            updateThread.interrupt();
+            physicsThread.interrupt();
+            timeThread.interrupt();
         }
     }
+    // current change : changed to interrupt and return line added to each run() method
 
     private long time = 0;
 
@@ -93,7 +101,8 @@ public class GameEngine {
                         Thread.sleep(1);
                     }
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    return;
+                    //e.printStackTrace();
                 }
             }
         });

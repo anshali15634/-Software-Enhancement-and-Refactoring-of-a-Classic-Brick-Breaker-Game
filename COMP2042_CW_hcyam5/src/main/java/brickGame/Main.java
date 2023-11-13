@@ -8,17 +8,24 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
+
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
 
@@ -60,8 +67,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long goldTime = 0;
 
     private GameEngine engine;
-    public static String savePath    = "D:/save/save.mdds";
-    public static String savePathDir = "D:/save/";
+    public static String savePath;
+    public static String savePathDir;
 
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
@@ -90,31 +97,108 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     Stage  primaryStage;
     Button load    = null;
     Button newGame = null;
+    Button exit = null; // exit the program
+
+    Button about = null; // navigates user to how to play scene
+
+    // the two following functions are to check if the computer has a d drive and setting the save paths accordingly
+    private static boolean checkForDDrive() {
+        File[] drives = File.listRoots();
+        for (File drive : drives) {
+            if (drive.getAbsolutePath().equals("D:\\")) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public static void setSavePaths() {
+        // Check if the computer has a D drive for saving game progress
+        boolean hasDDrive = checkForDDrive();
+
+        // Set save paths based on the presence of D drive
+        if (hasDDrive) {
+            savePath = "D:/save/save.mdds";
+            savePathDir = "D:/save/";
+        } else {
+            savePath = "C:/save/save.mdds";
+            savePathDir = "C:/save/";
+        }
+    }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        System.out.println("PRIMARY STAGE CALLED");
         this.primaryStage = primaryStage;
+        primaryStage.setResizable(false);
+
+        // adding game icon
+        Image icon = new Image("game_icon.png");
+        primaryStage.getIcons().add(icon);
+
+        // "new game" button's image
+        Image new_game_button_img = new Image("new_game_button.png");
+        ImageView imageView = new ImageView(new_game_button_img); // converting button img for display - line 123
+
+        //"about" button's image
+        Image about_button_img = new Image("how_to_play.png");
+        ImageView imageView1 = new ImageView(about_button_img);
+
+        //"exit" button's image
+        Image exit_button_img = new Image("exit_button.png");
+        ImageView imageView2 = new ImageView(exit_button_img);
+
+        imageView.setFitHeight(30);
+        imageView.setPreserveRatio(true);
+
+        imageView1.setFitHeight(30);
+        imageView1.setPreserveRatio(true);
+
+        imageView2.setFitHeight(30);
+        imageView2.setPreserveRatio(true);
 
         if (loadFromSave == false) {
             level++;
             if (level >1){
                 new Score().showMessage("Level Up :)", this);
             }
-            if (level == 18) {
+            if (level == 3) {
                 new Score().showWin(this);
                 return;
             }
 
             initBall();
-            initBreak();
+            initBreak(); // initializes the paddle
             initBoard();
 
             load = new Button("Load Game");
             newGame = new Button("Start New Game");
-            load.setTranslateX(220);
-            load.setTranslateY(300);
-            newGame.setTranslateX(220);
-            newGame.setTranslateY(340);
+            about = new Button("About");
+            exit = new Button("Exit");
+
+            newGame.setPrefSize(30, 10); //(width,height)
+            newGame.setStyle("-fx-background-color: black;");
+            newGame.setGraphic(imageView);
+
+            about.setPrefSize(30, 10); //(width,height)
+            about.setStyle("-fx-background-color: black;");
+            about.setGraphic(imageView1);
+
+            exit.setPrefSize(30, 10); //(width,height)
+            exit.setStyle("-fx-background-color: black;");
+            exit.setGraphic(imageView2);
+
+            newGame.setTranslateX(170);
+            newGame.setTranslateY(140);
+
+            load.setTranslateX(170);
+            load.setTranslateY(230);
+
+            about.setTranslateX(170);
+            about.setTranslateY(320);
+
+            exit.setTranslateX(170);
+            exit.setTranslateY(400);
 
         }
 
@@ -126,25 +210,62 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel = new Label("Heart : " + heart);
         heartLabel.setTranslateX(sceneWidth - 70);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame);
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit);
+            // add load button after the other three buttons work
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
         }
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
         }
+
+        // setting up main scene
         Scene scene = new Scene(root, sceneWidth, sceneHeigt);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
 
-        primaryStage.setTitle("Game");
+        // setting up "how to play" scene2
+        // Set the background image
+        Image backgroundImage = new Image("how_To_play_bg.png");
+        BackgroundImage background = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                null,
+                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
+        );
+
+        StackPane root2 = new StackPane();
+        root2.setBackground(new Background(background));
+
+        // button back will navigate back to first scene
+        Button back = new Button("Back");
+        StackPane.setAlignment(back, javafx.geometry.Pos.TOP_LEFT);
+        back.setOnAction(e -> primaryStage.setScene(scene));
+
+        root2.getChildren().add(back);
+        Scene scene2 = new Scene(root2, sceneWidth, sceneHeigt);
+        scene2.setFill(Color.BLACK);
+
+        // about button should navigate to the "How To Play" scene
+        about.setOnAction(e -> primaryStage.setScene(scene2));
+        exit.setOnAction(e -> {
+            // Close the window when the button is clicked
+            Stage stage = (Stage) exit.getScene().getWindow();
+            stage.close();
+        });
+
+        primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
+
 
         if (loadFromSave == false) {
             if (level > 1 && level < 18) {
                 load.setVisible(false);
                 newGame.setVisible(false);
+                about.setVisible(false);
+                exit.setVisible(false);
                 engine = new GameEngine();
                 engine.setOnAction(this);
                 engine.setFps(120);
@@ -158,6 +279,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                     load.setVisible(false);
                     newGame.setVisible(false);
+                    about.setVisible(false);
+                    exit.setVisible(false);
                 }
             });
 
@@ -171,6 +294,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
                     load.setVisible(false);
                     newGame.setVisible(false);
+                    about.setVisible(false);
+                    exit.setVisible(false);
                 }
             });
         } else {
@@ -214,6 +339,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     public static void main(String[] args) {
+        setSavePaths();
         launch(args);
     }
 
