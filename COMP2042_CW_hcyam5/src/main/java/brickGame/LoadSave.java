@@ -77,7 +77,7 @@ public class LoadSave {
                 e.printStackTrace();
             }
 
-        } catch (IOException e) {
+        } catch (IOException e) { // if catch block executed, no games were saved. save.mdd doesnt exist
             e.printStackTrace();
         }
 

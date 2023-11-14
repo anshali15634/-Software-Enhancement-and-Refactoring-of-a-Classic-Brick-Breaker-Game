@@ -1,5 +1,6 @@
 package brickGame;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -21,6 +22,7 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -70,9 +72,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public static String savePath;
     public static String savePathDir;
 
+    private Label loadLabel;
+
+    public FadeTransition fadeTransition;
+
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
-    private Color[]          colors = new Color[]{
+    /*private Color[]          colors = new Color[]{
+
+            //Color.valueOf("");
             Color.MAGENTA,
             Color.RED,
             Color.GOLD,
@@ -86,7 +94,16 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             Color.YELLOW,
             Color.TOMATO,
             Color.TAN,
+    };*/
+    private Color[] colors = new Color[] {
+            Color.valueOf("#10016A"),
+            Color.valueOf("#421C89"),
+            Color.valueOf("#690FA4"),
+            Color.valueOf("#C918A7"),
+            Color.valueOf("#EC007C"),
+            Color.valueOf("#FE5898")
     };
+
     public  Pane             root;
     private Label            scoreLabel;
     private Label            heartLabel;
@@ -124,6 +141,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             savePathDir = "C:/save/";
         }
     }
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -200,6 +218,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             exit.setTranslateX(170);
             exit.setTranslateY(400);
 
+            // if no previous game saved, when load button pressed should display this message
+            loadLabel = new Label("No previous games saved :<");
+            loadLabel.setLayoutX(170);
+            loadLabel.setLayoutY(460);
+            loadLabel.setVisible(false);
+            fadeTransition = new FadeTransition(Duration.seconds(2), loadLabel);
+            fadeTransition.setFromValue(1.0);
+            fadeTransition.setToValue(0.0);
+
         }
 
 
@@ -210,8 +237,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel = new Label("Heart : " + heart);
         heartLabel.setTranslateX(sceneWidth - 70);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit);
-            // add load button after the other three buttons work
+            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit,load,loadLabel);
         } else {
             root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
         }
@@ -275,12 +301,19 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             load.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    loadGame();
-
-                    load.setVisible(false);
-                    newGame.setVisible(false);
-                    about.setVisible(false);
-                    exit.setVisible(false);
+                    // check if the save file exists first - else no game to load
+                    File file = new File(savePath);
+                    if (file.exists()){
+                        loadGame();
+                        load.setVisible(false);
+                        newGame.setVisible(false);
+                        about.setVisible(false);
+                        exit.setVisible(false);
+                    }else{
+                        // Label
+                        loadLabel.setVisible(true);
+                        fadeTransition.play();
+                    }
                 }
             });
 
@@ -331,8 +364,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
+                System.out.println("colors " + type);
                 blocks.add(new Block(j, i, colors[r % (colors.length)], type));
-                //System.out.println("colors " + r % (colors.length));
+
             }
         }
     }

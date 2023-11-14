@@ -75,9 +75,10 @@ public class Block implements Serializable {
             rect.setFill(pattern);
         } else {
             rect.setFill(color);
+            System.out.printf("\ntype:%d",type);
         }
-
     }
+
 
 
     public int checkHitToBlock(double xBall, double yBall) {
