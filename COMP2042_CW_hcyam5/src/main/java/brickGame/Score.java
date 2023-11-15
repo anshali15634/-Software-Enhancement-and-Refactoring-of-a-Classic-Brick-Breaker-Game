@@ -1,75 +1,60 @@
 package brickGame;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.util.Duration;
 //import sun.plugin2.message.Message;
 
 public class Score {
+    private static final int ANIMATION_DURATION = 500; // animation duration in ms
     public void show(final double x, final double y, int score, final Main main) {
-        String sign;
-        if (score >= 0) {
-            sign = "+";
-        } else {
-            sign = "";
-        }
+        String sign = (score >=0)? "+":"";
         final Label label = new Label(sign + score);
         label.setTranslateX(x);
         label.setTranslateY(y);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                main.root.getChildren().add(label);
-            }
-        });
+        Platform.runLater(() ->main.root.getChildren().add(label));
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 21; i++) {
-                    try {
-                        label.setScaleX(i);
-                        label.setScaleY(i);
-                        label.setOpacity((20 - i) / 20.0);
-                        Thread.sleep(15);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        // translation animation (moving up after +score appears)
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION),label);
+        translateTransition.setToY(y - 50); // Move up
+        translateTransition.setCycleCount(1); // animation only happens once
+        translateTransition.play();
+
+        // fade transition
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
+        fadeTransition.setToValue(0); // Fade out
+        fadeTransition.setCycleCount(1);
+        fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+        fadeTransition.play();
     }
 
+    // animation for the messages like "Level up :)"
     public void showMessage(String message, final Main main) {
         final Label label = new Label(message);
         label.setTranslateX(220);
         label.setTranslateY(340);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                main.root.getChildren().add(label);
-            }
-        });
+        Platform.runLater(() -> main.root.getChildren().add(label));
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < 21; i++) {
-                    try {
-                        label.setScaleX(Math.abs(i-10));
-                        label.setScaleY(Math.abs(i-10));
-                        label.setOpacity((20 - i) / 20.0);
-                        Thread.sleep(15);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        // translation animation
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
+        translateTransition.setToY(290); // Move up
+        translateTransition.setCycleCount(1);
+        translateTransition.play();
+
+        // fade Animation
+        FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
+        fadeTransition.setToValue(0); // Fade out
+        fadeTransition.setCycleCount(1);
+        // removes label from scene after animation is over
+        fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+        fadeTransition.play();
     }
 
     public void showGameOver(final Main main) {

@@ -47,20 +47,29 @@ in an endless loop, does not configure the next level.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' run() functions (Lines 96,52,30) to throw an
      Interrupted Exception, and then returning from the functions to exit them.
+
 2. When saving the game using (S), there was a FileNotFound Exception. This was due to the filepath storing in 
    the file path "D:/..." but not all laptops own a D drive.
    - How the problem was solved:
      In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
      If the device does not have a D drive, it changes the filepath to the device's C drive.
+
 3. Load button was present in the game code but did not appear in the game screen.
    - How the problem was solved:
      load button added to root for the first scene added to primaryStage. The load button functioned as expected.
+
 4. If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
    and ball moves abnormally.
    - How the problem was solved:
      There is game progress saved only if the save.mdd file exists. When load button is pressed, the load button's
      setOnAction function checks if the save.mdd file exists. If it does, the file is read to resume that game, else
      the label "No previous games saved :<" appears.
-5. Load game after game is over leads to loading a game with no bricks?
-6. Labels keep freezing on screen
+
+5. Labels keep freezing on screen. Thread.sleep(15) for animations is not the most efficient way to achieve animations
+   on JavaFX, therefore I used a built-in animation framework for smoother animations.
+      - How the problem was solved:
+      Instead of manually updating the scale/position of the label with a for loop to make animations with threading,
+      I utilized TranslateTransition for movement and FadeTransition for fading.
+
+6. Load game after game is over leads to loading a game with no bricks?
