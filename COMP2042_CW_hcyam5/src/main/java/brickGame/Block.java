@@ -75,36 +75,37 @@ public class Block implements Serializable {
             rect.setFill(pattern);
         } else {
             rect.setFill(color);
-            System.out.printf("\ntype:%d",type);
+            }
         }
-    }
-
-
 
     public int checkHitToBlock(double xBall, double yBall) {
-
         if (isDestroyed) {
             return NO_HIT;
         }
-
-        if (xBall >= x && xBall <= x + width && yBall == y + height) {
-            return HIT_BOTTOM;
+        double boundary = 5.0; // marks boundary for ball-block collision
+        if (xBall + Main.ballRadius >= x - boundary && xBall - Main.ballRadius <= x + width + boundary &&
+                yBall + Main.ballRadius >= y - boundary && yBall - Main.ballRadius <= y + height + boundary) {
+            // now just decide which block side was touched by ball
+            if (yBall >= y && yBall <= y + height) {
+                if (xBall >= x && xBall <= x + width) {
+                    if (yBall <= y + boundary) {
+                        return HIT_TOP;
+                    } else if (yBall >= y + height - boundary) {
+                        return HIT_BOTTOM;
+                    }
+                }
+            }
+            if (xBall >= x && xBall <= x + width) {
+                if (xBall <= x + boundary) {
+                    return HIT_LEFT;
+                } else if (xBall >= x + width - boundary) {
+                    return HIT_RIGHT;
+                }
+            }
         }
-
-        if (xBall >= x && xBall <= x + width && yBall == y) {
-            return HIT_TOP;
-        }
-
-        if (yBall >= y && yBall <= y + height && xBall == x + width) {
-            return HIT_RIGHT;
-        }
-
-        if (yBall >= y && yBall <= y + height && xBall == x) {
-            return HIT_LEFT;
-        }
-
         return NO_HIT;
     }
+
 
     public static int getPaddingTop() {
         return block.paddingTop;

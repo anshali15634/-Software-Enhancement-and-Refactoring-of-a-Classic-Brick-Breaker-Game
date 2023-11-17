@@ -33,6 +33,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private int level = 0;
+    public int final_level = 4; // game finishes after level 3
 
     private double xBreak = 0.0f;
     private double centerBreakX;
@@ -56,7 +57,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean isExistHeartBlock = false;
 
     private Rectangle rect;
-    private int       ballRadius = 10;
+    public static final int       ballRadius = 10;
 
     private int destroyedBlockCount = 0;
 
@@ -118,6 +119,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     Button about = null; // navigates user to how to play scene
 
+    Button back = null;
     // the two following functions are to check if the computer has a d drive and setting the save paths accordingly
     private static boolean checkForDDrive() {
         File[] drives = File.listRoots();
@@ -175,12 +177,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         imageView2.setFitHeight(30);
         imageView2.setPreserveRatio(true);
 
-        if (loadFromSave == false) {
+        if (loadFromSave==false) {
             level++;
-            if (level >1){
+            if (level >1 && level<final_level){
                 new Score().showMessage("Level Up :)", this);
             }
-            if (level == 3) {
+            if (level==final_level){
                 new Score().showWin(this);
                 return;
             }
@@ -220,8 +222,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             // if no previous game saved, when load button pressed should display this message
             loadLabel = new Label("No previous games saved :<");
-            loadLabel.setLayoutX(170);
-            loadLabel.setLayoutY(460);
             loadLabel.setVisible(false);
             fadeTransition = new FadeTransition(Duration.seconds(2), loadLabel);
             fadeTransition.setFromValue(1.0);
@@ -265,7 +265,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         root2.setBackground(new Background(background));
 
         // button back will navigate back to first scene
-        Button back = new Button("Back");
+        back = new Button("Back");
         StackPane.setAlignment(back, javafx.geometry.Pos.TOP_LEFT);
         back.setOnAction(e -> primaryStage.setScene(scene));
 
@@ -287,7 +287,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
         if (loadFromSave == false) {
-            if (level > 1 && level < 18) {
+            if (level > 1 && level < final_level) {
                 load.setVisible(false);
                 newGame.setVisible(false);
                 about.setVisible(false);
@@ -364,7 +364,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
-                System.out.println("colors " + type);
                 blocks.add(new Block(j, i, colors[r % (colors.length)], type));
 
             }
@@ -465,8 +464,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean colideToLeftBlock           = false;
     private boolean colideToTopBlock            = false;
 
-    private double vX = 1.000;
-    private double vY = 1.000;
+    private double vX = 2.000;
+    private double vY = 2.000;
 
 
     private void resetColideFlags() {
@@ -604,7 +603,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void checkDestroyedCount() {
         if (destroyedBlockCount == blocks.size()) {
             //TODO win level todo...
-            //System.out.println("You Win");
 
             nextLevel();
         }
@@ -734,7 +732,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             @Override
             public void run() {
                 try {
-                    vX = 1.000;
+                    vX = 2.000;
 
                     engine.stop();
                     resetColideFlags();
@@ -767,7 +765,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             level = 0;
             heart = 3;
             score = 0;
-            vX = 1.000;
+            vX = 2.000;
             destroyedBlockCount = 0;
             resetColideFlags();
             goDownBall = true;

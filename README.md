@@ -1,5 +1,4 @@
 # COMP2042_CW_hcyam5
-REMINDER: fter no games aved, find a way to go back to restarting the game code so that the paddle doesnt go wierd
 REMINDER: Main.java line 157 -> change last level to 10 afterwards
 Game Instructions:
 - choco block gives +3 score
@@ -17,7 +16,9 @@ Implemented and Working Properly:
     and then a back button switches the scene back to game scene.
 5. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
 6. Load button is functioning - allows saved game progress to be resumed.
-7. 
+7. Speed of the ball doubled
+8. Better ball-block collision detection (previous code allowed ball to move behind blocks)
+9. 
 Implemented but Not Working Properly:
 
 Features Not Implemented(Yet):
@@ -34,11 +35,19 @@ Modified Java Classes:
       to add a game icon, to add an extra button to the first scene of the game and to add images to the buttons an to add
       image as a background to the How To Play scene.
     - functions setSavePaths() and checkforDDrive() added
+    - ballRadius's scope was changed from private to public final static, as the altered function checkHitToBlock() in 
+      the Block class uses ballRadius to calculate more accurate ball-block collisions
+
 - Game Engine Class
     - instead of .stop() to stop the threads (updateThread, timeThread and PhysicsThread) interrupt was used.
     - at the run functions for each thread, the catch section of the try-catch block is changed
       to return from the function instead of printing the stack trace.
-
+  
+- Block Class
+  - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
+    The old checkHitToBlock() method is checking for exact positions of the ball relative to the block, and it was
+    not robust enough to handle higher speeds. The new function allows for a range of positions to be considered
+    as hits and adjusts well to the new speed of the ball.
 Unexpected Problems:
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
 in an endless loop, does not configure the next level. 
@@ -73,3 +82,21 @@ in an endless loop, does not configure the next level.
       I utilized TranslateTransition for movement and FadeTransition for fading.
 
 6. Load game after game is over leads to loading a game with no bricks?
+
+
+- check if each function only has one task, if have more than one
+    then should refactor and make separate functions. 
+  - For example if we have a function moveBall() which checks boundaries of the walls of the game, changes ball's x and
+    y coordinates, and checks for collisions with the blocks, then the function moveBall should be refactored 
+    to only do one task (change x and y coordinates) and should call functions checkBoundary()and collisionBlocks()
+    to complete its task
+- no method should have more than 5 levels of indentation.
+  - if this is the case then make new helper methods.
+- each line should not have more than 80 chars (should fit inside your screen)
+- Class Variable Names
+- all class variables have get set methods.
+- all class variables should be private
+- methods should not have more than 5 parameters. The more parameters, less reusable
+    then you need to group all the parameters in a new class
+- use lambda expressions to simplify the syntax for anonymous inner classes.
+
