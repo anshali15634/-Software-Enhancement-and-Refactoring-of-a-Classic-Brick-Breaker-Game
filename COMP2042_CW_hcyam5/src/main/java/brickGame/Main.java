@@ -56,7 +56,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean isGoldStauts      = false;
     private boolean isExistHeartBlock = false;
 
-    private Rectangle rect;
+    private Rectangle paddle;
     public static final int       ballRadius = 10;
 
     private int destroyedBlockCount = 0;
@@ -79,33 +79,20 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private ArrayList<Block> blocks = new ArrayList<Block>();
     private ArrayList<Bonus> chocos = new ArrayList<Bonus>();
-    /*private Color[]          colors = new Color[]{
 
-            //Color.valueOf("");
-            Color.MAGENTA,
-            Color.RED,
-            Color.GOLD,
-            Color.CORAL,
-            Color.AQUA,
-            Color.VIOLET,
-            Color.GREENYELLOW,
-            Color.ORANGE,
-            Color.PINK,
-            Color.SLATEGREY,
-            Color.YELLOW,
-            Color.TOMATO,
-            Color.TAN,
-    };*/
     private Color[] colors = new Color[] {
-            Color.valueOf("#10016A"),
-            Color.valueOf("#421C89"),
-            Color.valueOf("#690FA4"),
-            Color.valueOf("#C918A7"),
-            Color.valueOf("#EC007C"),
-            Color.valueOf("#FE5898")
+            Color.valueOf("#B81DC2"),
+            Color.valueOf("#EC6360"),
+            Color.valueOf("#EA4574"),
+            Color.valueOf("#C60A9E"),
+            Color.valueOf("#DB0463"),
+            Color.valueOf("#DB43AD"),
+            Color.valueOf("#FF835D")
     };
 
     public  Pane             root;
+
+    public Pane              root2;
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
@@ -144,11 +131,34 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    public void setNotVisibleGameObjects(){
+        scoreLabel.setVisible(false);
+        heartLabel.setVisible(false);
+        levelLabel.setVisible(false);
+        ball.setVisible(false);
+        paddle.setVisible(false);
+        for (Block block : blocks) {
+            block.rect.setVisible(false);
+        }
+    }
+    public void setVisibleGameObjects(){
+        scoreLabel.setVisible(true);
+        heartLabel.setVisible(true);
+        levelLabel.setVisible(true);
+        ball.setVisible(true);
+        paddle.setVisible(true);
+        for (Block block : blocks) {
+            block.rect.setVisible(true);
+        }
+        load.setVisible(false);
+        newGame.setVisible(false);
+        about.setVisible(false);
+        exit.setVisible(false);
+    }
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        System.out.println("PRIMARY STAGE CALLED");
         this.primaryStage = primaryStage;
         primaryStage.setResizable(false);
 
@@ -168,14 +178,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Image exit_button_img = new Image("exit_button.png");
         ImageView imageView2 = new ImageView(exit_button_img);
 
-        imageView.setFitHeight(30);
+        //"load" button's image
+        Image load_button = new Image("load_button.png");
+        ImageView imageView3 = new ImageView(load_button);
+
+        imageView.setFitHeight(50);
         imageView.setPreserveRatio(true);
 
-        imageView1.setFitHeight(30);
+        imageView1.setFitHeight(50);
         imageView1.setPreserveRatio(true);
 
-        imageView2.setFitHeight(30);
+        imageView2.setFitHeight(50);
         imageView2.setPreserveRatio(true);
+
+        imageView3.setFitHeight(50);
+        imageView3.setPreserveRatio(true);
 
         if (loadFromSave==false) {
             level++;
@@ -197,49 +214,57 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             exit = new Button("Exit");
 
             newGame.setPrefSize(30, 10); //(width,height)
-            newGame.setStyle("-fx-background-color: black;");
+            newGame.setStyle("-fx-background-color: #291741;");
             newGame.setGraphic(imageView);
 
             about.setPrefSize(30, 10); //(width,height)
-            about.setStyle("-fx-background-color: black;");
+            about.setStyle("-fx-background-color: #291741;");
             about.setGraphic(imageView1);
 
+            load.setPrefSize(30, 10); //(width,height)
+            load.setStyle("-fx-background-color: #291741;");
+            load.setGraphic(imageView3);
+
             exit.setPrefSize(30, 10); //(width,height)
-            exit.setStyle("-fx-background-color: black;");
+            exit.setStyle("-fx-background-color: #291741;");
             exit.setGraphic(imageView2);
 
-            newGame.setTranslateX(170);
-            newGame.setTranslateY(140);
+            newGame.setTranslateX(130);
+            newGame.setTranslateY(290);
 
-            load.setTranslateX(170);
-            load.setTranslateY(230);
+            load.setTranslateX(130);
+            load.setTranslateY(380);
 
-            about.setTranslateX(170);
-            about.setTranslateY(320);
+            about.setTranslateX(130);
+            about.setTranslateY(470);
 
-            exit.setTranslateX(170);
-            exit.setTranslateY(400);
+            exit.setTranslateX(130);
+            exit.setTranslateY(560);
 
             // if no previous game saved, when load button pressed should display this message
             loadLabel = new Label("No previous games saved :<");
+            loadLabel.setLayoutX(135);
+            loadLabel.setLayoutY(240);
             loadLabel.setVisible(false);
             fadeTransition = new FadeTransition(Duration.seconds(2), loadLabel);
             fadeTransition.setFromValue(1.0);
             fadeTransition.setToValue(0.0);
 
+
         }
 
 
         root = new Pane();
+        root.setStyle("-fx-background-image: url('bg.jpg');");
         scoreLabel = new Label("Score: " + score);
         levelLabel = new Label("Level: " + level);
         levelLabel.setTranslateY(20);
         heartLabel = new Label("Heart : " + heart);
-        heartLabel.setTranslateX(sceneWidth - 70);
+        heartLabel.setTranslateX(sceneWidth - 90);
         if (loadFromSave == false) {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit,load,loadLabel);
+            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit,load,loadLabel);
         } else {
-            root.getChildren().addAll(rect, ball, scoreLabel, heartLabel, levelLabel);
+            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel);
         }
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
@@ -261,8 +286,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
         );
 
-        StackPane root2 = new StackPane();
-        root2.setBackground(new Background(background));
+        root2 = new StackPane();
 
         // button back will navigate back to first scene
         back = new Button("Back");
@@ -280,7 +304,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             Stage stage = (Stage) exit.getScene().getWindow();
             stage.close();
         });
-
+        setNotVisibleGameObjects();
         primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -288,10 +312,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         if (loadFromSave == false) {
             if (level > 1 && level < final_level) {
-                load.setVisible(false);
-                newGame.setVisible(false);
-                about.setVisible(false);
-                exit.setVisible(false);
+                setVisibleGameObjects();
                 engine = new GameEngine();
                 engine.setOnAction(this);
                 engine.setFps(120);
@@ -305,10 +326,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     File file = new File(savePath);
                     if (file.exists()){
                         loadGame();
-                        load.setVisible(false);
-                        newGame.setVisible(false);
-                        about.setVisible(false);
-                        exit.setVisible(false);
+                        setVisibleGameObjects();
                     }else{
                         // Label
                         loadLabel.setVisible(true);
@@ -320,15 +338,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             newGame.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
+                    root.setStyle("-fx-background-image: url('bg2.jpg');");
                     engine = new GameEngine();
                     engine.setOnAction(Main.this);
                     engine.setFps(120);
                     engine.start();
 
-                    load.setVisible(false);
-                    newGame.setVisible(false);
-                    about.setVisible(false);
-                    exit.setVisible(false);
+                    setVisibleGameObjects();
                 }
             });
         } else {
@@ -441,15 +457,15 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initBreak() {
-        rect = new Rectangle();
-        rect.setWidth(breakWidth);
-        rect.setHeight(breakHeight);
-        rect.setX(xBreak);
-        rect.setY(yBreak);
+        paddle = new Rectangle();
+        paddle.setWidth(breakWidth);
+        paddle.setHeight(breakHeight);
+        paddle.setX(xBreak);
+        paddle.setY(yBreak);
 
-        ImagePattern pattern = new ImagePattern(new Image("block.jpg"));
+        ImagePattern pattern = new ImagePattern(new Image("paddle.png"));
 
-        rect.setFill(pattern);
+        paddle.setFill(pattern);
     }
 
 
@@ -678,7 +694,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void loadGame() {
-
         LoadSave loadSave = new LoadSave();
         loadSave.read();
 
@@ -762,6 +777,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void restartGame() {
 
         try {
+            root.setStyle("-fx-background-image: url('bg2.jpg');");
             level = 0;
             heart = 3;
             score = 0;
@@ -795,8 +811,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 scoreLabel.setText("Score: " + score);
                 heartLabel.setText("Heart : " + heart);
 
-                rect.setX(xBreak);
-                rect.setY(yBreak);
+                paddle.setX(xBreak);
+                paddle.setY(yBreak);
                 ball.setCenterX(xBall);
                 ball.setCenterY(yBall);
 
@@ -818,6 +834,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     block.rect.setVisible(false);
                     block.isDestroyed = true;
                     destroyedBlockCount++;
+
                     //System.out.println("size is " + blocks.size());
                     resetColideFlags();
 

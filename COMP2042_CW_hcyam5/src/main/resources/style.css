@@ -1,4 +1,7 @@
 .root {
+    -fx-background-image: url('bg2.jpg');
+    -fx-background-repeat: no-repeat;
+    -fx-background-size: cover;
     -fx-background-color: #000000;
 }
 
@@ -9,5 +12,12 @@
 .label {
     -fx-text-fill: #FFF;
     -fx-label-padding: 8px;
+    -fx-font-family: 'Consolas';
     -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-pref-width: 150px;
+    -fx-pref-height: 80px;
 }

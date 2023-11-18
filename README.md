@@ -8,23 +8,27 @@ Game Instructions:
 
 Compilation Instructions:
 
-Implemented and Working Properly:
+Features Implemented and Working Properly:
 1. Game Icon added
-2. "New Game" Image for button added
-3. Window size is now fixed (does not extend to full screen)
-4. Incorporating a "How To Play" button - switches scene to a guide on how to play the game,
-    and then a back button switches the scene back to game scene.
-5. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
+2. Window size is now fixed (does not extend to full screen).
+3. Exit button added.
+4. Incorporated an "About" button - has how to play instructions.
 6. Load button is functioning - allows saved game progress to be resumed.
+7. Separate start screen with game menu implemented.
+
+DO THESE COUNT AS FEATURES:
 7. Speed of the ball doubled
 8. Better ball-block collision detection (previous code allowed ball to move behind blocks)
-9. 
-Implemented but Not Working Properly:
+
+
+Features Implemented but Not Working Properly:
 
 Features Not Implemented(Yet):
 1. New bonus power - laser shooting to bricks to break them
 2. New bonus power - paddle elongates (change paddle image + increase size of paddle)
 3. Blocks changing color when they are hit by ball, disappears after third hit?
+4. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
+5. pause button?
 
 New Java Classes:
 
@@ -37,6 +41,8 @@ Modified Java Classes:
     - functions setSavePaths() and checkforDDrive() added
     - ballRadius's scope was changed from private to public final static, as the altered function checkHitToBlock() in 
       the Block class uses ballRadius to calculate more accurate ball-block collisions
+    - two functions setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
+      for setting visibility of game objects. 
 
 - Game Engine Class
     - instead of .stop() to stop the threads (updateThread, timeThread and PhysicsThread) interrupt was used.
@@ -48,6 +54,7 @@ Modified Java Classes:
     The old checkHitToBlock() method is checking for exact positions of the ball relative to the block, and it was
     not robust enough to handle higher speeds. The new function allows for a range of positions to be considered
     as hits and adjusts well to the new speed of the ball.
+  
 Unexpected Problems:
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
 in an endless loop, does not configure the next level. 
@@ -82,6 +89,8 @@ in an endless loop, does not configure the next level.
       I utilized TranslateTransition for movement and FadeTransition for fading.
 
 6. Load game after game is over leads to loading a game with no bricks?
+7. Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
+    over blocks array and making changes to the array during iteration?
 
 
 - check if each function only has one task, if have more than one
