@@ -3,8 +3,8 @@ package brickGame;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -18,10 +18,6 @@ import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundImage;
-import javafx.scene.layout.BackgroundRepeat;
-import javafx.scene.layout.BackgroundSize;
 import javafx.util.Duration;
 
 import java.io.*;
@@ -68,6 +64,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long time     = 0;
     private long hitTime  = 0;
     private long goldTime = 0;
+
+    public boolean gameBG = false;
 
     private GameEngine engine;
     public static String savePath;
@@ -182,6 +180,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Image load_button = new Image("load_button.png");
         ImageView imageView3 = new ImageView(load_button);
 
+        //"back" button's image
+        Image back_button = new Image("back.png");
+        ImageView imageView4 = new ImageView(back_button);
+
         imageView.setFitHeight(50);
         imageView.setPreserveRatio(true);
 
@@ -194,7 +196,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         imageView3.setFitHeight(50);
         imageView3.setPreserveRatio(true);
 
-        if (loadFromSave==false) {
+        imageView4.setFitHeight(50);
+        imageView4.setPreserveRatio(true);
+
+        if (!loadFromSave) {
             level++;
             if (level >1 && level<final_level){
                 new Score().showMessage("Level Up :)", this);
@@ -255,13 +260,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
         root = new Pane();
-        root.setStyle("-fx-background-image: url('bg.jpg');");
+        if (gameBG){ // if nextLevel() calls this start() function, should change bg to game bg
+            root.setStyle("-fx-background-image: url('bg2.jpg');");
+        }else{
+            root.setStyle("-fx-background-image: url('bg.jpg');");
+        }
         scoreLabel = new Label("Score: " + score);
         levelLabel = new Label("Level: " + level);
         levelLabel.setTranslateY(20);
         heartLabel = new Label("Heart : " + heart);
         heartLabel.setTranslateX(sceneWidth - 90);
-        if (loadFromSave == false) {
+        if (!loadFromSave) {
             root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit,load,loadLabel);
         } else {
             root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel);
@@ -276,25 +285,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         scene.setOnKeyPressed(this);
 
         // setting up "how to play" scene2
-        // Set the background image
-        Image backgroundImage = new Image("how_To_play_bg.png");
-        BackgroundImage background = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                null,
-                new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false)
-        );
-
         root2 = new StackPane();
 
         // button back will navigate back to first scene
         back = new Button("Back");
-        StackPane.setAlignment(back, javafx.geometry.Pos.TOP_LEFT);
+        StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
+
+        back.setPrefSize(30, 10); //(width,height)
+        back.setStyle("-fx-background-color: #291741;");
+        back.setGraphic(imageView4);
+
         back.setOnAction(e -> primaryStage.setScene(scene));
 
         root2.getChildren().add(back);
         Scene scene2 = new Scene(root2, sceneWidth, sceneHeigt);
+        root2.setStyle("-fx-background-image: url('how_To_play_bg.png')");
         scene2.setFill(Color.BLACK);
 
         // about button should navigate to the "How To Play" scene
@@ -310,7 +315,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         primaryStage.show();
 
 
-        if (loadFromSave == false) {
+        if (!loadFromSave) {
             if (level > 1 && level < final_level) {
                 setVisibleGameObjects();
                 engine = new GameEngine();
@@ -319,33 +324,27 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine.start();
             }
 
-            load.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    // check if the save file exists first - else no game to load
-                    File file = new File(savePath);
-                    if (file.exists()){
-                        loadGame();
-                        setVisibleGameObjects();
-                    }else{
-                        // Label
-                        loadLabel.setVisible(true);
-                        fadeTransition.play();
-                    }
+            load.setOnAction(event -> {
+                // check if the save file exists first - else no game to load
+                File file = new File(savePath);
+                if (file.exists()){
+                    loadGame();
+                    setVisibleGameObjects();
+                }else{
+                    // Label
+                    loadLabel.setVisible(true);
+                    fadeTransition.play();
                 }
             });
 
-            newGame.setOnAction(new EventHandler<ActionEvent>() {
-                @Override
-                public void handle(ActionEvent event) {
-                    root.setStyle("-fx-background-image: url('bg2.jpg');");
-                    engine = new GameEngine();
-                    engine.setOnAction(Main.this);
-                    engine.setFps(120);
-                    engine.start();
+            newGame.setOnAction(event -> {
+                root.setStyle("-fx-background-image: url('bg2.jpg');");
+                engine = new GameEngine();
+                engine.setOnAction(Main.this);
+                engine.setFps(120);
+                engine.start();
 
-                    setVisibleGameObjects();
-                }
+                setVisibleGameObjects();
             });
         } else {
             engine = new GameEngine();
@@ -414,31 +413,28 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     float oldXBreak;
 
     private void move(final int direction) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                int sleepTime = 4;
-                for (int i = 0; i < 30; i++) {
-                    if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
-                        return;
-                    }
-                    if (xBreak == 0 && direction == LEFT) {
-                        return;
-                    }
-                    if (direction == RIGHT) {
-                        xBreak++;
-                    } else {
-                        xBreak--;
-                    }
-                    centerBreakX = xBreak + halfBreakWidth;
-                    try {
-                        Thread.sleep(sleepTime);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    if (i >= 20) {
-                        sleepTime = i;
-                    }
+        new Thread(() -> {
+            int sleepTime = 4;
+            for (int i = 0; i < 30; i++) {
+                if (xBreak == (sceneWidth - breakWidth) && direction == RIGHT) {
+                    return;
+                }
+                if (xBreak == 0 && direction == LEFT) {
+                    return;
+                }
+                if (direction == RIGHT) {
+                    xBreak++;
+                } else {
+                    xBreak--;
+                }
+                centerBreakX = xBreak + halfBreakWidth;
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if (i >= 20) {
+                    sleepTime = i;
                 }
             }
         }).start();
@@ -625,68 +621,67 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void saveGame() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                new File(savePathDir).mkdirs();
-                File file = new File(savePath);
-                ObjectOutputStream outputStream = null;
-                try {
-                    outputStream = new ObjectOutputStream(new FileOutputStream(file));
+        new Thread(() -> {
+            new File(savePathDir).mkdirs();
+            File file = new File(savePath);
+            ObjectOutputStream outputStream = null;
+            try {
+                outputStream = new ObjectOutputStream(new FileOutputStream(file));
 
-                    outputStream.writeInt(level);
-                    outputStream.writeInt(score);
-                    outputStream.writeInt(heart);
-                    outputStream.writeInt(destroyedBlockCount);
+                outputStream.writeInt(level);
+                outputStream.writeInt(score);
+                outputStream.writeInt(heart);
+                outputStream.writeInt(destroyedBlockCount);
 
 
-                    outputStream.writeDouble(xBall);
-                    outputStream.writeDouble(yBall);
-                    outputStream.writeDouble(xBreak);
-                    outputStream.writeDouble(yBreak);
-                    outputStream.writeDouble(centerBreakX);
-                    outputStream.writeLong(time);
-                    outputStream.writeLong(goldTime);
-                    outputStream.writeDouble(vX);
+                outputStream.writeDouble(xBall);
+                outputStream.writeDouble(yBall);
+                outputStream.writeDouble(xBreak);
+                outputStream.writeDouble(yBreak);
+                outputStream.writeDouble(centerBreakX);
+                outputStream.writeLong(time);
+                outputStream.writeLong(goldTime);
+                outputStream.writeDouble(vX);
 
 
-                    outputStream.writeBoolean(isExistHeartBlock);
-                    outputStream.writeBoolean(isGoldStauts);
-                    outputStream.writeBoolean(goDownBall);
-                    outputStream.writeBoolean(goRightBall);
-                    outputStream.writeBoolean(colideToBreak);
-                    outputStream.writeBoolean(colideToBreakAndMoveToRight);
-                    outputStream.writeBoolean(colideToRightWall);
-                    outputStream.writeBoolean(colideToLeftWall);
-                    outputStream.writeBoolean(colideToRightBlock);
-                    outputStream.writeBoolean(colideToBottomBlock);
-                    outputStream.writeBoolean(colideToLeftBlock);
-                    outputStream.writeBoolean(colideToTopBlock);
+                outputStream.writeBoolean(isExistHeartBlock);
+                outputStream.writeBoolean(isGoldStauts);
+                outputStream.writeBoolean(goDownBall);
+                outputStream.writeBoolean(goRightBall);
+                outputStream.writeBoolean(colideToBreak);
+                outputStream.writeBoolean(colideToBreakAndMoveToRight);
+                outputStream.writeBoolean(colideToRightWall);
+                outputStream.writeBoolean(colideToLeftWall);
+                outputStream.writeBoolean(colideToRightBlock);
+                outputStream.writeBoolean(colideToBottomBlock);
+                outputStream.writeBoolean(colideToLeftBlock);
+                outputStream.writeBoolean(colideToTopBlock);
 
-                    ArrayList<BlockSerializable> blockSerializables = new ArrayList<BlockSerializable>();
-                    for (Block block : blocks) {
-                        if (block.isDestroyed) {
-                            continue;
-                        }
-                        blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+                ArrayList<BlockSerializable> blockSerializables = new ArrayList<BlockSerializable>();
+                for (Block block : blocks) {
+                    if (block.isDestroyed) {
+                        continue;
                     }
+                    blockSerializables.add(new BlockSerializable(block.row, block.column, block.type));
+                }
 
-                    outputStream.writeObject(blockSerializables);
+                outputStream.writeObject(blockSerializables);
 
-                    new Score().showMessage("Game Saved", Main.this);
+                new Score().showMessage("Game Saved", Main.this);
 
 
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    // prevents NullPointerException in some cases
+                    assert outputStream != null;
+                    outputStream.flush();
+                    outputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
-                } finally {
-                    try {
-                        outputStream.flush();
-                        outputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }).start();
@@ -734,6 +729,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         try {
             loadFromSave = true;
+            gameBG=true;
             start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
@@ -743,33 +739,31 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void nextLevel() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    vX = 2.000;
+        Platform.runLater(() -> {
+            try {
+                vX = 2.000;
 
-                    engine.stop();
-                    resetColideFlags();
-                    goDownBall = true;
+                engine.stop();
+                resetColideFlags();
+                goDownBall = true;
 
-                    isGoldStauts = false;
-                    isExistHeartBlock = false;
+                isGoldStauts = false;
+                isExistHeartBlock = false;
 
 
-                    hitTime = 0;
-                    time = 0;
-                    goldTime = 0;
+                hitTime = 0;
+                time = 0;
+                goldTime = 0;
 
-                    engine.stop();
-                    blocks.clear();
-                    chocos.clear();
-                    destroyedBlockCount = 0;
-                    start(primaryStage);
+                engine.stop();
+                blocks.clear();
+                chocos.clear();
+                destroyedBlockCount = 0;
+                gameBG=true;
+                start(primaryStage);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -777,7 +771,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void restartGame() {
 
         try {
-            root.setStyle("-fx-background-image: url('bg2.jpg');");
             level = 0;
             heart = 3;
             score = 0;
@@ -794,7 +787,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             blocks.clear();
             chocos.clear();
-
+            gameBG=false;
             start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
@@ -804,21 +797,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void onUpdate() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
 
-                scoreLabel.setText("Score: " + score);
-                heartLabel.setText("Heart : " + heart);
+            scoreLabel.setText("Score: " + score);
+            heartLabel.setText("Heart : " + heart);
 
-                paddle.setX(xBreak);
-                paddle.setY(yBreak);
-                ball.setCenterX(xBall);
-                ball.setCenterY(yBall);
+            paddle.setX(xBreak);
+            paddle.setY(yBreak);
+            ball.setCenterX(xBall);
+            ball.setCenterY(yBall);
 
-                for (Bonus choco : chocos) {
-                    choco.choco.setY(choco.y);
-                }
+            for (Bonus choco : chocos) {
+                choco.choco.setY(choco.y);
             }
         });
 
@@ -841,12 +831,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     if (block.type == Block.BLOCK_CHOCO) {
                         final Bonus choco = new Bonus(block.row, block.column);
                         choco.timeCreated = time;
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                root.getChildren().add(choco.choco);
-                            }
-                        });
+                        Platform.runLater(() -> root.getChildren().add(choco.choco));
                         chocos.add(choco);
                     }
 

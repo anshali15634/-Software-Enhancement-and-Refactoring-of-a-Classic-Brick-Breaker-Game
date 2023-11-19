@@ -1,4 +1,5 @@
 # COMP2042_CW_hcyam5
+NOTE: ask later about what ss is needed for git - show an example?
 REMINDER: Main.java line 157 -> change last level to 10 afterwards
 Game Instructions:
 - choco block gives +3 score
@@ -11,10 +12,10 @@ Compilation Instructions:
 Features Implemented and Working Properly:
 1. Game Icon added
 2. Window size is now fixed (does not extend to full screen).
-3. Exit button added.
+3. Exit button added - closes window and exits program.
 4. Incorporated an "About" button - has how to play instructions.
-6. Load button is functioning - allows saved game progress to be resumed.
-7. Separate start screen with game menu implemented.
+5. Load button is functioning - allows saved game progress to be resumed.
+6. Separate start screen with game menu implemented.
 
 DO THESE COUNT AS FEATURES:
 7. Speed of the ball doubled
@@ -33,6 +34,7 @@ Features Not Implemented(Yet):
 New Java Classes:
 
 Modified Java Classes:
+Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
     - new variables were added, for the How To Play (about) button, and new scene for the "how to play" page was introduced.
     - start function was modified to add a new scene for How To Play, to restrict window size (window should not enlarge),

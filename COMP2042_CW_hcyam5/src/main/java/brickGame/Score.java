@@ -3,8 +3,6 @@ package brickGame;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
@@ -58,45 +56,34 @@ public class Score {
     }
 
     public void showGameOver(final Main main) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Label label = new Label("Game Over :(");
-                label.setTranslateX(200);
-                label.setTranslateY(250);
-                label.setScaleX(2);
-                label.setScaleY(2);
+        Platform.runLater(() -> {
+            Label label = new Label("Game Over :(");
+            label.setTranslateX(200);
+            label.setTranslateY(250);
+            label.setScaleX(2);
+            label.setScaleY(2);
 
-                Button restart = new Button("Back");
-                restart.setTranslateX(220);
-                restart.setTranslateY(300);
-                restart.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        main.restartGame();
-                    }
-                });
+            Button restart = new Button("Back");
+            restart.setTranslateX(220);
+            restart.setTranslateY(300);
+            restart.setOnAction(event -> main.restartGame());
 
-                main.root.getChildren().addAll(label, restart);
+            main.root.getChildren().addAll(label, restart);
 
-            }
         });
     }
 
     public void showWin(final Main main) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                Label label = new Label("You Win :)");
-                label.setTranslateX(200);
-                label.setTranslateY(250);
-                label.setScaleX(2);
-                label.setScaleY(2);
+        Platform.runLater(() -> {
+            Label label = new Label("You Win :)");
+            label.setTranslateX(200);
+            label.setTranslateY(250);
+            label.setScaleX(2);
+            label.setScaleY(2);
 
 
-                main.root.getChildren().addAll(label);
+            main.root.getChildren().addAll(label);
 
-            }
         });
     }
 }

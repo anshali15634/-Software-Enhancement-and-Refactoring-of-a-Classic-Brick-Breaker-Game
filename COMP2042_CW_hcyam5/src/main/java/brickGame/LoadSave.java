@@ -31,7 +31,7 @@ public class LoadSave {
     public long             time;
     public long             goldTime;
     public double           vX;
-    public ArrayList<BlockSerializable> blocks = new ArrayList<BlockSerializable>();
+    public ArrayList<BlockSerializable> blocks = new ArrayList<>();
 
 
     public void read() {
