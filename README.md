@@ -36,26 +36,37 @@ New Java Classes:
 Modified Java Classes:
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
-    - new variables were added, for the How To Play (about) button, and new scene for the "how to play" page was introduced.
+    - new variables were added (LIST LATER) and new scene for the "how to play" page was introduced.
     - start function was modified to add a new scene for How To Play, to restrict window size (window should not enlarge),
       to add a game icon, to add an extra button to the first scene of the game and to add images to the buttons an to add
       image as a background to the How To Play scene.
-    - functions setSavePaths() and checkforDDrive() added
-    - ballRadius's scope was changed from private to public final static, as the altered function checkHitToBlock() in 
+  
+    - methods setSavePaths() and checkforDDrive() added to set the file path for game file saving the game progress.
+      checkforDDrive() method checks if the device has a DDrive.
+      setSavePaths() uses the function checkforDDrive() to set the file path for save.mdd. If D drive does not exist,
+      it saves the game file in the device's C drive.
+
+    - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in 
       the Block class uses ballRadius to calculate more accurate ball-block collisions
-    - two functions setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
+
+    - two methods setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
       for setting visibility of game objects. 
 
-- Game Engine Class
-    - instead of .stop() to stop the threads (updateThread, timeThread and PhysicsThread) interrupt was used.
-    - at the run functions for each thread, the catch section of the try-catch block is changed
-      to return from the function instead of printing the stack trace.
+    - method setPhysicsToBall() was refactored. According to Bob's Concise Coding Conventions, it should be possible 
+      to see the whole method from start to finish without scrolling. Therefore helper methods moveBall(),
+      handleBallYBoundaries(), handleBallPaddleCollision(), handleBallXBoundaries(), handleBallWallCollisions() and 
+      handleBallBlockCollision() were used to make the method setPhysicsToBall() more maintainable and easy to read.
+      Each helper method is responsible for a specific aspect of the ball's behavior.
+
+    - method saveGame() was refactored for the same reason as setPhysicsToBall(). Helper methods saveGameInfo(),
+      saveBlockInfo() and closeOutputStream() were created to make method saveGame() more modular and easier to
+      understand.
   
 - Block Class
   - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
     The old checkHitToBlock() method is checking for exact positions of the ball relative to the block, and it was
-    not robust enough to handle higher speeds. The new function allows for a range of positions to be considered
-    as hits and adjusts well to the new speed of the ball.
+    not robust enough to handle higher speeds. The new altered version of the method allows for a range of positions
+    to be considered as hits and adjusts well to the new speed of the ball.
   
 Unexpected Problems:
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
@@ -63,8 +74,8 @@ in an endless loop, does not configure the next level.
    - How the problem was solved:
      Line 82 - 84 in the stop() function of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
-     I used .interrupt() to make the respective threads' run() functions (Lines 96,52,30) to throw an
-     Interrupted Exception, and then returning from the functions to exit them.
+     I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
+     run() functions to throw an Interrupted Exception, and then returning from the functions to exit them.
 
 2. When saving the game using (S), there was a FileNotFound Exception. This was due to the filepath storing in 
    the file path "D:/..." but not all laptops own a D drive.
@@ -110,4 +121,28 @@ in an endless loop, does not configure the next level.
 - methods should not have more than 5 parameters. The more parameters, less reusable
     then you need to group all the parameters in a new class
 - use lambda expressions to simplify the syntax for anonymous inner classes.
+
+REFACTORING:
+* functions which are larger than a single page and are not part of exception
+FUNCTIONS IN MAIN CLASS:
+setSavePaths()
+setNotVisibleGameObjects()
+setVisibleGameObjects()
+* start(Stage primaryStage)
+initBoard()
+main(String[] args)
+handle(KeyEvent event)
+move(final int direction)
+initBall()
+initBreak()
+* setPhysicsToBall() - REFACTORED
+checkDestroyedCount()
+* saveGame() - REFACTORED
+* loadGame()
+nextLevel()
+restartGame()
+* onUpdate()
+onInit() - NOT IMPLEMENTED??
+onPhysicsUpdate()
+onTime(long time)
 
