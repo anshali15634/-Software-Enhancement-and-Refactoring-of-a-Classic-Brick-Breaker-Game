@@ -25,9 +25,9 @@ public class LoadSave {
     public int              destroyedBlockCount;
     public double           xBall;
     public double           yBall;
-    public double           xBreak;
-    public double           yBreak;
-    public double           centerBreakX;
+    public double xPaddle;
+    public double YPaddle;
+    public double centerPaddleX;
     public long             time;
     public long             goldTime;
     public double           vX;
@@ -35,51 +35,51 @@ public class LoadSave {
 
 
     public void read() {
-
-
         try {
             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Main.savePath)));
-
-
-            level = inputStream.readInt();
-            score = inputStream.readInt();
-            heart = inputStream.readInt();
-            destroyedBlockCount = inputStream.readInt();
-
-
-            xBall = inputStream.readDouble();
-            yBall = inputStream.readDouble();
-            xBreak = inputStream.readDouble();
-            yBreak = inputStream.readDouble();
-            centerBreakX = inputStream.readDouble();
-            time = inputStream.readLong();
-            goldTime = inputStream.readLong();
-            vX = inputStream.readDouble();
-
-
-            isExistHeartBlock = inputStream.readBoolean();
-            isGoldStauts = inputStream.readBoolean();
-            goDownBall = inputStream.readBoolean();
-            goRightBall = inputStream.readBoolean();
-            colideToBreak = inputStream.readBoolean();
-            colideToBreakAndMoveToRight = inputStream.readBoolean();
-            colideToRightWall = inputStream.readBoolean();
-            colideToLeftWall = inputStream.readBoolean();
-            colideToRightBlock = inputStream.readBoolean();
-            colideToBottomBlock = inputStream.readBoolean();
-            colideToLeftBlock = inputStream.readBoolean();
-            colideToTopBlock = inputStream.readBoolean();
-
-
+            loadGameStats(inputStream);
+            loadGameObjs(inputStream);
+            loadGameFlags(inputStream);
             try {
                 blocks = (ArrayList<BlockSerializable>) inputStream.readObject();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-
         } catch (IOException e) { // if catch block executed, no games were saved. save.mdd doesnt exist
             e.printStackTrace();
         }
+    }
 
+    private void loadGameStats(ObjectInputStream inputStream) throws IOException{
+        level = inputStream.readInt();
+        score = inputStream.readInt();
+        heart = inputStream.readInt();
+        destroyedBlockCount = inputStream.readInt();
+    }
+
+    private void loadGameObjs(ObjectInputStream inputStream) throws IOException{
+        xBall = inputStream.readDouble();
+        yBall = inputStream.readDouble();
+        xPaddle = inputStream.readDouble();
+        YPaddle = inputStream.readDouble();
+        centerPaddleX = inputStream.readDouble();
+        time = inputStream.readLong();
+        goldTime = inputStream.readLong();
+        vX = inputStream.readDouble();
+    }
+
+    private void loadGameFlags(ObjectInputStream inputStream) throws IOException{
+        isExistHeartBlock = inputStream.readBoolean();
+        isGoldStauts = inputStream.readBoolean();
+        goDownBall = inputStream.readBoolean();
+        goRightBall = inputStream.readBoolean();
+        colideToBreak = inputStream.readBoolean();
+        colideToBreakAndMoveToRight = inputStream.readBoolean();
+        colideToRightWall = inputStream.readBoolean();
+        colideToLeftWall = inputStream.readBoolean();
+        colideToRightBlock = inputStream.readBoolean();
+        colideToBottomBlock = inputStream.readBoolean();
+        colideToLeftBlock = inputStream.readBoolean();
+        colideToTopBlock = inputStream.readBoolean();
     }
 }

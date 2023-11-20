@@ -1,6 +1,8 @@
+NOTE: then fix concurr error
+
 # COMP2042_CW_hcyam5
 NOTE: ask later about what ss is needed for git - show an example?
-REMINDER: Main.java line 157 -> change last level to 10 afterwards
+REMINDER: change final level to 5 afterwards.
 Game Instructions:
 - choco block gives +3 score
 - heart block gives lives
@@ -30,6 +32,7 @@ Features Not Implemented(Yet):
 3. Blocks changing color when they are hit by ball, disappears after third hit?
 4. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
 5. pause button?
+6. Penalty power - inverted movement of paddle till level finishes
 
 New Java Classes:
 
@@ -52,33 +55,43 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - two methods setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
       for setting visibility of game objects. 
 
-    - method setPhysicsToBall() was refactored. According to Bob's Concise Coding Conventions, it should be possible 
-      to see the whole method from start to finish without scrolling. Therefore helper methods moveBall(),
-      handleBallYBoundaries(), handleBallPaddleCollision(), handleBallXBoundaries(), handleBallWallCollisions() and 
-      handleBallBlockCollision() were used to make the method setPhysicsToBall() more maintainable and easy to read.
-      Each helper method is responsible for a specific aspect of the ball's behavior.
-
-    - method saveGame() was refactored for the same reason as setPhysicsToBall(). Helper methods saveGameInfo(),
-      saveBlockInfo() and closeOutputStream() were created to make method saveGame() more modular and easier to
+    - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
+      without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate(). 
+    - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
       understand.
+      - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(), 
+        handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the 
+        method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
+        aspect of the ball's behavior.
+
+      - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
+      - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
+      - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+
   
 - Block Class
   - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
-    The old checkHitToBlock() method is checking for exact positions of the ball relative to the block, and it was
-    not robust enough to handle higher speeds. The new altered version of the method allows for a range of positions
-    to be considered as hits and adjusts well to the new speed of the ball.
+    The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
+    sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
+    method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
+
+- LoadSave Class
+  - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
+    without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
+    loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and understandable.
+    
   
 Unexpected Problems:
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
-in an endless loop, does not configure the next level. 
+   in an endless loop, does not configure the next level. 
    - How the problem was solved:
-     Line 82 - 84 in the stop() function of the Game Engine class previously used .stop() to terminate the threads.
+     In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
      run() functions to throw an Interrupted Exception, and then returning from the functions to exit them.
 
 2. When saving the game using (S), there was a FileNotFound Exception. This was due to the filepath storing in 
-   the file path "D:/..." but not all laptops own a D drive.
+   the file path "D:/..." but not all devices own a D drive.
    - How the problem was solved:
      In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
@@ -91,27 +104,30 @@ in an endless loop, does not configure the next level.
 4. If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
    and ball moves abnormally.
    - How the problem was solved:
-     There is game progress saved only if the save.mdd file exists. When load button is pressed, the load button's
-     setOnAction function checks if the save.mdd file exists. If it does, the file is read to resume that game, else
+     There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
+     load button to check if the save.mdd file exists. If it does, the file is read to resume that game, else
      the label "No previous games saved :<" appears.
 
-5. Labels keep freezing on screen. Thread.sleep(15) for animations is not the most efficient way to achieve animations
-   on JavaFX, therefore I used a built-in animation framework for smoother animations.
-      - How the problem was solved:
-      Instead of manually updating the scale/position of the label with a for loop to make animations with threading,
-      I utilized TranslateTransition for movement and FadeTransition for fading.
+5. Labels keep freezing on screen.
+   - How the problem was solved:
+     Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
+     a built-in animation framework for smoother animations. Instead of manually updating the scale/position of the 
+     label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
+     FadeTransition for fading.
 
 6. Load game after game is over leads to loading a game with no bricks?
-7. Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
-    over blocks array and making changes to the array during iteration?
+
+7. [Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
+   over blocks array and making changes to the array during iteration. This is done multiple times in the Main class's
+   methods.]
+   - [How the problem was solved:
+     Iterations over the block array were modified to only make changes to the original array after the iterations were
+     over. This was done to the loadGame() function.
+     NEED TO DO FOR THE onUpdate() FUNCTION TOO]
 
 
 - check if each function only has one task, if have more than one
-    then should refactor and make separate functions. 
-  - For example if we have a function moveBall() which checks boundaries of the walls of the game, changes ball's x and
-    y coordinates, and checks for collisions with the blocks, then the function moveBall should be refactored 
-    to only do one task (change x and y coordinates) and should call functions checkBoundary()and collisionBlocks()
-    to complete its task
+    then should refactor and make separate functions.
 - no method should have more than 5 levels of indentation.
   - if this is the case then make new helper methods.
 - each line should not have more than 80 chars (should fit inside your screen)
@@ -122,27 +138,4 @@ in an endless loop, does not configure the next level.
     then you need to group all the parameters in a new class
 - use lambda expressions to simplify the syntax for anonymous inner classes.
 
-REFACTORING:
-* functions which are larger than a single page and are not part of exception
-FUNCTIONS IN MAIN CLASS:
-setSavePaths()
-setNotVisibleGameObjects()
-setVisibleGameObjects()
-* start(Stage primaryStage)
-initBoard()
-main(String[] args)
-handle(KeyEvent event)
-move(final int direction)
-initBall()
-initBreak()
-* setPhysicsToBall() - REFACTORED
-checkDestroyedCount()
-* saveGame() - REFACTORED
-* loadGame()
-nextLevel()
-restartGame()
-* onUpdate()
-onInit() - NOT IMPLEMENTED??
-onPhysicsUpdate()
-onTime(long time)
 
