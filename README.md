@@ -36,6 +36,19 @@ Features Not Implemented(Yet):
 
 New Java Classes:
 
+- GameButton Class
+  - It inherits from the existing Button class.
+  - Its purpose is to:
+    - store the image file name for the button
+    - set the image to the button
+    - set the height of the button
+    - preserve the ratio of height and width of image
+    - sets the background color of the button
+    - sets the X and Y coordinates of the button
+  - Reason why class was created:
+    - To replace the repetitive blocks of code for each button's graphic settings in the start() function of
+      the Main class.
+
 Modified Java Classes:
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
@@ -43,6 +56,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - start function was modified to add a new scene for How To Play, to restrict window size (window should not enlarge),
       to add a game icon, to add an extra button to the first scene of the game and to add images to the buttons an to add
       image as a background to the How To Play scene.
+    - Unused variables like v and oldXBreak were removed.
   
     - methods setSavePaths() and checkforDDrive() added to set the file path for game file saving the game progress.
       checkforDDrive() method checks if the device has a DDrive.

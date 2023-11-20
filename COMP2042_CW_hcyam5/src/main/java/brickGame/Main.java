@@ -4,9 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -58,8 +56,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private int destroyedBlockCount = 0;
 
-    private final double v = 1.000;
-
     private int  heart    = 3;
     private int  score    = 0;
     private long time     = 0;
@@ -76,8 +72,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     public FadeTransition fadeTransition;
 
-    private final ArrayList<Block> blocks = new ArrayList<Block>();
-    private final ArrayList<Bonus> chocos = new ArrayList<Bonus>();
+    private final ArrayList<Block> blocks = new ArrayList<>();
+    private final ArrayList<Bonus> chocos = new ArrayList<>();
 
     private final Color[] colors = new Color[] {
             Color.valueOf("#B81DC2"),
@@ -99,13 +95,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private boolean loadFromSave = false;
 
     Stage  primaryStage;
-    Button load    = null;
-    Button newGame = null;
-    Button exit = null; // exit the program
+    GameButton newGame = new GameButton("Start New Game", "new_game_button.png",130,290);
+    GameButton loadGame = new GameButton("Load Game", "load_button.png", 130, 470);
+    GameButton about = new GameButton("About", "how_to_play.png", 130, 380);
+    GameButton exit = new GameButton("Exit", "exit_button.png", 130, 560);
+    GameButton back = new GameButton("Back", "back.png",0,0);
 
-    Button about = null; // navigates user to how to play scene
-
-    Button back = null;
     // the two following functions are to check if the computer has a d drive and setting the save paths accordingly
     private static boolean checkForDDrive() {
         File[] drives = File.listRoots();
@@ -149,7 +144,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         for (Block block : blocks) {
             block.rect.setVisible(true);
         }
-        load.setVisible(false);
+        loadGame.setVisible(false);
         newGame.setVisible(false);
         about.setVisible(false);
         exit.setVisible(false);
@@ -165,41 +160,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Image icon = new Image("game_icon.png");
         primaryStage.getIcons().add(icon);
 
-        // "new game" button's image
-        Image new_game_button_img = new Image("new_game_button.png");
-        ImageView imageView = new ImageView(new_game_button_img); // converting button img for display - line 123
-
-        //"about" button's image
-        Image about_button_img = new Image("how_to_play.png");
-        ImageView imageView1 = new ImageView(about_button_img);
-
-        //"exit" button's image
-        Image exit_button_img = new Image("exit_button.png");
-        ImageView imageView2 = new ImageView(exit_button_img);
-
-        //"load" button's image
-        Image load_button = new Image("load_button.png");
-        ImageView imageView3 = new ImageView(load_button);
-
-        //"back" button's image
-        Image back_button = new Image("back.png");
-        ImageView imageView4 = new ImageView(back_button);
-
-        imageView.setFitHeight(50);
-        imageView.setPreserveRatio(true);
-
-        imageView1.setFitHeight(50);
-        imageView1.setPreserveRatio(true);
-
-        imageView2.setFitHeight(50);
-        imageView2.setPreserveRatio(true);
-
-        imageView3.setFitHeight(50);
-        imageView3.setPreserveRatio(true);
-
-        imageView4.setFitHeight(50);
-        imageView4.setPreserveRatio(true);
-
         if (!loadFromSave) {
             level++;
             if (level >1 && level<final_level){
@@ -214,39 +174,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBreak(); // initializes the paddle
             initBoard();
 
-            load = new Button("Load Game");
-            newGame = new Button("Start New Game");
-            about = new Button("About");
-            exit = new Button("Exit");
-
-            newGame.setPrefSize(30, 10); //(width,height)
-            newGame.setStyle("-fx-background-color: #291741;");
-            newGame.setGraphic(imageView);
-
-            about.setPrefSize(30, 10); //(width,height)
-            about.setStyle("-fx-background-color: #291741;");
-            about.setGraphic(imageView1);
-
-            load.setPrefSize(30, 10); //(width,height)
-            load.setStyle("-fx-background-color: #291741;");
-            load.setGraphic(imageView3);
-
-            exit.setPrefSize(30, 10); //(width,height)
-            exit.setStyle("-fx-background-color: #291741;");
-            exit.setGraphic(imageView2);
-
-            newGame.setTranslateX(130);
-            newGame.setTranslateY(290);
-
-            load.setTranslateX(130);
-            load.setTranslateY(380);
-
-            about.setTranslateX(130);
-            about.setTranslateY(470);
-
-            exit.setTranslateX(130);
-            exit.setTranslateY(560);
-
             // if no previous game saved, when load button pressed should display this message
             loadLabel = new Label("No previous games saved :<");
             loadLabel.setLayoutX(135);
@@ -256,9 +183,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             fadeTransition.setFromValue(1.0);
             fadeTransition.setToValue(0.0);
 
-
         }
-
 
         root = new Pane();
         if (gameBG){ // if nextLevel() calls this start() function, should change bg to game bg
@@ -272,7 +197,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         heartLabel = new Label("Heart : " + heart);
         heartLabel.setTranslateX(sceneWidth - 90);
         if (!loadFromSave) {
-            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit,load,loadLabel);
+            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit, loadGame,loadLabel);
         } else {
             root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel);
         }
@@ -288,33 +213,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         // setting up "how to play" scene2
         root2 = new StackPane();
 
-        // button back will navigate back to first scene
-        back = new Button("Back");
-        StackPane.setAlignment(back, Pos.BOTTOM_LEFT);
-
-        back.setPrefSize(30, 10); //(width,height)
-        back.setStyle("-fx-background-color: #291741;");
-        back.setGraphic(imageView4);
+        Scene scene2 = new Scene(root2, sceneWidth, sceneHeigt);
+        root2.getChildren().add(back);
+        root2.setStyle("-fx-background-image: url('how_To_play_bg.png')");
 
         back.setOnAction(e -> primaryStage.setScene(scene));
-
-        root2.getChildren().add(back);
-        Scene scene2 = new Scene(root2, sceneWidth, sceneHeigt);
-        root2.setStyle("-fx-background-image: url('how_To_play_bg.png')");
-        scene2.setFill(Color.BLACK);
-
-        // about button should navigate to the "How To Play" scene
         about.setOnAction(e -> primaryStage.setScene(scene2));
         exit.setOnAction(e -> {
-            // Close the window when the button is clicked
             Stage stage = (Stage) exit.getScene().getWindow();
             stage.close();
         });
+
         setNotVisibleGameObjects();
         primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
-
 
         if (!loadFromSave) {
             if (level > 1 && level < final_level) {
@@ -325,7 +238,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine.start();
             }
 
-            load.setOnAction(event -> {
+            loadGame.setOnAction(event -> {
                 // check if the save file exists first - else no game to load
                 File file = new File(savePath);
                 if (file.exists()){
@@ -410,8 +323,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 break;
         }
     }
-
-    float oldXBreak;
 
     private void move(final int direction) {
         new Thread(() -> {
@@ -752,27 +663,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void nextLevel() {
         Platform.runLater(() -> {
             try {
+                System.out.println("Number of bricks and number destroyed: "+blocks.size()+" "+destroyedBlockCount);
                 vX = 2.000;
-
                 engine.stop();
                 resetColideFlags();
                 goDownBall = true;
-
                 isGoldStauts = false;
                 isExistHeartBlock = false;
-
-
                 hitTime = 0;
                 time = 0;
                 goldTime = 0;
-
                 engine.stop();
                 blocks.clear();
                 chocos.clear();
                 destroyedBlockCount = 0;
                 gameBG=true;
                 start(primaryStage);
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
