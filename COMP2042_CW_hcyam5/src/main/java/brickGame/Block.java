@@ -40,6 +40,7 @@ public class Block implements Serializable {
     public static int BLOCK_CHOCO = 100;
     public static int BLOCK_STAR = 101;
     public static int BLOCK_HEART = 102;
+    public static int BLOCK_INVERT = 103;
 
 
     public Block(int row, int column, Color color, int type) {
@@ -73,6 +74,10 @@ public class Block implements Serializable {
             Image image = new Image("star.jpg");
             ImagePattern pattern = new ImagePattern(image);
             rect.setFill(pattern);
+        }else if (type == BLOCK_INVERT){
+            Image image = new Image("darker_blue_final_brick.png");
+            ImagePattern pattern = new ImagePattern(image);
+            rect.setFill(pattern);
         } else {
             rect.setFill(color);
             }
@@ -82,7 +87,7 @@ public class Block implements Serializable {
         if (isDestroyed) {
             return NO_HIT;
         }
-        double boundary = 5.0; // marks boundary for ball-block collision
+        double boundary = 7.0; // marks boundary for ball-block collision
         if (xBall + Main.ballRadius >= x - boundary && xBall - Main.ballRadius <= x + width + boundary &&
                 yBall + Main.ballRadius >= y - boundary && yBall - Main.ballRadius <= y + height + boundary) {
             // now just decide which block side was touched by ball

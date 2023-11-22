@@ -1,5 +1,6 @@
 NOTE: then fix concurr error
-
+OBS:
+>> choco array stores all the choco blocks, when hit s
 # COMP2042_CW_hcyam5
 NOTE: ask later about what ss is needed for git - show an example?
 REMINDER: change final level to 5 afterwards.
@@ -15,14 +16,14 @@ Features Implemented and Working Properly:
 1. Game Icon added
 2. Window size is now fixed (does not extend to full screen).
 3. Exit button added - closes window and exits program.
-4. Incorporated an "About" button - has how to play instructions.
-5. Load button is functioning - allows saved game progress to be resumed.
+4. About button - has how to play instructions.
 6. Separate start screen with game menu implemented.
+7. Invert blocks - if the paddle touches this bonus, the paddle's controls reverse.
 
-DO THESE COUNT AS FEATURES:
+REFACTORING ACTUALLY - ADD TO MODIFIED CLASSES
 7. Speed of the ball doubled
 8. Better ball-block collision detection (previous code allowed ball to move behind blocks)
-
+5. Load button is functioning - allows saved game progress to be resumed.
 
 Features Implemented but Not Working Properly:
 
@@ -52,35 +53,43 @@ New Java Classes:
 Modified Java Classes:
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
-    - new variables were added (LIST LATER) and new scene for the "how to play" page was introduced.
+    - getter methods for sceneWidth and sceneHeigt included because in Score class, the labels for messages are to be 
+      centered, therefore scene dimensions are needed.
+    - new scene for the "how to play" page was introduced.
+    - new flag variable invert introduced to inform other functions if paddle touches the invert bonus.
+    - variables related to the paddle (xBreak, yBreak, breakWidth, etc ) were changed to include the word 'paddle' 
+      instead (eg. xPaddle, yPaddle, paddleWidth, etc) as the word 'break' was ambiguous.
     - start function was modified to add a new scene for How To Play, to restrict window size (window should not enlarge),
-      to add a game icon, to add an extra button to the first scene of the game and to add images to the buttons an to add
-      image as a background to the How To Play scene.
+      to add a game icon.
+    - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
+    - choco was also renamed as bonus1, as new bonuses are to be introduced.
     - Unused variables like v and oldXBreak were removed.
+    - vX and vY control the speed of the ball (both stored 1). The speed value was doubled. (Now they both store 2)
+    - for the buttons, a class GameButton was introduced to reduce the amount of duplicated code for adding images
+      to the buttons. The code was refactored to adjust to the inclusion of the new class.
   
-    - methods setSavePaths() and checkforDDrive() added to set the file path for game file saving the game progress.
-      checkforDDrive() method checks if the device has a DDrive.
-      setSavePaths() uses the function checkforDDrive() to set the file path for save.mdd. If D drive does not exist,
-      it saves the game file in the device's C drive.
+  - methods setSavePaths() and checkforDDrive() added to set the file path for game file saving the game progress.
+    checkforDDrive() method checks if the device has a DDrive.
+    setSavePaths() uses the function checkforDDrive() to set the file path for save.mdd. If D drive does not exist,
+    it saves the game file in the device's C drive.
 
-    - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in 
-      the Block class uses ballRadius to calculate more accurate ball-block collisions
+  - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in 
+    the Block class uses ballRadius to calculate more accurate ball-block collisions
 
-    - two methods setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
-      for setting visibility of game objects. 
+  - two methods setVisibleGameObjects() and setNotVisibleGameObjects() made to replace repetitive blocks of code
+    for setting visibility of game objects. 
 
-    - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
-      without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate(). 
-    - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
-      understand.
-      - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(), 
-        handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the 
-        method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
-        aspect of the ball's behavior.
-
-      - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
-      - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
-      - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+  - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
+    without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate(). 
+  - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
+    understand.
+    - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(), 
+      handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the 
+      method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
+      aspect of the ball's behavior.
+    - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
+    - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
+    - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
 
   
 - Block Class
@@ -88,11 +97,18 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
     sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
     method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
+  - new block type called BLOCK_INVERT introduced - when hit by ball, gives the bonus of reversing the controls of 
+    the paddle (when left arrow pressed, moves right, and vice versa.)
 
 - LoadSave Class
   - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
-    loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and understandable.
+    loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
+
+- Bonus Class
+  - new variable bonusType to identify the type of bonus - eg: +3, invert, longer paddle etc.
+  - bonusType added as parameter to constructor.
+  - using bonusType to identify type of bonus, the image is added to the bonus in the draw() function.
     
   
 Unexpected Problems:
@@ -129,15 +145,26 @@ Unexpected Problems:
      label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
      FadeTransition for fading.
 
-6. Load game after game is over leads to loading a game with no bricks?
+6. Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
+   over the collections blocks and bonusArray and making changes to the collections during iteration.
+   - How the problem was solved:
+     The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
+     cause problems if they are modified while they are being iterated over. Therefore, I declared both arrays as
+     concurrent collections of type CopyOnWriteArrayList. This means that it is safe to modify the collections
+     while you are iterating over it, so you will not get a ConcurrentModificationException.
 
-7. [Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
-   over blocks array and making changes to the array during iteration. This is done multiple times in the Main class's
-   methods.]
-   - [How the problem was solved:
-     Iterations over the block array were modified to only make changes to the original array after the iterations were
-     over. This was done to the loadGame() function.
-     NEED TO DO FOR THE onUpdate() FUNCTION TOO]
+7. when the player loses all their lives, when Game Over is displayed, the hearts label is not updated to 0, remains at
+   old value.
+   - How problem was solved:
+     - In function handleBallYBoundaries(), in the if statement that confirms that the game is over, the program was
+       altered to call the function onUpdate() for the last time to update the game screen before the game engine
+       halts.
+
+8. After all bricks are broken, sometimes the game continues without moving to the next level.
+
+
+
+
 
 
 - check if each function only has one task, if have more than one
@@ -153,3 +180,9 @@ Unexpected Problems:
 - use lambda expressions to simplify the syntax for anonymous inner classes.
 
 
+Exception in thread "Thread-3" java.util.ConcurrentModificationException
+at java.base/java.util.ArrayList$Itr.checkForComodification(ArrayList.java:1095)
+at java.base/java.util.ArrayList$Itr.next(ArrayList.java:1049)
+at brickGame/brickGame.Main.onUpdate(Main.java:731)
+at brickGame/brickGame.GameEngine.lambda$Update$0(GameEngine.java:31)
+at java.base/java.lang.Thread.run(Thread.java:1583)

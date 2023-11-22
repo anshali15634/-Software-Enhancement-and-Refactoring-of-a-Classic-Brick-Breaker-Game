@@ -31,6 +31,7 @@ public class LoadSave {
     public long             time;
     public long             goldTime;
     public double           vX;
+    public boolean invert;
     public ArrayList<BlockSerializable> blocks = new ArrayList<>();
 
 
@@ -51,35 +52,48 @@ public class LoadSave {
     }
 
     private void loadGameStats(ObjectInputStream inputStream) throws IOException{
-        level = inputStream.readInt();
-        score = inputStream.readInt();
-        heart = inputStream.readInt();
-        destroyedBlockCount = inputStream.readInt();
+        try {
+            level = inputStream.readInt();
+            score = inputStream.readInt();
+            heart = inputStream.readInt();
+            destroyedBlockCount = inputStream.readInt();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void loadGameObjs(ObjectInputStream inputStream) throws IOException{
-        xBall = inputStream.readDouble();
-        yBall = inputStream.readDouble();
-        xPaddle = inputStream.readDouble();
-        YPaddle = inputStream.readDouble();
-        centerPaddleX = inputStream.readDouble();
-        time = inputStream.readLong();
-        goldTime = inputStream.readLong();
-        vX = inputStream.readDouble();
+        try {
+            xBall = inputStream.readDouble();
+            yBall = inputStream.readDouble();
+            xPaddle = inputStream.readDouble();
+            YPaddle = inputStream.readDouble();
+            centerPaddleX = inputStream.readDouble();
+            time = inputStream.readLong();
+            goldTime = inputStream.readLong();
+            vX = inputStream.readDouble();
+        }catch (Exception e){
+           e.printStackTrace();
+        }
     }
 
     private void loadGameFlags(ObjectInputStream inputStream) throws IOException{
-        isExistHeartBlock = inputStream.readBoolean();
-        isGoldStauts = inputStream.readBoolean();
-        goDownBall = inputStream.readBoolean();
-        goRightBall = inputStream.readBoolean();
-        colideToBreak = inputStream.readBoolean();
-        colideToBreakAndMoveToRight = inputStream.readBoolean();
-        colideToRightWall = inputStream.readBoolean();
-        colideToLeftWall = inputStream.readBoolean();
-        colideToRightBlock = inputStream.readBoolean();
-        colideToBottomBlock = inputStream.readBoolean();
-        colideToLeftBlock = inputStream.readBoolean();
-        colideToTopBlock = inputStream.readBoolean();
+        try {
+            isExistHeartBlock = inputStream.readBoolean();
+            isGoldStauts = inputStream.readBoolean();
+            goDownBall = inputStream.readBoolean();
+            goRightBall = inputStream.readBoolean();
+            colideToBreak = inputStream.readBoolean();
+            colideToBreakAndMoveToRight = inputStream.readBoolean();
+            colideToRightWall = inputStream.readBoolean();
+            colideToLeftWall = inputStream.readBoolean();
+            colideToRightBlock = inputStream.readBoolean();
+            colideToBottomBlock = inputStream.readBoolean();
+            colideToLeftBlock = inputStream.readBoolean();
+            colideToTopBlock = inputStream.readBoolean();
+            invert = inputStream.readBoolean();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

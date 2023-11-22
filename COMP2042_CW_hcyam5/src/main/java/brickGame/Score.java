@@ -3,7 +3,7 @@ package brickGame;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
 //import sun.plugin2.message.Message;
@@ -35,14 +35,18 @@ public class Score {
     // animation for the messages like "Level up :)"
     public void showMessage(String message, final Main main) {
         final Label label = new Label(message);
-        label.setTranslateX(220);
-        label.setTranslateY(340);
+
+        label.setScaleX(2);
+        label.setScaleY(2);
+        // Center the label in the middle of the screen
+        label.setTranslateX((double) main.getSceneWidth() / 2 - 100);
+        label.setTranslateY((double) main.getSceneWidth() / 2);
 
         Platform.runLater(() -> main.root.getChildren().add(label));
 
         // translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
-        translateTransition.setToY(290); // Move up
+        translateTransition.setToY(((double) main.getSceneHeigt() / 2) - 50); // Move up
         translateTransition.setCycleCount(1);
         translateTransition.play();
 
@@ -50,6 +54,7 @@ public class Score {
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
+
         // removes label from scene after animation is over
         fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
         fadeTransition.play();
@@ -63,9 +68,7 @@ public class Score {
             label.setScaleX(2);
             label.setScaleY(2);
 
-            Button restart = new Button("Back");
-            restart.setTranslateX(220);
-            restart.setTranslateY(300);
+            GameButton restart = new GameButton("Back", "back.png",0,0);
             restart.setOnAction(event -> main.restartGame());
 
             main.root.getChildren().addAll(label, restart);
@@ -80,8 +83,6 @@ public class Score {
             label.setTranslateY(250);
             label.setScaleX(2);
             label.setScaleY(2);
-
-
             main.root.getChildren().addAll(label);
 
         });

@@ -9,15 +9,17 @@ import java.util.Random;
 
 public class Bonus implements Serializable {
     public Rectangle choco;
+    public int bonusType; // 1 if it is the +3 bonus, 2 if it is the invert bonus
 
     public double x;
     public double y;
     public long timeCreated;
-    public boolean taken = false;
+    public boolean taken = false; // paddle hits the bonus
 
-    public Bonus(int row, int column) {
+    public Bonus(int row, int column, int bonType) {
         x = (column * (Block.getWidth())) + Block.getPaddingH() + (Block.getWidth() / 2) - 15;
         y = (row * (Block.getHeight())) + Block.getPaddingTop() + (Block.getHeight() / 2) - 15;
+        bonusType = bonType;
 
         draw();
     }
@@ -30,10 +32,14 @@ public class Bonus implements Serializable {
         choco.setY(y);
 
         String url;
-        if (new Random().nextInt(20) % 2 == 0) {
-            url = "bonus1.png";
-        } else {
-            url = "bonus2.png";
+        if (bonusType == 1) {
+            if (new Random().nextInt(20) % 2 == 0) {
+                url = "bonus1.png";
+            } else {
+                url = "bonus2.png";
+            }
+        }else{
+            url = "invertbonus.png";
         }
 
         choco.setFill(new ImagePattern(new Image(url)));
