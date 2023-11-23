@@ -57,6 +57,7 @@ public class LoadSave {
             score = inputStream.readInt();
             heart = inputStream.readInt();
             destroyedBlockCount = inputStream.readInt();
+            destroyedBlockCount=0;
         }catch (Exception e){
             e.printStackTrace();
         }

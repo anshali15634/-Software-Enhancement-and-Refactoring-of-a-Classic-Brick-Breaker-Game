@@ -38,8 +38,10 @@ public class Bonus implements Serializable {
             } else {
                 url = "bonus2.png";
             }
-        }else{
+        }else if (bonusType == 2){
             url = "invertbonus.png";
+        }else{
+            url="short_bonus.png";
         }
 
         choco.setFill(new ImagePattern(new Image(url)));

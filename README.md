@@ -18,22 +18,24 @@ Features Implemented and Working Properly:
 3. Exit button added - closes window and exits program.
 4. About button - has how to play instructions.
 6. Separate start screen with game menu implemented.
-7. Invert blocks - if the paddle touches this bonus, the paddle's controls reverse.
-
-REFACTORING ACTUALLY - ADD TO MODIFIED CLASSES
-7. Speed of the ball doubled
-8. Better ball-block collision detection (previous code allowed ball to move behind blocks)
-5. Load button is functioning - allows saved game progress to be resumed.
+7. Invert bonus - if ball touches a dark-blue pixel block, it releases an invert bonus.
+   if the paddle touches this bonus, the paddle's controls reverse. (feature taken from the original BrickBreaker game)
+   If paddle's controls were already reversed, catching the bonus again will reverse the paddle controls back to 
+   normal.
+8. Short Paddle bonus - if the ball touches the dark-purple pixel block, it releases a short paddle bonus.
+   If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
+   will reverse the bonus (paddle becomes old size again)
+8. [Back button to start menu added after player wins the game.]
+9. [LOGIC ERROR FIXED]
+10. [ShortPaddle bonus added]
 
 Features Implemented but Not Working Properly:
 
 Features Not Implemented(Yet):
 1. New bonus power - laser shooting to bricks to break them
 2. New bonus power - paddle elongates (change paddle image + increase size of paddle)
-3. Blocks changing color when they are hit by ball, disappears after third hit?
-4. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
-5. pause button?
-6. Penalty power - inverted movement of paddle till level finishes
+3. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
+4. pause button?
 
 New Java Classes:
 
@@ -53,8 +55,12 @@ New Java Classes:
 Modified Java Classes:
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
-    - getter methods for sceneWidth and sceneHeigt included because in Score class, the labels for messages are to be 
+    - isGoldStauts renamed as isGoldStatus, sceneHeigt renamed as sceneHeight, and variables and functions with the word
+      colide in it was renamed to collide for clarity.
+    - getter methods for sceneWidth and sceneHeight included because in Score class, the labels for messages are to be 
       centered, therefore scene dimensions are needed.
+    - paddleWidth is no longer final as it is changed according to the shortPaddle bonus.
+      Setter method for paddleWidth added.
     - new scene for the "how to play" page was introduced.
     - new flag variable invert introduced to inform other functions if paddle touches the invert bonus.
     - variables related to the paddle (xBreak, yBreak, breakWidth, etc ) were changed to include the word 'paddle' 
@@ -64,7 +70,8 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
     - choco was also renamed as bonus1, as new bonuses are to be introduced.
     - Unused variables like v and oldXBreak were removed.
-    - vX and vY control the speed of the ball (both stored 1). The speed value was doubled. (Now they both store 2)
+    - vX and vY control the speed of the ball (both stored 1). The speed value was doubled. (Now they both store 2 and 
+      2.5 respectively)
     - for the buttons, a class GameButton was introduced to reduce the amount of duplicated code for adding images
       to the buttons. The code was refactored to adjust to the inclusion of the new class.
   
@@ -106,7 +113,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
 
 - Bonus Class
-  - new variable bonusType to identify the type of bonus - eg: +3, invert, longer paddle etc.
+  - new variable bonusType to identify the type of bonus - eg: +3, invert, short paddle etc.
   - bonusType added as parameter to constructor.
   - using bonusType to identify type of bonus, the image is added to the bonus in the draw() function.
     
@@ -160,10 +167,16 @@ Unexpected Problems:
        altered to call the function onUpdate() for the last time to update the game screen before the game engine
        halts.
 
-8. After all bricks are broken, sometimes the game continues without moving to the next level.
-
-
-
+8. When playing a loaded game, after all bricks are broken, sometimes the game continues without moving to the next 
+   level. 
+   - How the problem was solved:
+      - A logical error was present. This is because, in the read file we read the destroyedBlockCount value and the 
+      blocks array stores only the blocks which have not been destroyed. If for example the player starts with 12 bricks, 
+      and he breaks 7 bricks and saves the game, destroyedBlockCount stores 7, but when he reloads the game, the blocks 
+      array size is now 5, as destroyed bricks are not loaded. We compare destroyedBlockCount and blocks array size (if they are equal) 
+      to call nextLevel, but these values will never be the same.
+      - in the function loadGameStats(), I overwrite destroyedBlockCount to 0. If destroyed blocks are not loaded into
+      the game, there is no need to store the player's previous destroyedBlockCount.
 
 
 
@@ -178,11 +191,3 @@ Unexpected Problems:
 - methods should not have more than 5 parameters. The more parameters, less reusable
     then you need to group all the parameters in a new class
 - use lambda expressions to simplify the syntax for anonymous inner classes.
-
-
-Exception in thread "Thread-3" java.util.ConcurrentModificationException
-at java.base/java.util.ArrayList$Itr.checkForComodification(ArrayList.java:1095)
-at java.base/java.util.ArrayList$Itr.next(ArrayList.java:1049)
-at brickGame/brickGame.Main.onUpdate(Main.java:731)
-at brickGame/brickGame.GameEngine.lambda$Update$0(GameEngine.java:31)
-at java.base/java.lang.Thread.run(Thread.java:1583)

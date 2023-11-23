@@ -3,7 +3,6 @@ package brickGame;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.scene.text.Font;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
 //import sun.plugin2.message.Message;
@@ -46,7 +45,7 @@ public class Score {
 
         // translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
-        translateTransition.setToY(((double) main.getSceneHeigt() / 2) - 50); // Move up
+        translateTransition.setToY(((double) main.getSceneHeight() / 2) - 50); // Move up
         translateTransition.setCycleCount(1);
         translateTransition.play();
 
@@ -62,7 +61,7 @@ public class Score {
 
     public void showGameOver(final Main main) {
         Platform.runLater(() -> {
-            Label label = new Label("Game Over :(");
+            Label label = new Label("Game Over (T_T)");
             label.setTranslateX(200);
             label.setTranslateY(250);
             label.setScaleX(2);
@@ -78,12 +77,18 @@ public class Score {
 
     public void showWin(final Main main) {
         Platform.runLater(() -> {
-            Label label = new Label("You Win :)");
+            Label label = new Label("You Win ٩(◕‿◕｡)۶");
             label.setTranslateX(200);
             label.setTranslateY(250);
             label.setScaleX(2);
             label.setScaleY(2);
-            main.root.getChildren().addAll(label);
+            GameButton restart = new GameButton("Back", "back.png",130,380);
+            restart.setOnAction(event -> {
+                label.setVisible(false);
+                main.restartGame();
+            }
+            );
+            main.root.getChildren().addAll(label, restart);
 
         });
     }
