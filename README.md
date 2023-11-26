@@ -1,18 +1,16 @@
-NOTE: then fix concurr error
-OBS:
 >> choco array stores all the choco blocks, when hit s
 # COMP2042_CW_hcyam5
 NOTE: ask later about what ss is needed for git - show an example?
 REMINDER: change final level to 5 afterwards.
-Game Instructions:
+**Game Instructions:**
 - choco block gives +3 score
 - heart block gives lives
 - gold star block -> gold ball -> freezes lives for _ seconds
 - s -> saves game
 
-Compilation Instructions:
+**Compilation Instructions:**
 
-Features Implemented and Working Properly:
+**Features Implemented and Working Properly:**
 1. Game Icon added
 2. Window size is now fixed (does not extend to full screen).
 3. Exit button added - closes window and exits program.
@@ -25,19 +23,16 @@ Features Implemented and Working Properly:
 8. Short Paddle bonus - if the ball touches the dark-purple pixel block, it releases a short paddle bonus.
    If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
    will reverse the bonus (paddle becomes old size again)
-8. [Back button to start menu added after player wins the game.]
-9. [LOGIC ERROR FIXED]
-10. [ShortPaddle bonus added]
 
-Features Implemented but Not Working Properly:
+**Features Implemented but Not Working Properly:**
 
-Features Not Implemented(Yet):
+**Features Not Implemented(Yet):**
 1. New bonus power - laser shooting to bricks to break them
 2. New bonus power - paddle elongates (change paddle image + increase size of paddle)
 3. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
 4. pause button?
 
-New Java Classes:
+**New Java Classes:**
 
 - GameButton Class
   - It inherits from the existing Button class.
@@ -52,7 +47,7 @@ New Java Classes:
     - To replace the repetitive blocks of code for each button's graphic settings in the start() function of
       the Main class.
 
-Modified Java Classes:
+**Modified Java Classes:**
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
 - Main Class 
     - isGoldStauts renamed as isGoldStatus, sceneHeigt renamed as sceneHeight, and variables and functions with the word
@@ -106,6 +101,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
   - new block type called BLOCK_INVERT introduced - when hit by ball, gives the bonus of reversing the controls of 
     the paddle (when left arrow pressed, moves right, and vice versa.)
+  - new block type called BLOCK_SHORT was introduced - when hit by the ball, gives the bonus of shortening the paddle.
 
 - LoadSave Class
   - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
@@ -117,8 +113,10 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
   - bonusType added as parameter to constructor.
   - using bonusType to identify type of bonus, the image is added to the bonus in the draw() function.
     
+- Score Class
+  - showWin() method altered to include a back button to navigate back to start menu after game is won.
   
-Unexpected Problems:
+**Unexpected Problems:**
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
    in an endless loop, does not configure the next level. 
    - How the problem was solved:
@@ -177,6 +175,14 @@ Unexpected Problems:
       to call nextLevel, but these values will never be the same.
       - in the function loadGameStats(), I overwrite destroyedBlockCount to 0. If destroyed blocks are not loaded into
       the game, there is no need to store the player's previous destroyedBlockCount.
+
+9. After incorporating the short paddle bonus, if there were multiple of that same bonus being caught by the paddle
+   the paddle glitches.
+   - How the problem was solved:
+     The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
+     modified. This ensured that the UI updates occurred in a thread-safe manner. After applying the solution, the game 
+     was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
+     paddle remained smooth and glitch-free.
 
 
 

@@ -82,6 +82,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private final CopyOnWriteArrayList<Bonus> bonusArray = new CopyOnWriteArrayList<>(); // stores bonuses for choco blocks
     public void setPaddleWidth(int pW){
         paddleWidth = pW;
+        Platform.runLater(() -> {
+            // Update UI with the new paddle width
+            paddle.setWidth(pW);
+        });
     }
     public int getSceneHeight(){
         return sceneHeight;
@@ -290,6 +294,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void initBoard() {
+        //boolean short_exists = false; // only one short_brick per level
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < level + 1; j++) {
                 int r = new Random().nextInt(500);
@@ -310,8 +315,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     type = Block.BLOCK_STAR;
                 }else if (r % 10 == 4){
                     type = Block.BLOCK_INVERT;
-                }else if (r % 10 == 6){
+                }else if (r % 10 == 6 /*&& !short_exists*/){
                     type = Block.BLOCK_SHORT;
+                    //short_exists=true;
                 } else {
                     type = Block.BLOCK_NORMAL;
                 }
@@ -874,7 +880,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     }else{
                         setPaddleWidth(NORMAL_PADDLE_WIDTH);
                     }
-                    paddle.setWidth(paddleWidth);
+                    setPaddleWidth(paddleWidth);
                 }
                 bonus.choco.setVisible(false);
                 bonus.taken = true;
