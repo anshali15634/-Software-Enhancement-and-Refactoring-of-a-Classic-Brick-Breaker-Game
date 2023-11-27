@@ -1,22 +1,31 @@
 package brickGame;
 
-
 public class GameEngine {
+
+    private static GameEngine instance;
 
     private OnAction onAction;
     private int fps = 15;
     private Thread updateThread;
     private Thread physicsThread;
-    public boolean isStopped = true;
+    private boolean isStopped = true;
+    private boolean paused = false;
 
-    /**
-     *
-     * @param onAction
-     */
+    private GameEngine() {
+        // Private constructor to prevent instantiation outside of this class.
+    }
+
+    public static synchronized GameEngine getInstance() {
+        if (instance == null) {
+            instance = new GameEngine();
+        }
+        return instance;
+    }
+
+
     public void setOnAction(OnAction onAction) {
         this.onAction = onAction;
     }
-
     /**
      * @param fps set fps and we convert it to millisecond
      */
@@ -28,7 +37,9 @@ public class GameEngine {
         updateThread = new Thread(() -> {
             while (!updateThread.isInterrupted()) {
                 try {
-                    onAction.onUpdate();
+                    if (!paused) {
+                        onAction.onUpdate();
+                    }
                     Thread.sleep(fps);
                 } catch (InterruptedException e) {
                     return; // remove if error
@@ -47,7 +58,9 @@ public class GameEngine {
         physicsThread = new Thread(() -> {
             while (!physicsThread.isInterrupted()) {
                 try {
-                    onAction.onPhysicsUpdate();
+                    if (!paused) {
+                        onAction.onPhysicsUpdate();
+                    }
                     Thread.sleep(fps);
                 } catch (InterruptedException e) {
                     return;
@@ -78,7 +91,13 @@ public class GameEngine {
             timeThread.interrupt();
         }
     }
-    // current change : changed to interrupt and return line added to each run() method
+    public void pause(){
+        paused = true;
+    }
+
+    public void resume(){
+        paused = false;
+    }
 
     private long time = 0;
 

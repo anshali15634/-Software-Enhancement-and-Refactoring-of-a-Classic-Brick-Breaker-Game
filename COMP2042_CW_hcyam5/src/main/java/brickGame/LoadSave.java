@@ -32,6 +32,7 @@ public class LoadSave {
     public long             goldTime;
     public double           vX;
     public boolean invert;
+    public boolean is_short;
     public ArrayList<BlockSerializable> blocks = new ArrayList<>();
 
 
@@ -93,6 +94,8 @@ public class LoadSave {
             colideToLeftBlock = inputStream.readBoolean();
             colideToTopBlock = inputStream.readBoolean();
             invert = inputStream.readBoolean();
+            is_short = inputStream.readBoolean();
+
         }catch (Exception e){
             e.printStackTrace();
         }

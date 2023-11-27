@@ -15,22 +15,21 @@ REMINDER: change final level to 5 afterwards.
 2. Window size is now fixed (does not extend to full screen).
 3. Exit button added - closes window and exits program.
 4. About button - has how to play instructions.
-6. Separate start screen with game menu implemented.
-7. Invert bonus - if ball touches a dark-blue pixel block, it releases an invert bonus.
+5. Separate start screen with game menu implemented.
+6. Invert bonus - if ball touches a dark-blue pixel block, it releases an invert bonus.
    if the paddle touches this bonus, the paddle's controls reverse. (feature taken from the original BrickBreaker game)
    If paddle's controls were already reversed, catching the bonus again will reverse the paddle controls back to 
    normal.
-8. Short Paddle bonus - if the ball touches the dark-purple pixel block, it releases a short paddle bonus.
+7. Short Paddle bonus - if the ball touches the dark-purple pixel block, it releases a short paddle bonus.
    If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
    will reverse the bonus (paddle becomes old size again)
+8. Pause feature implemented - press space bar to pause the game, and press space bar again to resume the game.
 
 **Features Implemented but Not Working Properly:**
 
 **Features Not Implemented(Yet):**
 1. New bonus power - laser shooting to bricks to break them
-2. New bonus power - paddle elongates (change paddle image + increase size of paddle)
-3. After game is won, label "You win :)" is shown. Add a back button and an exit button to end program
-4. pause button?
+
 
 **New Java Classes:**
 
@@ -54,7 +53,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
       colide in it was renamed to collide for clarity.
     - getter methods for sceneWidth and sceneHeight included because in Score class, the labels for messages are to be 
       centered, therefore scene dimensions are needed.
-    - paddleWidth is no longer final as it is changed according to the shortPaddle bonus.
+    - paddleWidth is not final as it is changed according to the shortPaddle bonus.
       Setter method for paddleWidth added.
     - new scene for the "how to play" page was introduced.
     - new flag variable invert introduced to inform other functions if paddle touches the invert bonus.
@@ -69,11 +68,16 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
       2.5 respectively)
     - for the buttons, a class GameButton was introduced to reduce the amount of duplicated code for adding images
       to the buttons. The code was refactored to adjust to the inclusion of the new class.
+    - the method handle() was altered to accommodate for the new feature "pause game" using the space bar.
+    - new method togglePause() was added, it alters the visibility of the "Game paused :)" label and stops and resumes
+      the game engine.
+    - in method handle(), the sleepTime was set to 0, because when invert bonus is caught by paddle, it causes a lag in
+      inverting the controls.
   
   - methods setSavePaths() and checkforDDrive() added to set the file path for game file saving the game progress.
     checkforDDrive() method checks if the device has a DDrive.
     setSavePaths() uses the function checkforDDrive() to set the file path for save.mdd. If D drive does not exist,
-    it saves the game file in the device's C drive.
+    it saves the game file relative to the game directory.
 
   - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in 
     the Block class uses ballRadius to calculate more accurate ball-block collisions
@@ -92,6 +96,15 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
     - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
     - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+
+- GameEngine Class:
+  - Since GameEngine is only used once in the Main class, it was converted to a singleton class. The getInstance method 
+    is synchronized, which is good for ensuring that only one instance of GameEngine class is created even in a 
+    multithreaded environment.
+  - flag variable 'paused' introduced. Used by most threads in the GameEngine class to ensure the game is not
+    paused before executing their respective instructions.
+  - methods pause() and resume() added to alter the paused variable. This is later called in the Main class to 
+    pause the game.
 
   
 - Block Class

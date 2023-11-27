@@ -85,7 +85,7 @@ public class Score {
             GameButton restart = new GameButton("Back", "back.png",130,380);
             restart.setOnAction(event -> {
                 label.setVisible(false);
-                main.restartGame();
+                        main.restartGame();
             }
             );
             main.root.getChildren().addAll(label, restart);

@@ -27,9 +27,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
 
     private int level = 0;
-    public int final_level = 6; // game finishes after level 5
-    public boolean invert = false; // to check if invert bonus is used
-    public boolean shortPaddle = false; // to check if short paddle bonus is used
+    public int final_level = 3; // game finishes after level 5
+    private boolean invert = false; // to check if invert bonus is used
+    private boolean shortPaddle = false; // to check if short paddle bonus is used
 
     private double xPaddle = 0.0f;
     private double centerPaddleX;
@@ -67,6 +67,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private long time     = 0;
     private long hitTime  = 0;
     private long goldTime = 0;
+    private boolean isPaused = false;
 
     public boolean gameBG = false;
 
@@ -75,16 +76,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public static String savePathDir;
 
     private Label loadLabel;
+    private Label pauseLabel;
 
     public FadeTransition fadeTransition;
 
     private final CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
     private final CopyOnWriteArrayList<Bonus> bonusArray = new CopyOnWriteArrayList<>(); // stores bonuses for choco blocks
-    public void setPaddleWidth(int pW){
-        paddleWidth = pW;
+    public void setPaddleWidth(boolean shortPaddle) {
+        if (shortPaddle) {
+            paddleWidth = SHORT_PADDLE_WIDTH;
+        } else {
+            paddleWidth = NORMAL_PADDLE_WIDTH; // Use the initial paddle width when not short
+        }
+
         Platform.runLater(() -> {
             // Update UI with the new paddle width
-            paddle.setWidth(pW);
+            paddle.setWidth(paddleWidth);
         });
     }
     public int getSceneHeight(){
@@ -138,8 +145,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             savePath = "D:/save/save.mdds";
             savePathDir = "D:/save/";
         } else {
-            savePath = "C:/save/save.mdds";
-            savePathDir = "C:/save/";
+            savePath = "./save/save.mdds";
+            savePathDir = "./save/";
         }
     }
 
@@ -226,6 +233,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         for (Block block : blocks) {
             root.getChildren().add(block.rect);
         }
+        initPauseLabel();
+
 
         // setting up main scene
         Scene scene = new Scene(root, sceneWidth, sceneHeight);
@@ -254,7 +263,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         if (!loadFromSave) {
             if (level > 1 && level < final_level) {
                 setVisibleGameObjects();
-                engine = new GameEngine();
+                engine = GameEngine.getInstance();
                 engine.setOnAction(this);
                 engine.setFps(120);
                 engine.start();
@@ -265,6 +274,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 File file = new File(savePath);
                 if (file.exists()){
                     loadGame();
+                    setPaddleWidth(isShortPaddle());
                     setVisibleGameObjects();
                 }else{
                     // Label
@@ -275,7 +285,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
             newGame.setOnAction(event -> {
                 root.setStyle("-fx-background-image: url('bg2.jpg');");
-                engine = new GameEngine();
+                engine = GameEngine.getInstance();
                 engine.setOnAction(Main.this);
                 engine.setFps(120);
                 engine.start();
@@ -283,7 +293,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 setVisibleGameObjects();
             });
         } else {
-            engine = new GameEngine();
+            engine = GameEngine.getInstance();
             engine.setOnAction(this);
             engine.setFps(120);
             engine.start();
@@ -291,6 +301,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
 
 
+    }
+    private void initPauseLabel() {
+        pauseLabel = new Label("Game Paused :)");
+        pauseLabel.setStyle("-fx-font-size: 24; -fx-text-fill: white;");
+        pauseLabel.setLayoutX(sceneWidth / 2 - 100);
+        pauseLabel.setLayoutY(sceneHeight / 2 - 20);
+        pauseLabel.setVisible(false);
+        root.getChildren().add(pauseLabel);
     }
 
     private void initBoard() {
@@ -337,14 +355,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void handle(KeyEvent event) {
         switch (event.getCode()) {
             case LEFT:
-                if (invert) {
+                if (isInvert()) {
                     move(RIGHT);
                 }else{
                     move(LEFT);
                 }
                 break;
             case RIGHT:
-                if (invert) {
+                if (isInvert()) {
                     move(LEFT);
                 }else{
                     move(RIGHT);
@@ -356,6 +374,22 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             case S:
                 saveGame();
                 break;
+            case SPACE:
+                togglePause();
+                break;
+        }
+    }
+    private void togglePause() {
+        isPaused = !isPaused;
+
+        if (isPaused) {
+            // Display pause label
+            pauseLabel.setVisible(true);
+            engine.pause(); // You might need to implement a pause method in your GameEngine class
+        } else {
+            // Hide pause label
+            pauseLabel.setVisible(false);
+            engine.resume(); // You might need to implement a resume method in your GameEngine class
         }
     }
 
@@ -399,7 +433,12 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void initPaddle() {
         paddle = new Rectangle();
-        paddle.setWidth(paddleWidth);
+        System.out.println("\npaddle in initpaddle: "+ isShortPaddle());
+        if (isShortPaddle()){
+            paddle.setWidth(SHORT_PADDLE_WIDTH);
+        }else{
+            paddle.setWidth(NORMAL_PADDLE_WIDTH);
+        }
         paddle.setHeight(paddleHeight);
         paddle.setX(xPaddle);
         paddle.setY(yPaddle);
@@ -606,7 +645,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         outputStream.writeBoolean(collideToBottomBlock);
         outputStream.writeBoolean(collideToLeftBlock);
         outputStream.writeBoolean(collideToTopBlock);
-        outputStream.writeBoolean(invert);
+        outputStream.writeBoolean(isInvert());
+        outputStream.writeBoolean(isShortPaddle());
     }
 
     private void saveBlockInfo(ObjectOutputStream outputStream) throws IOException {
@@ -684,7 +724,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         time = loadSave.time;
         goldTime = loadSave.goldTime;
         vX = loadSave.vX;
-        invert = loadSave.invert;
+        setInvert(loadSave.invert);
+        setShortPaddle(loadSave.is_short);
+        System.out.println("\nFROM FILE SHORTPADDLE: "+ isShortPaddle());
     }
 
     private void copyBlockInfo(LoadSave loadSave) {
@@ -701,9 +743,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         Platform.runLater(() -> {
             try {
                 System.out.println("Number of bricks and number destroyed: "+blocks.size()+" "+destroyedBlockCount);
-                invert = false;
-                shortPaddle=false;
-                setPaddleWidth(NORMAL_PADDLE_WIDTH);
+                setInvert(false);
+                setShortPaddle(false);
+                setPaddleWidth(isShortPaddle());
                 paddle.setWidth(paddleWidth);
                 vX = 2.000;
                 engine.stop();
@@ -734,9 +776,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             score = 0;
             vX = 2.000;
 
-            invert = false;
-            shortPaddle = false;
-            setPaddleWidth(NORMAL_PADDLE_WIDTH);
+            setInvert(false);
+            setShortPaddle(false);
+            setPaddleWidth(isShortPaddle());
             paddle.setWidth(paddleWidth);
 
             destroyedBlockCount = 0;
@@ -761,24 +803,26 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     @Override
     public void onUpdate() {
-        Platform.runLater(() -> {
+        if (!isPaused) {
+            Platform.runLater(() -> {
 
-            scoreLabel.setText("Score: " + score);
-            heartLabel.setText("Heart : " + heart);
-            paddle.setX(xPaddle);
-            paddle.setY(yPaddle);
-            ball.setCenterX(xBall);
-            ball.setCenterY(yBall);
+                scoreLabel.setText("Score: " + score);
+                heartLabel.setText("Heart : " + heart);
+                paddle.setX(xPaddle);
+                paddle.setY(yPaddle);
+                ball.setCenterX(xBall);
+                ball.setCenterY(yBall);
 
-            for (Bonus choco : bonusArray) {
-                choco.choco.setY(choco.y);
-            }
-        });
+                for (Bonus choco : bonusArray) {
+                    choco.choco.setY(choco.y);
+                }
+            });
 
-        if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
-            for (final Block block : blocks) {
-                int hitCode = block.checkHitToBlock(xBall, yBall);
-                handleBlockHit(hitCode,block);
+            if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
+                for (final Block block : blocks) {
+                    int hitCode = block.checkHitToBlock(xBall, yBall);
+                    handleBlockHit(hitCode, block);
+                }
             }
         }
     }
@@ -871,16 +915,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     new Score().show(bonus.x, bonus.y, 3, this);
                 }else if (bonus.bonusType == 2){
                     new Score().showMessage("INVERTED PADDLE CONTROLS :>", Main.this);
-                    invert=!invert;
+                    setInvert(!isInvert());
                 }else if (bonus.bonusType == 3){
                     new Score().showMessage("CAREFUL! SHORT PADDLE!", Main.this);
-                    shortPaddle = !shortPaddle;
-                    if (shortPaddle) {
-                        setPaddleWidth(SHORT_PADDLE_WIDTH);
-                    }else{
-                        setPaddleWidth(NORMAL_PADDLE_WIDTH);
-                    }
-                    setPaddleWidth(paddleWidth);
+                    setShortPaddle(!isShortPaddle());
+                    setPaddleWidth(isShortPaddle());
                 }
                 bonus.choco.setVisible(false);
                 bonus.taken = true;
@@ -893,5 +932,21 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onTime(long time) {
         this.time = time;
+    }
+
+    private boolean isInvert() {
+        return invert;
+    }
+
+    private void setInvert(boolean invert) {
+        this.invert = invert;
+    }
+
+    private boolean isShortPaddle() {
+        return shortPaddle;
+    }
+
+    private void setShortPaddle(boolean shortPaddle) {
+        this.shortPaddle = shortPaddle;
     }
 }
