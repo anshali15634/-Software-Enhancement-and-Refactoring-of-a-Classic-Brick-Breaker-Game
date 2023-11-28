@@ -116,6 +116,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private Label            scoreLabel;
     private Label            heartLabel;
     private Label            levelLabel;
+    private boolean startGame = false;
 
     private boolean loadFromSave = false;
 
@@ -190,6 +191,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         primaryStage.getIcons().add(icon);
 
         if (!loadFromSave) {
+            System.out.println("current level, level after final: "+level+" "+final_level);
             level++;
             if (level >1 && level<final_level){
                 new Score().showMessage("Level Up (๑˃ᴗ˂)ﻭ", this);
@@ -255,7 +257,17 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             stage.close();
         });
 
-        setNotVisibleGameObjects();
+        scoreLabel.setVisible(false);
+        heartLabel.setVisible(false);
+        levelLabel.setVisible(false);
+        ball.setVisible(false);
+        paddle.setVisible(false);
+        for (Block block : blocks) {
+            block.rect.setVisible(false);
+        }
+        if (!startGame){
+            setNotVisibleGameObjects();
+        }
         primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -274,10 +286,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 File file = new File(savePath);
                 if (file.exists()){
                     loadGame();
-                    setPaddleWidth(isShortPaddle());
                     setVisibleGameObjects();
                 }else{
-                    // Label
                     loadLabel.setVisible(true);
                     fadeTransition.play();
                 }
@@ -289,7 +299,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 engine.setOnAction(Main.this);
                 engine.setFps(120);
                 engine.start();
-
                 setVisibleGameObjects();
             });
         } else {
@@ -693,6 +702,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         try {
             loadFromSave = true;
             gameBG = true;
+            startGame=true;
             start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
@@ -761,6 +771,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 bonusArray.clear();
                 destroyedBlockCount = 0;
                 gameBG=true;
+                startGame=true;
                 start(primaryStage);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -794,6 +805,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             blocks.clear();
             bonusArray.clear();
             gameBG=false;
+            startGame=false;
             start(primaryStage);
         } catch (Exception e) {
             e.printStackTrace();
