@@ -8,17 +8,17 @@ import java.util.ArrayList;
 
 public class LoadSave {
     public boolean          isExistHeartBlock;
-    public boolean          isGoldStauts;
+    public boolean isGoldStats;
     public boolean          goDownBall;
     public boolean          goRightBall;
-    public boolean          colideToBreak;
-    public boolean          colideToBreakAndMoveToRight;
-    public boolean          colideToRightWall;
-    public boolean          colideToLeftWall;
-    public boolean          colideToRightBlock;
-    public boolean          colideToBottomBlock;
-    public boolean          colideToLeftBlock;
-    public boolean          colideToTopBlock;
+    public boolean collideToBreak;
+    public boolean collideToBreakAndMoveToRight;
+    public boolean collideToRightWall;
+    public boolean collideToLeftWall;
+    public boolean collideToRightBlock;
+    public boolean collideToBottomBlock;
+    public boolean collideToLeftBlock;
+    public boolean collideToTopBlock;
     public int              level;
     public int              score;
     public int              heart;
@@ -26,7 +26,7 @@ public class LoadSave {
     public double           xBall;
     public double           yBall;
     public double xPaddle;
-    public double YPaddle;
+    public double yPaddle;
     public double centerPaddleX;
     public long             time;
     public long             goldTime;
@@ -42,6 +42,7 @@ public class LoadSave {
             loadGameStats(inputStream);
             loadGameObjs(inputStream);
             loadGameFlags(inputStream);
+            System.out.printf("\n IS IT GOLDEN TIME??"+isGoldStats);
             try {
                 blocks = (ArrayList<BlockSerializable>) inputStream.readObject();
             } catch (ClassNotFoundException e) {
@@ -69,7 +70,7 @@ public class LoadSave {
             xBall = inputStream.readDouble();
             yBall = inputStream.readDouble();
             xPaddle = inputStream.readDouble();
-            YPaddle = inputStream.readDouble();
+            yPaddle = inputStream.readDouble();
             centerPaddleX = inputStream.readDouble();
             time = inputStream.readLong();
             goldTime = inputStream.readLong();
@@ -82,17 +83,17 @@ public class LoadSave {
     private void loadGameFlags(ObjectInputStream inputStream) throws IOException{
         try {
             isExistHeartBlock = inputStream.readBoolean();
-            isGoldStauts = inputStream.readBoolean();
+            isGoldStats = inputStream.readBoolean();
             goDownBall = inputStream.readBoolean();
             goRightBall = inputStream.readBoolean();
-            colideToBreak = inputStream.readBoolean();
-            colideToBreakAndMoveToRight = inputStream.readBoolean();
-            colideToRightWall = inputStream.readBoolean();
-            colideToLeftWall = inputStream.readBoolean();
-            colideToRightBlock = inputStream.readBoolean();
-            colideToBottomBlock = inputStream.readBoolean();
-            colideToLeftBlock = inputStream.readBoolean();
-            colideToTopBlock = inputStream.readBoolean();
+            collideToBreak = inputStream.readBoolean();
+            collideToBreakAndMoveToRight = inputStream.readBoolean();
+            collideToRightWall = inputStream.readBoolean();
+            collideToLeftWall = inputStream.readBoolean();
+            collideToRightBlock = inputStream.readBoolean();
+            collideToBottomBlock = inputStream.readBoolean();
+            collideToLeftBlock = inputStream.readBoolean();
+            collideToTopBlock = inputStream.readBoolean();
             invert = inputStream.readBoolean();
             is_short = inputStream.readBoolean();
 

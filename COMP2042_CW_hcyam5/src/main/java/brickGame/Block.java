@@ -64,25 +64,15 @@ public class Block implements Serializable {
         rect.setY(y);
 
         if (type == BLOCK_CHOCO) {
-            Image image = new Image("choco.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
+            View.gameObjectImageFill(rect, "choco.jpg");
         } else if (type == BLOCK_HEART) {
-            Image image = new Image("heart.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
+            View.gameObjectImageFill(rect, "heart.jpg");
         } else if (type == BLOCK_STAR) {
-            Image image = new Image("star.jpg");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
+            View.gameObjectImageFill(rect, "star.jpg");
         }else if (type == BLOCK_INVERT) {
-            Image image = new Image("darker_blue_final_brick.png");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
+            View.gameObjectImageFill(rect,"darker_blue_final_brick.png");
         }else if (type == BLOCK_SHORT){
-            Image image = new Image("dark_purple_final_brick.png");
-            ImagePattern pattern = new ImagePattern(image);
-            rect.setFill(pattern);
+            View.gameObjectImageFill(rect, "dark_purple_final_brick.png");
         } else {
             rect.setFill(color);
             }
@@ -93,8 +83,8 @@ public class Block implements Serializable {
             return NO_HIT;
         }
         double boundary = 5.0; // marks boundary for ball-block collision
-        if (xBall + Main.ballRadius >= x - boundary && xBall - Main.ballRadius <= x + width + boundary &&
-                yBall + Main.ballRadius >= y - boundary && yBall - Main.ballRadius <= y + height + boundary) {
+        if (xBall + Model.ballRadius >= x - boundary && xBall - Model.ballRadius <= x + width + boundary &&
+                yBall + Model.ballRadius >= y - boundary && yBall - Model.ballRadius <= y + height + boundary) {
             // now just decide which block side was touched by ball
             if (yBall >= y && yBall <= y + height) {
                 if (xBall >= x && xBall <= x + width) {

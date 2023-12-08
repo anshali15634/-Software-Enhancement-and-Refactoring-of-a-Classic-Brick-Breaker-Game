@@ -34,26 +34,21 @@ public class Score {
     // animation for the messages like "Level up :)"
     public void showMessage(String message, final Main main) {
         final Label label = new Label(message);
-
         label.setScaleX(2);
         label.setScaleY(2);
         // Center the label in the middle of the screen
-        label.setTranslateX((double) main.getSceneWidth() / 2 - 100);
-        label.setTranslateY((double) main.getSceneWidth() / 2);
-
+        label.setTranslateX((double) Model.sceneWidth / 2 - 100);
+        label.setTranslateY((double) Model.sceneWidth / 2);
         Platform.runLater(() -> main.root.getChildren().add(label));
-
         // translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
-        translateTransition.setToY(((double) main.getSceneHeight() / 2) - 50); // Move up
+        translateTransition.setToY(((double) Model.sceneHeight / 2) - 50); // Move up
         translateTransition.setCycleCount(1);
         translateTransition.play();
-
         // fade Animation
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
-
         // removes label from scene after animation is over
         fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
         fadeTransition.play();
@@ -67,7 +62,7 @@ public class Score {
             label.setScaleX(2);
             label.setScaleY(2);
 
-            GameButton restart = new GameButton("Back", "back.png",0,0);
+            GameButton restart = new GameButton("Back", "back.png",130,380);
             restart.setOnAction(event -> main.restartGame());
 
             main.root.getChildren().addAll(label, restart);

@@ -1,7 +1,41 @@
->> choco array stores all the choco blocks, when hit s
+In the MVC pattern, the manipulation of data and the coordination of actions between the View and 
+the Model are typically handled by the Controller. The Controller receives user input from the View,
+updates the Model accordingly, and may also update the View to reflect changes in the Model.
+
+Model (Manages Data and Business Logic):
+
+    Holds the state of the application.
+    Performs calculations, updates data, and enforces business rules.
+    Provides methods to query or modify the state.
+
+View (Displays Information):
+
+    Displays the current state of the Model to the user.
+    Sends user input to the Controller.
+    Should not contain application state or business logic.
+    Controller (Handles User Input and Coordinates Actions):
+
+    Listens to user input from the View.
+    Updates the Model based on user input.
+    May update the View to reflect changes in the Model.
+    In your case, the Controller should handle tasks like updating the paddle position, 
+    managing game physics, handling key events, initiating game saves, loading games, 
+    and controlling the flow of the game. It should delegate specific tasks to the Model 
+    when it comes to manipulating data or applying game logic.
+
+Here are examples of tasks that might belong in the Controller:
+
+    Handling key events (handle(KeyEvent event) method).
+    Initiating game saves and loads (saveGame(), loadGame() methods).
+    Controlling game flow (starting, stopping, restarting the game).
+    Managing game physics and collisions.
+    Updating the Model based on user input.
+    The division of responsibilities helps keep your code organized, 
+    modular, and easier to maintain. It also supports the concept of separation of concerns, 
+    making each component focused on a specific aspect of the application.
+
 # COMP2042_CW_hcyam5
 NOTE: ask later about what ss is needed for git - show an example?
-REMINDER: change final level to 5 afterwards.
 **Game Instructions:**
 - choco block gives +3 score
 - heart block gives lives
@@ -16,11 +50,13 @@ REMINDER: change final level to 5 afterwards.
 3. Exit button added - closes window and exits program.
 4. About button - has how to play instructions.
 5. Separate start screen with game menu implemented.
-6. Invert bonus - if ball touches a dark-blue pixel block, it releases an invert bonus.
-   if the paddle touches this bonus, the paddle's controls reverse. (feature taken from the original BrickBreaker game)
-   If paddle's controls were already reversed, catching the bonus again will reverse the paddle controls back to 
-   normal.
-7. Short Paddle bonus - if the ball touches the dark-purple pixel block, it releases a short paddle bonus.
+6. Invert bonus - (A feature from the original Brick Breaker game) 
+   If ball touches a dark-blue pixel block, it releases an invert bonus. If the paddle touches this bonus, 
+   the paddle's controls reverse. If paddle's controls were already reversed, catching the bonus 
+   again will reverse the paddle controls back to normal.
+7. Short Paddle bonus - (the original Brick Breaker game had a feature that elongates the paddle, I have decided to
+   implement the opposite to make the game harder)
+   if the ball touches the dark-purple pixel block, it releases a short paddle bonus. 
    If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
    will reverse the bonus (paddle becomes old size again)
 8. Pause feature implemented - press space bar to pause the game, and press space bar again to resume the game.
@@ -44,7 +80,34 @@ REMINDER: change final level to 5 afterwards.
     - sets the X and Y coordinates of the button
   - Reason why class was created:
     - To replace the repetitive blocks of code for each button's graphic settings in the start() function of
-      the Main class.
+      the Main class, and the buttons in showWin and showGameOver().
+    - Provides a convenient way to create buttons with associated images, coordinates, and styles for the application. 
+      It encapsulates the common functionality required for creating game buttons in this game, reducing redundancy 
+      and promoting code reuseability.
+
+- View Class
+  - It holds all the functions which were in the Main class, that were related to modifying the UI.
+  - Its purpose is to:
+    - 
+  - Reasons why this class was created:
+    - The Main class violates the Single-Class-Single-Responsibility Principle. This is because the modification of the
+      UI, game logic, and storage of data was all executed in a single class. As a solution, I implemented the MVC
+      pattern and therefore the View class was created.
+    - This class handles the changes in the UI, like changing teh game background, initializing the labels for display,
+      setting visibility of the objects, and filling in images for the objects.
+    - This class was made as a singleton class as only one View object is required for the game, and this centralizes
+      the configuration of the View class and prevents duplication of resources.
+- Model Class
+  - A singleton class which holds all the variables and functions relating to the game state and logic.
+  - Its purpose is to:
+    - 
+  - Reasons why this class was created:
+    -  single point of access to the game state from various parts of your application
+    -  centralizes the game state, making it easier to manage and modify. Particularly useful since multiple components
+       need to interact with or modify the game state.
+    - ensures that there is only one instance of the game state, preventing issues related to multiple instances 
+      having different states.
+
 
 **Modified Java Classes:**
 Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
@@ -57,6 +120,8 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
       Setter method for paddleWidth added.
     - new scene for the "how to play" page was introduced.
     - new flag variable invert introduced to inform other functions if paddle touches the invert bonus.
+    - new flag variable startGame was introduced so that the functions loadGame and nextLevel do not set the 
+      visibility of the game buttons to true when moving to the next level or when starting a loaded game.
     - variables related to the paddle (xBreak, yBreak, breakWidth, etc ) were changed to include the word 'paddle' 
       instead (eg. xPaddle, yPaddle, paddleWidth, etc) as the word 'break' was ambiguous.
     - start function was modified to add a new scene for How To Play, to restrict window size (window should not enlarge),
@@ -96,6 +161,13 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
     - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
     - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+  - Since the Main class violated the Single Class, Single Responsibility principle, the MVC pattern was used to
+    separate the responsibilities to different classes, and the Model and View classes were created,
+    variables and functions from the Main class were moved accordingly. Functions initPaddle, initBoard, initBall remain
+    in the Main class as they have to be configured according to user input (like when the game is loaded, the paddle
+    width may differ if player caught the short paddle bonus previously and has to be drawn differently).
+
+  - function startEngine() added to remove duplicate blocks of code used to initialise the engine settings.
 
 - GameEngine Class:
   - Since GameEngine is only used once in the Main class, it was converted to a singleton class. The getInstance method 
@@ -121,13 +193,14 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
     loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
 
-- Bonus Class
-  - new variable bonusType to identify the type of bonus - eg: +3, invert, short paddle etc.
-  - bonusType added as parameter to constructor.
-  - using bonusType to identify type of bonus, the image is added to the bonus in the draw() function.
+- Bonus Class was renamed to Power (there are negative and positive powers, therefore the word bonus was not appropriate)
+  - new variable powerType to identify the type of power - eg: +3, invert, short paddle etc.
+  - powerType added as parameter to constructor.
+  - using powerType to identify type of power, the image is added to the power in the draw() function.
     
 - Score Class
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
+
   
 **Unexpected Problems:**
 1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
@@ -197,16 +270,14 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
      was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
      paddle remained smooth and glitch-free.
 
+10. If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.
+    - How the problem was solved:
+      The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
+      this function to check the isGoldStats flag and change the image of the ball appropriately.
+
+**Implementation of the MVC pattern: Explanation of the separation of the original Main class code**
+why is initpaddle, board and ball left in main class?
+why is physics ball and onupdate functions left in the main class?
+what was moved to model and view classes and why?
 
 
-- check if each function only has one task, if have more than one
-    then should refactor and make separate functions.
-- no method should have more than 5 levels of indentation.
-  - if this is the case then make new helper methods.
-- each line should not have more than 80 chars (should fit inside your screen)
-- Class Variable Names
-- all class variables have get set methods.
-- all class variables should be private
-- methods should not have more than 5 parameters. The more parameters, less reusable
-    then you need to group all the parameters in a new class
-- use lambda expressions to simplify the syntax for anonymous inner classes.

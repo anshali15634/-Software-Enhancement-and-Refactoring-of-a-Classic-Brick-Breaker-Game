@@ -1,21 +1,13 @@
 package brickGame;
-import java.util.concurrent.CopyOnWriteArrayList;
-import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,108 +16,20 @@ import java.util.Random;
 
 
 public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
+    private boolean          startGame = false;
+    public boolean           gameBG = false;
 
-
-    private int level = 0;
-    public int final_level = 3; // game finishes after level 5
-    private boolean invert = false; // to check if invert bonus is used
-    private boolean shortPaddle = false; // to check if short paddle bonus is used
-
-    private double xPaddle = 0.0f;
-    private double centerPaddleX;
-    private double yPaddle = 640.0f;
-
-    public static final int SHORT_PADDLE_WIDTH = 90;
-    public static final int NORMAL_PADDLE_WIDTH = 130;
-    private int paddleWidth = NORMAL_PADDLE_WIDTH;
-
-
-    private final int paddleHeight = 30;
-    private final int halfBreakWidth = paddleWidth / 2;
-
-    private final int sceneWidth = 500;
-
-    private final int sceneHeight = 700;
-
-    private static final int LEFT  = 1;
-    private static final int RIGHT = 2;
-
-    private Circle ball;
-    private double xBall;
-    private double yBall;
-
-    private boolean isGoldStatus = false;
-    private boolean isExistHeartBlock = false;
-
-    private Rectangle paddle;
-    public static final int       ballRadius = 10;
-
-    private int destroyedBlockCount = 0;
-
-    private int  heart    = 3;
-    private int  score    = 0;
-    private long time     = 0;
-    private long hitTime  = 0;
-    private long goldTime = 0;
-    private boolean isPaused = false;
-
-    public boolean gameBG = false;
-
-    private GameEngine engine;
-    public static String savePath;
-    public static String savePathDir;
-
-    private Label loadLabel;
-    private Label pauseLabel;
-
-    public FadeTransition fadeTransition;
-
-    private final CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
-    private final CopyOnWriteArrayList<Bonus> bonusArray = new CopyOnWriteArrayList<>(); // stores bonuses for choco blocks
-    public void setPaddleWidth(boolean shortPaddle) {
-        if (shortPaddle) {
-            paddleWidth = SHORT_PADDLE_WIDTH;
-        } else {
-            paddleWidth = NORMAL_PADDLE_WIDTH; // Use the initial paddle width when not short
-        }
-
-        Platform.runLater(() -> {
-            // Update UI with the new paddle width
-            paddle.setWidth(paddleWidth);
-        });
-    }
-    public int getSceneHeight(){
-        return sceneHeight;
-    }
-    public int getSceneWidth(){
-        return sceneWidth;
-    }
-    private final Color[] colors = new Color[] {
-            Color.valueOf("#B81DC2"),
-            Color.valueOf("#EC6360"),
-            Color.valueOf("#EA4574"),
-            Color.valueOf("#C60A9E"),
-            Color.valueOf("#DB0463"),
-            Color.valueOf("#DB43AD"),
-            Color.valueOf("#FF835D")
-    };
-
+    public static String     savePath;
+    public static String     savePathDir;
+    public static final int  LEFT  = 1;
+    public static final int  RIGHT = 2;
     public  Pane             root;
-
     public Pane              root2;
-    private Label            scoreLabel;
-    private Label            heartLabel;
-    private Label            levelLabel;
-    private boolean startGame = false;
+    private View view = View.getInstance();
+    private Model model = Model.getInstance();
 
-    private boolean loadFromSave = false;
 
     Stage  primaryStage;
-    GameButton newGame = new GameButton("Start New Game", "new_game_button.png",130,290);
-    GameButton loadGame = new GameButton("Load Game", "load_button.png", 130, 470);
-    GameButton about = new GameButton("About", "how_to_play.png", 130, 380);
-    GameButton exit = new GameButton("Exit", "exit_button.png", 130, 560);
-    GameButton back = new GameButton("Back", "back.png",0,0);
 
     // the two following functions are to check if the computer has a d drive and setting the save paths accordingly
     private static boolean checkForDDrive() {
@@ -151,208 +55,104 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    public void setNotVisibleGameObjects(){
-        scoreLabel.setVisible(false);
-        heartLabel.setVisible(false);
-        levelLabel.setVisible(false);
-        ball.setVisible(false);
-        paddle.setVisible(false);
-        for (Block block : blocks) {
-            block.rect.setVisible(false);
-        }
-        loadGame.setVisible(true);
-        newGame.setVisible(true);
-        about.setVisible(true);
-        exit.setVisible(true);
-    }
-    public void setVisibleGameObjects(){
-        scoreLabel.setVisible(true);
-        heartLabel.setVisible(true);
-        levelLabel.setVisible(true);
-        ball.setVisible(true);
-        paddle.setVisible(true);
-        for (Block block : blocks) {
-            block.rect.setVisible(true);
-        }
-        loadGame.setVisible(false);
-        newGame.setVisible(false);
-        about.setVisible(false);
-        exit.setVisible(false);
-    }
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         primaryStage.setResizable(false);
-
-        // adding game icon
-        Image icon = new Image("game_icon.png");
-        primaryStage.getIcons().add(icon);
-
-        if (!loadFromSave) {
-            System.out.println("current level, level after final: "+level+" "+final_level);
-            level++;
-            if (level >1 && level<final_level){
+        View.setGameIcon(primaryStage, "game_icon.png" );
+        if (!model.getLoadFromSave()) {
+            System.out.println("current level, level after final: "+model.getLevel()+" "+Model.final_level);
+            model.incLevel();
+            if (model.getLevel() >1 && model.getLevel()<Model.final_level){
                 new Score().showMessage("Level Up (๑˃ᴗ˂)ﻭ", this);
             }
-            if (level==final_level){
+            if (model.getLevel()==Model.final_level){
                 new Score().showWin(this);
                 return;
             }
-
-            initBall();
-            initPaddle(); // initializes the paddle
             initBoard();
-
-            // if no previous game saved, when load button pressed should display this message
-            loadLabel = new Label("No previous games saved :<");
-            loadLabel.setLayoutX(135);
-            loadLabel.setLayoutY(240);
-            loadLabel.setVisible(false);
-            fadeTransition = new FadeTransition(Duration.seconds(2), loadLabel);
-            fadeTransition.setFromValue(1.0);
-            fadeTransition.setToValue(0.0);
-
+            initPaddle();
+            initBall();
+            System.out.println("\nGOING TO INIT PADDLE");
         }
-
         root = new Pane();
-        if (gameBG){ // if nextLevel() calls this start() function, should change bg to game bg
-            root.setStyle("-fx-background-image: url('bg2.jpg');");
-        }else{
-            root.setStyle("-fx-background-image: url('bg.jpg');");
-        }
-        scoreLabel = new Label("Score: " + score);
-        levelLabel = new Label("Level: " + level);
-        levelLabel.setTranslateY(20);
-        heartLabel = new Label("Heart : " + heart);
-        heartLabel.setTranslateX(sceneWidth - 90);
-        if (!loadFromSave) {
-            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel, newGame, about, exit, loadGame,loadLabel);
+        root2 = new Pane();
+        View.changeGameBG(gameBG, root);
+        view.initLabels(model.getScore(), model.getLevel(), model.getHeart(), Model.sceneHeight, Model.sceneWidth);
+        if (!model.getLoadFromSave()) {
+            root.getChildren().addAll(model.getBall(), view.scoreLabel, view.heartLabel, view.levelLabel, view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
         } else {
-            root.getChildren().addAll(paddle, ball, scoreLabel, heartLabel, levelLabel);
+            root.getChildren().addAll(model.getBall(), view.scoreLabel, view.heartLabel, view.levelLabel, view.pauseLabel,model.getPaddle());
         }
-        for (Block block : blocks) {
+        for (Block block : model.blocks) {
             root.getChildren().add(block.rect);
         }
-        initPauseLabel();
 
-
-        // setting up main scene
-        Scene scene = new Scene(root, sceneWidth, sceneHeight);
+        // set up the main scene for gameplay
+        Scene scene = new Scene(root, Model.sceneWidth, Model.sceneHeight);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
 
-        // setting up "how to play" scene2
-        root2 = new StackPane();
-
-        Scene scene2 = new Scene(root2, sceneWidth, sceneHeight);
-        root2.getChildren().add(back);
+        // set up scene for showing game instructions
+        Scene scene2 = new Scene(root2, Model.sceneWidth, Model.sceneHeight);
+        root2.getChildren().add(view.back);
         root2.setStyle("-fx-background-image: url('how_To_play_bg.png')");
 
-        back.setOnAction(e -> primaryStage.setScene(scene));
-        about.setOnAction(e -> primaryStage.setScene(scene2));
-        exit.setOnAction(e -> {
-            Stage stage = (Stage) exit.getScene().getWindow();
+        view.back.setOnAction(e -> primaryStage.setScene(scene));
+        view.about.setOnAction(e -> primaryStage.setScene(scene2));
+        view.exit.setOnAction(e -> {
+            Stage stage = (Stage) view.exit.getScene().getWindow();
             stage.close();
         });
-
-        scoreLabel.setVisible(false);
-        heartLabel.setVisible(false);
-        levelLabel.setVisible(false);
-        ball.setVisible(false);
-        paddle.setVisible(false);
-        for (Block block : blocks) {
+        for (Block block : model.blocks) {
             block.rect.setVisible(false);
         }
         if (!startGame){
-            setNotVisibleGameObjects();
+            View.setNotVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
         }
         primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        if (!loadFromSave) {
-            if (level > 1 && level < final_level) {
-                setVisibleGameObjects();
-                engine = GameEngine.getInstance();
-                engine.setOnAction(this);
-                engine.setFps(120);
-                engine.start();
+        if (!model.getLoadFromSave()) {
+            if (model.getLevel() > 1 && model.getLevel() < Model.final_level) {
+                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
+                //engine = GameEngine.getInstance();
+                startEngine();
             }
-
-            loadGame.setOnAction(event -> {
+            view.loadGame.setOnAction(event -> {
                 // check if the save file exists first - else no game to load
                 File file = new File(savePath);
                 if (file.exists()){
                     loadGame();
-                    setVisibleGameObjects();
+                    model.updatePaddleWidth(model.isShortPaddle());
+                    View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
+                    View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
                 }else{
-                    loadLabel.setVisible(true);
-                    fadeTransition.play();
+                    view.loadLabel.setVisible(true);
+                    View.fadeTransition.play();
                 }
             });
-
-            newGame.setOnAction(event -> {
+            view.newGame.setOnAction(event -> {
                 root.setStyle("-fx-background-image: url('bg2.jpg');");
-                engine = GameEngine.getInstance();
-                engine.setOnAction(Main.this);
-                engine.setFps(120);
-                engine.start();
-                setVisibleGameObjects();
+                //engine = GameEngine.getInstance();
+                startEngine();
+                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
             });
         } else {
-            engine = GameEngine.getInstance();
-            engine.setOnAction(this);
-            engine.setFps(120);
-            engine.start();
-            loadFromSave = false;
-        }
-
-
-    }
-    private void initPauseLabel() {
-        pauseLabel = new Label("Game Paused :)");
-        pauseLabel.setStyle("-fx-font-size: 24; -fx-text-fill: white;");
-        pauseLabel.setLayoutX(sceneWidth / 2 - 100);
-        pauseLabel.setLayoutY(sceneHeight / 2 - 20);
-        pauseLabel.setVisible(false);
-        root.getChildren().add(pauseLabel);
-    }
-
-    private void initBoard() {
-        //boolean short_exists = false; // only one short_brick per level
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < level + 1; j++) {
-                int r = new Random().nextInt(500);
-                if (r % 5 == 0) {
-                    continue;
-                }
-                int type;
-                if (r % 10 == 1) {
-                    type = Block.BLOCK_CHOCO;
-                } else if (r % 10 == 2) {
-                    if (!isExistHeartBlock) {
-                        type = Block.BLOCK_HEART;
-                        isExistHeartBlock = true;
-                    } else {
-                        type = Block.BLOCK_NORMAL;
-                    }
-                } else if (r % 10 == 3) {
-                    type = Block.BLOCK_STAR;
-                }else if (r % 10 == 4){
-                    type = Block.BLOCK_INVERT;
-                }else if (r % 10 == 6 /*&& !short_exists*/){
-                    type = Block.BLOCK_SHORT;
-                    //short_exists=true;
-                } else {
-                    type = Block.BLOCK_NORMAL;
-                }
-                blocks.add(new Block(j, i, colors[r % (colors.length)], type));
-
-            }
+            //engine = GameEngine.getInstance();
+            startEngine();
+            model.setLoadFromSave(false);
         }
     }
+
+    private void startEngine(){
+        model.getGameEngine().setOnAction(this);
+        model.getGameEngine().setFps(120);
+        model.getGameEngine().start();
+    }
+
 
 
     public static void main(String[] args) {
@@ -364,14 +164,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void handle(KeyEvent event) {
         switch (event.getCode()) {
             case LEFT:
-                if (isInvert()) {
+                if (model.isInvert()) {
                     move(RIGHT);
                 }else{
                     move(LEFT);
                 }
                 break;
             case RIGHT:
-                if (isInvert()) {
+                if (model.isInvert()) {
                     move(LEFT);
                 }else{
                     move(RIGHT);
@@ -389,35 +189,31 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
     private void togglePause() {
-        isPaused = !isPaused;
-
-        if (isPaused) {
-            // Display pause label
-            pauseLabel.setVisible(true);
-            engine.pause(); // You might need to implement a pause method in your GameEngine class
+        model.setIsPaused(!model.getIsPaused());
+        if (model.getIsPaused()) {
+            view.pauseLabel.setVisible(true);
+            model.getGameEngine().pause();
         } else {
-            // Hide pause label
-            pauseLabel.setVisible(false);
-            engine.resume(); // You might need to implement a resume method in your GameEngine class
+            view.pauseLabel.setVisible(false);
+            model.getGameEngine().resume();
         }
     }
-
     private void move(final int direction) {
         new Thread(() -> {
             int sleepTime = 0;
             for (int i = 0; i < 30; i++) {
-                if (xPaddle == (sceneWidth - paddleWidth) && direction == RIGHT) {
+                if (model.getXPaddle() == (Model.sceneWidth - model.getPaddleWidth()) && direction == RIGHT) {
                     return;
                 }
-                if (xPaddle == 0 && direction == LEFT) {
+                if (model.getXPaddle() == 0 && direction == LEFT) {
                     return;
                 }
                 if (direction == RIGHT) {
-                    xPaddle++;
+                    model.setXPaddle(model.getXPaddle()+1);
                 } else {
-                    xPaddle--;
+                    model.setXPaddle(model.getXPaddle()-1);
                 }
-                centerPaddleX = xPaddle + halfBreakWidth;
+                model.setCenterPaddleX(model.getXPaddle() + Model.getHalfPaddleWidth());
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
@@ -433,171 +229,96 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void initBall() {
         Random random = new Random();
-        xBall = random.nextInt(sceneWidth) + 1;
-        yBall = random.nextInt(sceneHeight - 200) + ((level + 1) * Block.getHeight()) + 15;
-        ball = new Circle();
-        ball.setRadius(ballRadius);
-        ball.setFill(new ImagePattern(new Image("ball.png")));
+        model.setXBall(random.nextInt(Model.sceneWidth) + 1);
+        model.setYBall(random.nextInt(Model.sceneHeight - 200) + ((model.getLevel() + 1) * Block.getHeight()) + 15);
+        //ball = new Circle();
+        model.getBall().setRadius(Model.ballRadius);
+        View.gameObjectImageFill(model.getBall(),"ball.png");
     }
 
     private void initPaddle() {
-        paddle = new Rectangle();
-        System.out.println("\npaddle in initpaddle: "+ isShortPaddle());
-        if (isShortPaddle()){
-            paddle.setWidth(SHORT_PADDLE_WIDTH);
+        if (model.isShortPaddle()){
+            model.getPaddle().setWidth(Model.SHORT_PADDLE_WIDTH);
         }else{
-            paddle.setWidth(NORMAL_PADDLE_WIDTH);
+            model.getPaddle().setWidth(Model.NORMAL_PADDLE_WIDTH);
         }
-        paddle.setHeight(paddleHeight);
-        paddle.setX(xPaddle);
-        paddle.setY(yPaddle);
-
-        ImagePattern pattern = new ImagePattern(new Image("paddle.png"));
-
-        paddle.setFill(pattern);
+        model.getPaddle().setHeight(Model.paddleHeight);
+        model.getPaddle().setX(model.getXPaddle());
+        model.getPaddle().setY(model.getYPaddle());
+        View.gameObjectImageFill(model.getPaddle(),"paddle.png");
     }
+    private void initBoard() {
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < model.getLevel() + Model.LAST_BLOCK_ROW; j++) {
+                int r = new Random().nextInt(500);
+                if (r % 5 == 0) {
+                    continue;
+                }
+                int type;
+                if (r % 10 == 1) {
+                    type = Block.BLOCK_CHOCO;
+                } else if (r % 10 == 2) {
+                    if (!model.isIsExistHeartBlock()) {
+                        type = Block.BLOCK_HEART;
+                        model.setIsExistHeartBlock(true);
+                    } else {
+                        type = Block.BLOCK_NORMAL;
+                    }
+                } else if (r % 10 == 3) {
+                    type = Block.BLOCK_STAR;
+                }else if (r % 10 == 4){
+                    type = Block.BLOCK_INVERT;
+                }else if (r % 10 == 6){
+                    type = Block.BLOCK_SHORT;
+                } else {
+                    type = Block.BLOCK_NORMAL;
+                }
+                model.blocks.add(new Block(j, i, View.colors[r % (View.colors.length)], type));
 
-
-    private boolean goDownBall                  = true;
-    private boolean goRightBall                 = true;
-    private boolean collideToPaddle = false;
-    private boolean collideToPaddleAndMoveToRight = true;
-    private boolean collideToRightWall = false;
-    private boolean collideToLeftWall = false;
-    private boolean collideToRightBlock = false;
-    private boolean collideToBottomBlock = false;
-    private boolean collideToLeftBlock = false;
-    private boolean collideToTopBlock = false;
-
-    private double vX = 2.000;
-    private final double vY = 2.500;
-
-
-    private void resetCollideFlags() {
-
-        collideToPaddle = false;
-        collideToPaddleAndMoveToRight = false;
-        collideToRightWall = false;
-        collideToLeftWall = false;
-
-        collideToRightBlock = false;
-        collideToBottomBlock = false;
-        collideToLeftBlock = false;
-        collideToTopBlock = false;
+            }
+        }
     }
 
     private void setPhysicsToBall() {
-        moveBall();
-        handleBallYBoundaries();
-        handleBallPaddleCollision();
-        handleBallXBoundaries();
-        handleBallWallCollisions();
-        handleBallBlockCollision();
+        model.moveBall();
+        handleBallYBoundaries(); // left in Main class as it is interacting with other classes
+        model.handleBallPaddleCollision();
+        model.handleBallXBoundaries();
+        model.handleBallWallCollisions();
+        model.handleBallBlockCollision();
     }
 
-    private void moveBall(){
-        if (goDownBall) {
-            yBall += vY;
-        } else {
-            yBall -= vY;
-        }
-        if (goRightBall) {
-            xBall += vX;
-        } else {
-            xBall -= vX;
-        }
-    }
 
     private void handleBallYBoundaries(){
-        if (yBall <= 0) {
-            resetCollideFlags();
-            goDownBall = true;
+        if (model.getYBall() <= 0) {
+            model.resetCollideFlags();
+            model.setGoDownBall(true);
             return;
         }
-        if (yBall >= sceneHeight) {
-            goDownBall = false;
-            if (!isGoldStatus) {
-                heart--;
-                System.out.println("\nHEART DEDUCT");
-                new Score().show((int)((double) sceneWidth / 2), (int)((double) sceneHeight / 2), -1, this);
 
-                if (heart == 0) {
+        if (model.getYBall() >= Model.sceneHeight) {
+            model.setGoDownBall(false);
+
+            // Set the ball position to the boundary to make it bounce
+            model.setYBall(2 * Model.sceneHeight - model.getYBall());
+
+            System.out.printf("\nIS OUT OF BOUNDARY" + model.isGoDownBall() + model.getYBall());
+            if (!model.getIsGoldStats()) {
+                model.decHeart();
+                System.out.println("\nHEART DEDUCT AND NOT GOLD");
+                new Score().show((int)((double) Model.sceneWidth / 2), (int)((double) Model.sceneHeight / 2), -1, this);
+
+                if (model.getHeart() == 0) {
                     onUpdate();
                     new Score().showGameOver(this);
-                    engine.stop();
+                    model.getGameEngine().stop();
                 }
-
             }
-        }
-    }
-
-    private void handleBallPaddleCollision(){
-        if (yBall >= yPaddle - ballRadius) {
-            if (xBall >= xPaddle && xBall <= xPaddle + paddleWidth) {
-                hitTime = time;
-                resetCollideFlags();
-                collideToPaddle = true;
-                goDownBall = false;
-                double relation = (xBall - centerPaddleX) / (int)((double)paddleWidth / 2);
-                if (Math.abs(relation) <= 0.3) {
-                    vX = Math.abs(relation);
-                } else if (Math.abs(relation) > 0.3 && Math.abs(relation) <= 0.7) {
-                    vX = (Math.abs(relation) * 1.5) + (level / 3.500);
-                } else {
-                    vX = (Math.abs(relation) * 2) + (level / 3.500);
-                }
-                collideToPaddleAndMoveToRight = xBall - centerPaddleX > 0;
-            }
-        }
-        if (collideToPaddle) {
-            goRightBall = collideToPaddleAndMoveToRight;
-        }
-    }
-
-
-
-    private void handleBallXBoundaries(){
-        if (xBall >= sceneWidth) {
-            resetCollideFlags();
-            collideToRightWall = true;
-        }
-
-        if (xBall <= 0) {
-            resetCollideFlags();
-            collideToLeftWall = true;
-        }
-    }
-
-    private void handleBallWallCollisions(){
-        if (collideToRightWall) {
-            goRightBall = false;
-        }
-        if (collideToLeftWall) {
-            goRightBall = true;
-        }
-    }
-
-
-    private void handleBallBlockCollision(){
-        if (collideToRightBlock) {
-            goRightBall = true;
-        }
-
-        if (collideToLeftBlock) {
-            goRightBall = true;
-        }
-
-        if (collideToTopBlock) {
-            goDownBall = false;
-        }
-
-        if (collideToBottomBlock) {
-            goDownBall = true;
         }
     }
 
     private void checkDestroyedCount() {
-        if (destroyedBlockCount == blocks.size()) {
+        if (model.getDestroyedBlockCount() == model.blocks.size()) {
             //TODO win level todo...
             nextLevel();
         }
@@ -628,39 +349,39 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void saveGameInfo(ObjectOutputStream outputStream) throws IOException {
-        outputStream.writeInt(level);
-        outputStream.writeInt(score);
-        outputStream.writeInt(heart);
-        outputStream.writeInt(destroyedBlockCount);
+        outputStream.writeInt(model.getLevel());
+        outputStream.writeInt(model.getScore());
+        outputStream.writeInt(model.getHeart());
+        outputStream.writeInt(model.getDestroyedBlockCount());
 
-        outputStream.writeDouble(xBall);
-        outputStream.writeDouble(yBall);
-        outputStream.writeDouble(xPaddle);
-        outputStream.writeDouble(yPaddle);
-        outputStream.writeDouble(centerPaddleX);
-        outputStream.writeLong(time);
-        outputStream.writeLong(goldTime);
-        outputStream.writeDouble(vX);
+        outputStream.writeDouble(model.getXBall());
+        outputStream.writeDouble(model.getYBall());
+        outputStream.writeDouble(model.getXPaddle());
+        outputStream.writeDouble(model.getYPaddle());
+        outputStream.writeDouble(model.getCenterPaddleX());
+        outputStream.writeLong(model.getTime());
+        outputStream.writeLong(model.getGoldTime());
+        outputStream.writeDouble(model.getvX());
 
-        outputStream.writeBoolean(isExistHeartBlock);
-        outputStream.writeBoolean(isGoldStatus);
-        outputStream.writeBoolean(goDownBall);
-        outputStream.writeBoolean(goRightBall);
-        outputStream.writeBoolean(collideToPaddle);
-        outputStream.writeBoolean(collideToPaddleAndMoveToRight);
-        outputStream.writeBoolean(collideToRightWall);
-        outputStream.writeBoolean(collideToLeftWall);
-        outputStream.writeBoolean(collideToRightBlock);
-        outputStream.writeBoolean(collideToBottomBlock);
-        outputStream.writeBoolean(collideToLeftBlock);
-        outputStream.writeBoolean(collideToTopBlock);
-        outputStream.writeBoolean(isInvert());
-        outputStream.writeBoolean(isShortPaddle());
+        outputStream.writeBoolean(model.isIsExistHeartBlock());
+        outputStream.writeBoolean(model.getIsGoldStats());
+        outputStream.writeBoolean(model.isGoDownBall());
+        outputStream.writeBoolean(model.isGoRightBall());
+        outputStream.writeBoolean(model.isCollideToPaddle());
+        outputStream.writeBoolean(model.isCollideToPaddleAndMoveToRight());
+        outputStream.writeBoolean(model.isCollideToRightWall());
+        outputStream.writeBoolean(model.isCollideToLeftWall());
+        outputStream.writeBoolean(model.isCollideToRightBlock());
+        outputStream.writeBoolean(model.isCollideToBottomBlock());
+        outputStream.writeBoolean(model.isCollideToLeftBlock());
+        outputStream.writeBoolean(model.isCollideToTopBlock());
+        outputStream.writeBoolean(model.isInvert());
+        outputStream.writeBoolean(model.isShortPaddle());
     }
 
     private void saveBlockInfo(ObjectOutputStream outputStream) throws IOException {
         ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
-        for (Block block : blocks) {
+        for (Block block : model.blocks) {
             if (block.isDestroyed) {
                 continue;
             }
@@ -687,20 +408,20 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         copyGameInfo(loadSave);
         copyBlockInfo(loadSave);
 
-        blocks.clear();
-        bonusArray.clear();
+        model.blocks.clear();
+        model.powerArray.clear();
 
         List<Block> newBlocks = new ArrayList<>();
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            newBlocks.add(new Block(ser.row, ser.j, colors[r % colors.length], ser.type));
+            newBlocks.add(new Block(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
         }
 
-        blocks.addAll(newBlocks);
+        model.blocks.addAll(newBlocks);
 
         try {
-            loadFromSave = true;
+            model.setLoadFromSave(true);
             gameBG = true;
             startGame=true;
             start(primaryStage);
@@ -710,66 +431,52 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     private void copyGameInfo(LoadSave loadSave) {
-        isExistHeartBlock = loadSave.isExistHeartBlock;
-        isGoldStatus = loadSave.isGoldStauts;
-        goDownBall = loadSave.goDownBall;
-        goRightBall = loadSave.goRightBall;
-        collideToPaddle = loadSave.colideToBreak;
-        collideToPaddleAndMoveToRight = loadSave.colideToBreakAndMoveToRight;
-        collideToRightWall = loadSave.colideToRightWall;
-        collideToLeftWall = loadSave.colideToLeftWall;
-        collideToRightBlock = loadSave.colideToRightBlock;
-        collideToBottomBlock = loadSave.colideToBottomBlock;
-        collideToLeftBlock = loadSave.colideToLeftBlock;
-        collideToTopBlock = loadSave.colideToTopBlock;
-        level = loadSave.level;
-        score = loadSave.score;
-        heart = loadSave.heart;
-        destroyedBlockCount = loadSave.destroyedBlockCount;
-        xBall = loadSave.xBall;
-        yBall = loadSave.yBall;
-        xPaddle = loadSave.xPaddle;
-        yPaddle = loadSave.YPaddle;
-        centerPaddleX = loadSave.centerPaddleX;
-        time = loadSave.time;
-        goldTime = loadSave.goldTime;
-        vX = loadSave.vX;
-        setInvert(loadSave.invert);
-        setShortPaddle(loadSave.is_short);
-        System.out.println("\nFROM FILE SHORTPADDLE: "+ isShortPaddle());
+        model.setIsExistHeartBlock(loadSave.isExistHeartBlock);
+        model.setIsGoldStats(loadSave.isGoldStats);
+        model.setGoDownBall(loadSave.goDownBall);
+        model.setGoRightBall(loadSave.goRightBall);
+        model.setCollideToPaddle(loadSave.collideToBreak);
+        model.setCollideToPaddleAndMoveToRight(loadSave.collideToBreakAndMoveToRight);
+        model.setCollideToRightWall(loadSave.collideToRightWall);
+        model.setCollideToLeftWall(loadSave.collideToLeftWall);
+        model.setCollideToRightBlock(loadSave.collideToRightBlock);
+        model.setCollideToBottomBlock(loadSave.collideToBottomBlock);
+        model.setCollideToLeftBlock(loadSave.collideToLeftBlock);
+        model.setCollideToTopBlock(loadSave.collideToTopBlock);
+        model.setLevel(loadSave.level);
+        model.setScore(loadSave.score);
+        model.setHeart(loadSave.heart);
+        model.setDestroyedBlockCount(loadSave.destroyedBlockCount);
+        model.setXBall(loadSave.xBall);
+        model.setYBall(loadSave.yBall);
+        model.setXPaddle(loadSave.xPaddle);
+        model.setYPaddle(loadSave.yPaddle);
+        model.setCenterPaddleX(loadSave.centerPaddleX);
+        //time = loadSave.time;
+        //goldTime = loadSave.goldTime;
+        model.setTime(loadSave.time);
+        model.setGoldTime(loadSave.goldTime);
+        model.setvX(loadSave.vX);
+        model.setInvert(loadSave.invert);
+        model.setShortPaddle(loadSave.is_short);
+        System.out.println("\nFROM FILE SHORTPADDLE: "+ model.isShortPaddle());
     }
 
     private void copyBlockInfo(LoadSave loadSave) {
-        blocks.clear();
-        bonusArray.clear();
+        model.blocks.clear();
+        model.powerArray.clear();
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            blocks.add(new Block(ser.row, ser.j, colors[r % colors.length], ser.type));
+            model.blocks.add(new Block(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
         }
     }
 
     private void nextLevel() {
         Platform.runLater(() -> {
             try {
-                System.out.println("Number of bricks and number destroyed: "+blocks.size()+" "+destroyedBlockCount);
-                setInvert(false);
-                setShortPaddle(false);
-                setPaddleWidth(isShortPaddle());
-                paddle.setWidth(paddleWidth);
-                vX = 2.000;
-                engine.stop();
-                resetCollideFlags();
-                goDownBall = true;
-                isGoldStatus = false;
-                isExistHeartBlock = false;
-                hitTime = 0;
-                time = 0;
-                goldTime = 0;
-                engine.stop();
-                blocks.clear();
-                bonusArray.clear();
-                destroyedBlockCount = 0;
+                resetFlags();
+                model.getGameEngine().stop();
                 gameBG=true;
                 startGame=true;
                 start(primaryStage);
@@ -782,28 +489,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public void restartGame() {
 
         try {
-            level = 0;
-            heart = 3;
-            score = 0;
-            vX = 2.000;
-
-            setInvert(false);
-            setShortPaddle(false);
-            setPaddleWidth(isShortPaddle());
-            paddle.setWidth(paddleWidth);
-
-            destroyedBlockCount = 0;
-            resetCollideFlags();
-            goDownBall = true;
-
-            isGoldStatus = false;
-            isExistHeartBlock = false;
-            hitTime = 0;
-            time = 0;
-            goldTime = 0;
-
-            blocks.clear();
-            bonusArray.clear();
+            model.setLevel(0);
+            model.setHeart(3);
+            model.setScore(0);
+            resetFlags();
             gameBG=false;
             startGame=false;
             start(primaryStage);
@@ -812,27 +501,47 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    private void resetFlags(){
+        model.setvX(2.000);
+        model.setInvert(false);
+        model.setShortPaddle(false);
+        model.updatePaddleWidth(model.isShortPaddle());
+        View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
+        model.setDestroyedBlockCount(0);
+        model.resetCollideFlags();
+        model.setGoDownBall(true);
+        model.setIsGoldStats(false);
+        model.setIsExistHeartBlock(false);
+        model.setHitTime(0);
+        model.setTime(0);
+        model.setGoldTime(0);
+        model.blocks.clear();
+        model.powerArray.clear();
+
+    }
+
 
     @Override
     public void onUpdate() {
-        if (!isPaused) {
+        if (!model.getIsPaused()) {
             Platform.runLater(() -> {
 
-                scoreLabel.setText("Score: " + score);
-                heartLabel.setText("Heart : " + heart);
-                paddle.setX(xPaddle);
-                paddle.setY(yPaddle);
-                ball.setCenterX(xBall);
-                ball.setCenterY(yBall);
+                view.scoreLabel.setText("Score: " + model.getScore());
+                view.heartLabel.setText("Heart : " + model.getHeart());
+                model.getPaddle().setX(model.getXPaddle());
+                model.getPaddle().setY(model.getYPaddle());
+                model.getBall().setCenterX(model.getXBall());
+                model.getBall().setCenterY(model.getYBall());
 
-                for (Bonus choco : bonusArray) {
+                for (Power choco : model.powerArray) {
                     choco.choco.setY(choco.y);
                 }
             });
+            setPhysicsToBall();
 
-            if (yBall >= Block.getPaddingTop() && yBall <= (Block.getHeight() * (level + 1)) + Block.getPaddingTop()) {
-                for (final Block block : blocks) {
-                    int hitCode = block.checkHitToBlock(xBall, yBall);
+            if (model.getYBall() >= Block.getPaddingTop() && model.getYBall() <= (Block.getHeight() * (model.getLevel() + Model.LAST_BLOCK_ROW)) + Block.getPaddingTop()) {
+                for (final Block block : model.blocks) {
+                    int hitCode = block.checkHitToBlock(model.getXBall(), model.getYBall());
                     handleBlockHit(hitCode, block);
                 }
             }
@@ -841,62 +550,60 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
     private void handleBlockHit(int hitCode, Block block){
         if (hitCode != Block.NO_HIT) {
-            score += 1;
+            model.incScore();
 
             new Score().show(block.x, block.y, 1, this);
 
             block.rect.setVisible(false);
             block.isDestroyed = true;
-            destroyedBlockCount++;
+            model.setDestroyedBlockCount(model.getDestroyedBlockCount()+1);
 
-            resetCollideFlags();
+            model.resetCollideFlags();
             handleBlockType(block);
 
             if (hitCode == Block.HIT_RIGHT) {
-                collideToRightBlock = true;
+                model.setCollideToRightBlock (true);
             } else if (hitCode == Block.HIT_BOTTOM) {
-                collideToBottomBlock = true;
+                model.setCollideToBottomBlock(true);
             } else if (hitCode == Block.HIT_LEFT) {
-                collideToLeftBlock = true;
+                model.setCollideToLeftBlock(true);
             } else if (hitCode == Block.HIT_TOP) {
-                collideToTopBlock = true;
+                model.setCollideToTopBlock(true);
             }
         }
     }
     private void handleBlockType(Block block){
-        System.out.println("\nBLOCK BONUS ADDED");
         if (block.type == Block.BLOCK_CHOCO) {
-            final Bonus bonus1 = new Bonus(block.row, block.column,1);
-            bonus1.timeCreated = time;
-            Platform.runLater(() -> root.getChildren().add(bonus1.choco));
-            bonusArray.add(bonus1);
+            final Power pow1 = new Power(block.row, block.column,1);
+            pow1.timeCreated = model.getTime();
+            Platform.runLater(() -> root.getChildren().add(pow1.choco));
+            model.powerArray.add(pow1);
         }
 
         if (block.type == Block.BLOCK_INVERT){
-            final Bonus bonus1 = new Bonus(block.row, block.column, 2);
-            bonus1.timeCreated = time;
-            Platform.runLater(() -> root.getChildren().add(bonus1.choco));
-            bonusArray.add(bonus1);
+            final Power pow1 = new Power(block.row, block.column, 2);
+            pow1.timeCreated = model.getTime();
+            Platform.runLater(() -> root.getChildren().add(pow1.choco));
+            model.powerArray.add(pow1);
         }
 
         if (block.type == Block.BLOCK_SHORT){
-            final Bonus bonus1 = new Bonus(block.row, block.column, 3);
-            bonus1.timeCreated = time;
-            Platform.runLater(() -> root.getChildren().add(bonus1.choco));
-            bonusArray.add(bonus1);
+            final Power pow1 = new Power(block.row, block.column, 3);
+            pow1.timeCreated = model.getTime();
+            Platform.runLater(() -> root.getChildren().add(pow1.choco));
+            model.powerArray.add(pow1);
         }
 
         if (block.type == Block.BLOCK_STAR) {
-            goldTime = time;
-            ball.setFill(new ImagePattern(new Image("goldball.png")));
+            model.setGoldTime(model.getTime());
+            model.getBall().setFill(new ImagePattern(new Image("goldball.png")));
             System.out.println("gold ball");
             new Score().showMessage("GOLD BALL - UNLIMITED LIVES :>", Main.this);
-            //root.getStyleClass().add("goldRoot");
-            isGoldStatus = true;
+            model.setIsGoldStats(true);
         }
 
         if (block.type == Block.BLOCK_HEART) {
-            heart++;
+            model.incHeart();
         }
     }
 
@@ -910,55 +617,40 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         checkDestroyedCount();
         setPhysicsToBall();
 
-        if (time - goldTime > 5000) {
-            ball.setFill(new ImagePattern(new Image("ball.png")));
-            //root.getStyleClass().remove("goldRoot");
-            isGoldStatus = false;
+        if (model.getTime() - model.getGoldTime() > 5000) {
+            model.getBall().setFill(new ImagePattern(new Image("ball.png")));
+            model.setIsGoldStats(false);
         }
         // all bonuses are run through
-        for (Bonus bonus : bonusArray) {
-            if (bonus.y > sceneHeight || bonus.taken) {
+        for (Power power : model.powerArray) {
+            if (power.y > Model.sceneHeight || power.taken) {
                 continue; // skip this block and go to next choco
             }
-            if (bonus.y >= yPaddle && bonus.y <= yPaddle + paddleHeight && bonus.x >= xPaddle && bonus.x <= xPaddle + paddleWidth) {
-                if (bonus.bonusType==1){
+            if (power.y >= model.getYPaddle() && power.y <= model.getYPaddle() + Model.paddleHeight && power.x >= model.getXPaddle() && power.x <= model.getXPaddle() + model.getPaddleWidth()) {
+                if (power.powerType==1){
                     System.out.println("You Got it and +3 score for you");
-                    score += 3;
-                    new Score().show(bonus.x, bonus.y, 3, this);
-                }else if (bonus.bonusType == 2){
+                    model.setScore(model.getScore()+3);
+                    new Score().show(power.x, power.y, 3, this);
+                }else if (power.powerType == 2){
                     new Score().showMessage("INVERTED PADDLE CONTROLS :>", Main.this);
-                    setInvert(!isInvert());
-                }else if (bonus.bonusType == 3){
-                    new Score().showMessage("CAREFUL! SHORT PADDLE!", Main.this);
-                    setShortPaddle(!isShortPaddle());
-                    setPaddleWidth(isShortPaddle());
+                    model.setInvert(!model.isInvert());
+                }else if (power.powerType == 3){
+                    new Score().showMessage("CAREFUL! PADDLE CHANGE!", Main.this);
+                    model.setShortPaddle(!model.isShortPaddle());
+                    model.updatePaddleWidth(model.isShortPaddle());
+                    View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
                 }
-                bonus.choco.setVisible(false);
-                bonus.taken = true;
+                power.choco.setVisible(false);
+                power.taken = true;
             }
-            bonus.y += ((time - bonus.timeCreated) / 1000.000) + 1.000;
+            power.y += ((model.getTime() - power.timeCreated) / 1000.000) + 1.000;
         }
     }
 
 
     @Override
     public void onTime(long time) {
-        this.time = time;
+        model.setTime(time);
     }
 
-    private boolean isInvert() {
-        return invert;
-    }
-
-    private void setInvert(boolean invert) {
-        this.invert = invert;
-    }
-
-    private boolean isShortPaddle() {
-        return shortPaddle;
-    }
-
-    private void setShortPaddle(boolean shortPaddle) {
-        this.shortPaddle = shortPaddle;
-    }
 }
