@@ -1,50 +1,14 @@
-In the MVC pattern, the manipulation of data and the coordination of actions between the View and 
-the Model are typically handled by the Controller. The Controller receives user input from the View,
-updates the Model accordingly, and may also update the View to reflect changes in the Model.
-
-Model (Manages Data and Business Logic):
-
-    Holds the state of the application.
-    Performs calculations, updates data, and enforces business rules.
-    Provides methods to query or modify the state.
-
-View (Displays Information):
-
-    Displays the current state of the Model to the user.
-    Sends user input to the Controller.
-    Should not contain application state or business logic.
-    Controller (Handles User Input and Coordinates Actions):
-
-    Listens to user input from the View.
-    Updates the Model based on user input.
-    May update the View to reflect changes in the Model.
-    In your case, the Controller should handle tasks like updating the paddle position, 
-    managing game physics, handling key events, initiating game saves, loading games, 
-    and controlling the flow of the game. It should delegate specific tasks to the Model 
-    when it comes to manipulating data or applying game logic.
-
-Here are examples of tasks that might belong in the Controller:
-
-    Handling key events (handle(KeyEvent event) method).
-    Initiating game saves and loads (saveGame(), loadGame() methods).
-    Controlling game flow (starting, stopping, restarting the game).
-    Managing game physics and collisions.
-    Updating the Model based on user input.
-    The division of responsibilities helps keep your code organized, 
-    modular, and easier to maintain. It also supports the concept of separation of concerns, 
-    making each component focused on a specific aspect of the application.
-
 # COMP2042_CW_hcyam5
-NOTE: ask later about what ss is needed for git - show an example?
-**Game Instructions:**
+
+## **Game Instructions:**
 - choco block gives +3 score
 - heart block gives lives
 - gold star block -> gold ball -> freezes lives for _ seconds
 - s -> saves game
 
-**Compilation Instructions:**
+## **Compilation Instructions:**
 
-**Features Implemented and Working Properly:**
+## **Features Implemented and Working Properly:**
 1. Game Icon added
 2. Window size is now fixed (does not extend to full screen).
 3. Exit button added - closes window and exits program.
@@ -61,13 +25,13 @@ NOTE: ask later about what ss is needed for git - show an example?
    will reverse the bonus (paddle becomes old size again)
 8. Pause feature implemented - press space bar to pause the game, and press space bar again to resume the game.
 
-**Features Implemented but Not Working Properly:**
+## **Features Implemented but Not Working Properly:**
 
-**Features Not Implemented(Yet):**
+## **Features Not Implemented(Yet):**
 1. New bonus power - laser shooting to bricks to break them
 
 
-**New Java Classes:**
+## **New Java Classes:**
 
 - GameButton Class
   - It inherits from the existing Button class.
@@ -109,16 +73,17 @@ NOTE: ask later about what ss is needed for git - show an example?
       having different states.
 
 
-**Modified Java Classes:**
-Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions.
+## **Modified Java Classes:**
+_Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
+MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
 - Main Class 
-    - isGoldStauts renamed as isGoldStatus, sceneHeigt renamed as sceneHeight, and variables and functions with the word
+    - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
       colide in it was renamed to collide for clarity.
     - getter methods for sceneWidth and sceneHeight included because in Score class, the labels for messages are to be 
       centered, therefore scene dimensions are needed.
     - paddleWidth is not final as it is changed according to the shortPaddle bonus.
       Setter method for paddleWidth added.
-    - new scene for the "how to play" page was introduced.
+    - new scene for the "about" page was introduced.
     - new flag variable invert introduced to inform other functions if paddle touches the invert bonus.
     - new flag variable startGame was introduced so that the functions loadGame and nextLevel do not set the 
       visibility of the game buttons to true when moving to the next level or when starting a loaded game.
@@ -129,8 +94,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
     - choco was also renamed as bonus1, as new bonuses are to be introduced.
     - Unused variables like v and oldXBreak were removed.
-    - vX and vY control the speed of the ball (both stored 1). The speed value was doubled. (Now they both store 2 and 
-      2.5 respectively)
+    - vX and vY control the speed of the ball (both stored 1). The speed value was increased.
     - for the buttons, a class GameButton was introduced to reduce the amount of duplicated code for adding images
       to the buttons. The code was refactored to adjust to the inclusion of the new class.
     - the method handle() was altered to accommodate for the new feature "pause game" using the space bar.
@@ -193,10 +157,15 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
     loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
 
-- Bonus Class was renamed to Power (there are negative and positive powers, therefore the word bonus was not appropriate)
-  - new variable powerType to identify the type of power - eg: +3, invert, short paddle etc.
-  - powerType added as parameter to constructor.
-  - using powerType to identify type of power, the image is added to the power in the draw() function.
+- Power Class (previously called the Bonus class) 
+  - (there are negative and positive powers, therefore the class name bonus was not appropriate)
+  - Different powers have different images so the class had to include multiple if statements to decide which
+    image was for each power type. This violated the _Open-Closed principle_. The Power class's draw() function
+    has to be modified everytime a new bonus is added. Therefore, the _Template Method Pattern_ was used to modify
+    the class. 
+    - The Power class was modified to become an abstract class. The function chooseImage() is an abstract method to be
+       implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower).
+    - Now if new powers are to be added, the code is open for extension but closed for modification.
     
 - Score Class
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
@@ -216,7 +185,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
    - How the problem was solved:
      In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
-     If the device does not have a D drive, it changes the filepath to the device's C drive.
+     If the device does not have a D drive, it changes the filepath to the game file's relative directory.
 
 3. Load button was present in the game code but did not appear in the game screen.
    - How the problem was solved:
@@ -262,7 +231,7 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
       - in the function loadGameStats(), I overwrite destroyedBlockCount to 0. If destroyed blocks are not loaded into
       the game, there is no need to store the player's previous destroyedBlockCount.
 
-9. After incorporating the short paddle bonus, if there were multiple of that same bonus being caught by the paddle
+9. After incorporating the short paddle bonus, if there were many short paddle powers being caught by the paddle,
    the paddle glitches.
    - How the problem was solved:
      The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
@@ -276,8 +245,31 @@ Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes we
       this function to check the isGoldStats flag and change the image of the ball appropriately.
 
 **Implementation of the MVC pattern: Explanation of the separation of the original Main class code**
-why is initpaddle, board and ball left in main class?
-why is physics ball and onupdate functions left in the main class?
-what was moved to model and view classes and why?
+The original Main class code had the following purposes:
+- sets up game menu
+- sets up events for each button's press
+- loads, saves, levels up and restarts the game
+- initialize paddle, ball, board
+- handles threads for ball physics and game logic
+- stores the current game state variables (isGoldStats, heart, score, etc)
+- handles different types of collisions (block-ball, block-wall, block-paddle)
 
+After MVC pattern was implemented, the classes Model and View extracted their respective resposibilities
+from the Main class.
+
+>> View class carried out the user interface related responsibilities, providing a clear separation of concerns.
+It initialises the game buttons, sets the visibility of game objects, adds images to objects, changes the game 
+background, updates the UI in real time for objects like the paddle, initializes the labels and updates them.
+
+>> Model class encapsulates the game state variables like heart, score, etc. This class also contains final class 
+variables that store the measurements to be used consistently by all classes that require them, like sceneHeight,
+ballRadius, etc. It also stores the game logic for moving the ball and paddle, handling collisions and boundaries
+for the ball. 
+
+>> However, game logic that depends on user input and interaction with other classes like Model 
+and View were retained in the Main class. For example, the function
+that initializes the paddle depends on the bonus caught by the player, therefore needs to remain in the Main class as
+it is dependent on user input and requires interaction with the View class. The other initialization functions 
+(for the paddle and the ball) also remain in the Main class making it easier for developers (including future 
+maintainers) to follow the sequence of events during game initialization.
 
