@@ -3,10 +3,8 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.ImagePattern;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -68,14 +66,13 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             if (model.getLevel() >1 && model.getLevel()<Model.final_level){
                 new Score().showMessage("Level Up (๑˃ᴗ˂)ﻭ", this);
             }
-            if (model.getLevel()==Model.final_level){
+            if (model.getLevel()==Model.final_level) {
                 new Score().showWin(this);
                 return;
             }
             initBoard();
             initPaddle();
             initBall();
-            System.out.println("\nGOING TO INIT PADDLE");
         }
         root = new Pane();
         root2 = new Pane();
@@ -202,18 +199,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         new Thread(() -> {
             int sleepTime = 0;
             for (int i = 0; i < 30; i++) {
-                if (model.getXPaddle() == (Model.sceneWidth - model.getPaddleWidth()) && direction == RIGHT) {
-                    return;
-                }
-                if (model.getXPaddle() == 0 && direction == LEFT) {
-                    return;
-                }
-                if (direction == RIGHT) {
-                    model.setXPaddle(model.getXPaddle()+1);
-                } else {
-                    model.setXPaddle(model.getXPaddle()-1);
-                }
-                model.setCenterPaddleX(model.getXPaddle() + Model.getHalfPaddleWidth());
+                model.movePaddle(direction);
                 try {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
@@ -225,7 +211,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }).start();
     }
-
 
     private void initBall() {
         Random random = new Random();
@@ -275,44 +260,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 }
                 model.blocks.add(new Block(j, i, View.colors[r % (View.colors.length)], type));
 
-            }
-        }
-    }
-
-    private void setPhysicsToBall() {
-        model.moveBall();
-        handleBallYBoundaries(); // left in Main class as it is interacting with other classes
-        model.handleBallPaddleCollision();
-        model.handleBallXBoundaries();
-        model.handleBallWallCollisions();
-        model.handleBallBlockCollision();
-    }
-
-
-    private void handleBallYBoundaries(){
-        if (model.getYBall() <= 0) {
-            model.resetCollideFlags();
-            model.setGoDownBall(true);
-            return;
-        }
-
-        if (model.getYBall() >= Model.sceneHeight) {
-            model.setGoDownBall(false);
-
-            // Set the ball position to the boundary to make it bounce
-            model.setYBall(2 * Model.sceneHeight - model.getYBall());
-
-            System.out.printf("\nIS OUT OF BOUNDARY" + model.isGoDownBall() + model.getYBall());
-            if (!model.getIsGoldStats()) {
-                model.decHeart();
-                System.out.println("\nHEART DEDUCT AND NOT GOLD");
-                new Score().show((int)((double) Model.sceneWidth / 2), (int)((double) Model.sceneHeight / 2), -1, this);
-
-                if (model.getHeart() == 0) {
-                    onUpdate();
-                    new Score().showGameOver(this);
-                    model.getGameEngine().stop();
-                }
             }
         }
     }
@@ -475,7 +422,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void nextLevel() {
         Platform.runLater(() -> {
             try {
-                resetFlags();
+                model.resetFlags();
+                View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
                 model.getGameEngine().stop();
                 gameBG=true;
                 startGame=true;
@@ -492,7 +440,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             model.setLevel(0);
             model.setHeart(3);
             model.setScore(0);
-            resetFlags();
+            model.resetFlags();
+            View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
             gameBG=false;
             startGame=false;
             start(primaryStage);
@@ -501,24 +450,6 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
-    private void resetFlags(){
-        model.setvX(2.000);
-        model.setInvert(false);
-        model.setShortPaddle(false);
-        model.updatePaddleWidth(model.isShortPaddle());
-        View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
-        model.setDestroyedBlockCount(0);
-        model.resetCollideFlags();
-        model.setGoDownBall(true);
-        model.setIsGoldStats(false);
-        model.setIsExistHeartBlock(false);
-        model.setHitTime(0);
-        model.setTime(0);
-        model.setGoldTime(0);
-        model.blocks.clear();
-        model.powerArray.clear();
-
-    }
 
 
     @Override
@@ -534,14 +465,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 model.getBall().setCenterY(model.getYBall());
 
                 for (Power choco : model.powerArray) {
-                    choco.choco.setY(choco.y);
+                    choco.newPowerBlock.setY(choco.y);
                 }
             });
-            setPhysicsToBall();
+            model.setPhysicsToBall(this);
 
             if (model.getYBall() >= Block.getPaddingTop() && model.getYBall() <= (Block.getHeight() * (model.getLevel() + Model.LAST_BLOCK_ROW)) + Block.getPaddingTop()) {
                 for (final Block block : model.blocks) {
-                    int hitCode = block.checkHitToBlock(model.getXBall(), model.getYBall());
+                    int hitCode = model.checkHitToBlock(model.getXBall(), model.getYBall(), block);
                     handleBlockHit(hitCode, block);
                 }
             }
@@ -551,74 +482,53 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     private void handleBlockHit(int hitCode, Block block){
         if (hitCode != Block.NO_HIT) {
             model.incScore();
-
             new Score().show(block.x, block.y, 1, this);
-
             block.rect.setVisible(false);
             block.isDestroyed = true;
             model.setDestroyedBlockCount(model.getDestroyedBlockCount()+1);
-
             model.resetCollideFlags();
             handleBlockType(block);
-
-            if (hitCode == Block.HIT_RIGHT) {
-                model.setCollideToRightBlock (true);
-            } else if (hitCode == Block.HIT_BOTTOM) {
-                model.setCollideToBottomBlock(true);
-            } else if (hitCode == Block.HIT_LEFT) {
-                model.setCollideToLeftBlock(true);
-            } else if (hitCode == Block.HIT_TOP) {
-                model.setCollideToTopBlock(true);
-            }
+            model.setHitFlags(hitCode, block);
         }
     }
-    private void handleBlockType(Block block){
+    private void handleBlockType(Block block) {
+        Power pow1;
+
         if (block.type == Block.BLOCK_CHOCO) {
-            final Power pow1 = new Power(block.row, block.column,1);
+            pow1 = new scorePlusPower(block.row, block.column);
+        } else if (block.type == Block.BLOCK_INVERT) {
+            pow1 = new invertPower(block.row, block.column);
+        } else if (block.type == Block.BLOCK_SHORT) {
+            pow1 = new shortPaddlePower(block.row, block.column);
+        } else if (block.type == Block.BLOCK_STAR) {
+            pow1 = new goldPower(block.row, block.column);
+        } else if (block.type == Block.BLOCK_HEART) {
+            pow1 = new heartPower(block.row, block.column);
+        } else {
+            pow1 = null;
+        }
+
+        if (pow1 != null) {
             pow1.timeCreated = model.getTime();
-            Platform.runLater(() -> root.getChildren().add(pow1.choco));
+            Platform.runLater(() -> root.getChildren().add(pow1.newPowerBlock));
             model.powerArray.add(pow1);
-        }
-
-        if (block.type == Block.BLOCK_INVERT){
-            final Power pow1 = new Power(block.row, block.column, 2);
-            pow1.timeCreated = model.getTime();
-            Platform.runLater(() -> root.getChildren().add(pow1.choco));
-            model.powerArray.add(pow1);
-        }
-
-        if (block.type == Block.BLOCK_SHORT){
-            final Power pow1 = new Power(block.row, block.column, 3);
-            pow1.timeCreated = model.getTime();
-            Platform.runLater(() -> root.getChildren().add(pow1.choco));
-            model.powerArray.add(pow1);
-        }
-
-        if (block.type == Block.BLOCK_STAR) {
-            model.setGoldTime(model.getTime());
-            model.getBall().setFill(new ImagePattern(new Image("goldball.png")));
-            System.out.println("gold ball");
-            new Score().showMessage("GOLD BALL - UNLIMITED LIVES :>", Main.this);
-            model.setIsGoldStats(true);
-        }
-
-        if (block.type == Block.BLOCK_HEART) {
-            model.incHeart();
         }
     }
+
 
     @Override
     public void onInit() {
 
     }
 
+    // remains in the Main class as it involves alot of objects from different classes interacting.
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
-        setPhysicsToBall();
+        model.setPhysicsToBall(this);
 
         if (model.getTime() - model.getGoldTime() > 5000) {
-            model.getBall().setFill(new ImagePattern(new Image("ball.png")));
+            View.gameObjectImageFill(model.getBall(), "ball.png");
             model.setIsGoldStats(false);
         }
         // all bonuses are run through
@@ -627,20 +537,26 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 continue; // skip this block and go to next choco
             }
             if (power.y >= model.getYPaddle() && power.y <= model.getYPaddle() + Model.paddleHeight && power.x >= model.getXPaddle() && power.x <= model.getXPaddle() + model.getPaddleWidth()) {
-                if (power.powerType==1){
+                if (power instanceof scorePlusPower){
                     System.out.println("You Got it and +3 score for you");
                     model.setScore(model.getScore()+3);
                     new Score().show(power.x, power.y, 3, this);
-                }else if (power.powerType == 2){
-                    new Score().showMessage("INVERTED PADDLE CONTROLS :>", Main.this);
+                }else if (power instanceof invertPower){
                     model.setInvert(!model.isInvert());
-                }else if (power.powerType == 3){
-                    new Score().showMessage("CAREFUL! PADDLE CHANGE!", Main.this);
+                }else if (power instanceof shortPaddlePower){
                     model.setShortPaddle(!model.isShortPaddle());
                     model.updatePaddleWidth(model.isShortPaddle());
                     View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
+                }else if (power instanceof heartPower){
+                    model.incHeart();
+                }else if (power instanceof goldPower){
+                    model.setGoldTime(model.getTime());
+                    View.gameObjectImageFill(model.getBall(),"goldball.png");
+                    System.out.println("gold ball");
+                    model.setIsGoldStats(true);
                 }
-                power.choco.setVisible(false);
+                power.powerMessage(this);
+                power.newPowerBlock.setVisible(false);
                 power.taken = true;
             }
             power.y += ((model.getTime() - power.timeCreated) / 1000.000) + 1.000;

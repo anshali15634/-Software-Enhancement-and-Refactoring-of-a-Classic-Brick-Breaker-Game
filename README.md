@@ -1,5 +1,15 @@
 # COMP2042_CW_hcyam5
 
+>> checkHitToBlock() moved from Block class to Model because Block was in charge of initializing the blocks and
+block-ball collision detection which violates the Single Class Single Responsibility Principle. Therefore,
+the function was moved to Model as it comes under game logic.
+>> goldBlock and heartBlock before get hit and then effect. Now they are power ups.
+>> new Powers added: goldPower and heartPower
+
+design pattern stuff done:
+singleton pattern on classes game engine and model and view
+template method pattern on power class
+
 ## **Game Instructions:**
 - choco block gives +3 score
 - heart block gives lives
@@ -75,8 +85,8 @@
 
 ## **Modified Java Classes:**
 _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
-MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
-- Main Class 
+**- Main Class**
+    - Magic numbers avoided by adding NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH static final class variables.
     - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
       colide in it was renamed to collide for clarity.
     - getter methods for sceneWidth and sceneHeight included because in Score class, the labels for messages are to be 
@@ -133,7 +143,7 @@ MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
 
   - function startEngine() added to remove duplicate blocks of code used to initialise the engine settings.
 
-- GameEngine Class:
+**- GameEngine Class:**
   - Since GameEngine is only used once in the Main class, it was converted to a singleton class. The getInstance method 
     is synchronized, which is good for ensuring that only one instance of GameEngine class is created even in a 
     multithreaded environment.
@@ -143,7 +153,7 @@ MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
     pause the game.
 
   
-- Block Class
+**- Block Class**
   - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
     The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
     sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
@@ -152,12 +162,12 @@ MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
     the paddle (when left arrow pressed, moves right, and vice versa.)
   - new block type called BLOCK_SHORT was introduced - when hit by the ball, gives the bonus of shortening the paddle.
 
-- LoadSave Class
+**- LoadSave Class**
   - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
     loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
 
-- Power Class (previously called the Bonus class) 
+**- Power Class (previously called the Bonus class)** 
   - (there are negative and positive powers, therefore the class name bonus was not appropriate)
   - Different powers have different images so the class had to include multiple if statements to decide which
     image was for each power type. This violated the _Open-Closed principle_. The Power class's draw() function
@@ -167,62 +177,62 @@ MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
        implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower).
     - Now if new powers are to be added, the code is open for extension but closed for modification.
     
-- Score Class
+**- Score Class**
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
 
   
-**Unexpected Problems:**
-1. java.lang.UnsupportedOperationException - happened after level 1, the blocks keep forming,
+## **Unexpected Problems:**
+1. **java.lang.UnsupportedOperationException** - happened after level 1, the blocks keep forming,
    in an endless loop, does not configure the next level. 
-   - How the problem was solved:
+   **- How the problem was solved:**
      In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
      run() functions to throw an Interrupted Exception, and then returning from the functions to exit them.
 
-2. When saving the game using (S), there was a FileNotFound Exception. This was due to the filepath storing in 
+2. **When saving the game using (S), there was a FileNotFound Exception.** This was due to the filepath storing in 
    the file path "D:/..." but not all devices own a D drive.
-   - How the problem was solved:
+   **- How the problem was solved:**
      In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
      If the device does not have a D drive, it changes the filepath to the game file's relative directory.
 
-3. Load button was present in the game code but did not appear in the game screen.
-   - How the problem was solved:
+3. **Load button was present in the game code but did not appear in the game screen.**
+   **- How the problem was solved:**
      load button added to root for the first scene added to primaryStage. The load button functioned as expected.
 
-4. If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
-   and ball moves abnormally.
-   - How the problem was solved:
+4. **If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
+   and ball moves abnormally.**
+   **- How the problem was solved:**
      There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
      load button to check if the save.mdd file exists. If it does, the file is read to resume that game, else
      the label "No previous games saved :<" appears.
 
-5. Labels keep freezing on screen.
-   - How the problem was solved:
+5. **Labels keep freezing on screen.**
+   **- How the problem was solved:**
      Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
      a built-in animation framework for smoother animations. Instead of manually updating the scale/position of the 
      label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
      FadeTransition for fading.
 
-6. Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException - occurs when iterating
+6. **Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException -** occurs when iterating
    over the collections blocks and bonusArray and making changes to the collections during iteration.
-   - How the problem was solved:
+   **- How the problem was solved:**
      The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
      cause problems if they are modified while they are being iterated over. Therefore, I declared both arrays as
      concurrent collections of type CopyOnWriteArrayList. This means that it is safe to modify the collections
      while you are iterating over it, so you will not get a ConcurrentModificationException.
 
-7. when the player loses all their lives, when Game Over is displayed, the hearts label is not updated to 0, remains at
-   old value.
-   - How problem was solved:
+7. **when the player loses all their lives, when Game Over is displayed, the hearts label is not updated to 0, remains at
+   old value.**
+   **- How problem was solved:**
      - In function handleBallYBoundaries(), in the if statement that confirms that the game is over, the program was
        altered to call the function onUpdate() for the last time to update the game screen before the game engine
        halts.
 
-8. When playing a loaded game, after all bricks are broken, sometimes the game continues without moving to the next 
-   level. 
-   - How the problem was solved:
+8. **When playing a loaded game, after all bricks are broken, sometimes the game continues without moving to the next 
+   level.** 
+   **- How the problem was solved:**
       - A logical error was present. This is because, in the read file we read the destroyedBlockCount value and the 
       blocks array stores only the blocks which have not been destroyed. If for example the player starts with 12 bricks, 
       and he breaks 7 bricks and saves the game, destroyedBlockCount stores 7, but when he reloads the game, the blocks 
@@ -231,20 +241,20 @@ MAGIC NUMBERS AVOIDED BY ADDING NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH
       - in the function loadGameStats(), I overwrite destroyedBlockCount to 0. If destroyed blocks are not loaded into
       the game, there is no need to store the player's previous destroyedBlockCount.
 
-9. After incorporating the short paddle bonus, if there were many short paddle powers being caught by the paddle,
-   the paddle glitches.
-   - How the problem was solved:
+9. **After incorporating the short paddle bonus, if there were many short paddle powers being caught by the paddle,
+   the paddle glitches.**
+   **- How the problem was solved:**
      The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
      modified. This ensured that the UI updates occurred in a thread-safe manner. After applying the solution, the game 
      was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
      paddle remained smooth and glitch-free.
 
-10. If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.
-    - How the problem was solved:
+10. **If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.**
+    **- How the problem was solved:**
       The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
       this function to check the isGoldStats flag and change the image of the ball appropriately.
 
-**Implementation of the MVC pattern: Explanation of the separation of the original Main class code**
+## **Implementation of the MVC pattern: Explanation of the separation of the original Main class code**
 The original Main class code had the following purposes:
 - sets up game menu
 - sets up events for each button's press
@@ -257,16 +267,16 @@ The original Main class code had the following purposes:
 After MVC pattern was implemented, the classes Model and View extracted their respective resposibilities
 from the Main class.
 
->> View class carried out the user interface related responsibilities, providing a clear separation of concerns.
+> View class carried out the user interface related responsibilities, providing a clear separation of concerns.
 It initialises the game buttons, sets the visibility of game objects, adds images to objects, changes the game 
 background, updates the UI in real time for objects like the paddle, initializes the labels and updates them.
 
->> Model class encapsulates the game state variables like heart, score, etc. This class also contains final class 
+> Model class encapsulates the game state variables like heart, score, etc. This class also contains final class 
 variables that store the measurements to be used consistently by all classes that require them, like sceneHeight,
 ballRadius, etc. It also stores the game logic for moving the ball and paddle, handling collisions and boundaries
 for the ball. 
 
->> However, game logic that depends on user input and interaction with other classes like Model 
+> However, game logic that depends on user input and interaction with other classes like Model 
 and View were retained in the Main class. For example, the function
 that initializes the paddle depends on the bonus caught by the player, therefore needs to remain in the Main class as
 it is dependent on user input and requires interaction with the View class. The other initialization functions 

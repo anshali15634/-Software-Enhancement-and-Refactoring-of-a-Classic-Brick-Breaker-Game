@@ -1,52 +1,120 @@
 package brickGame;
-
-import javafx.scene.image.Image;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
 import java.util.Random;
 
-public class Power implements Serializable {
-    public Rectangle choco;
-    public int powerType; // 1 if it is the +3 bonus, 2 if it is the invert bonus
+// Abstract class for Power
+public abstract class Power implements Serializable {
+    protected Rectangle newPowerBlock;
+    protected double x;
+    protected double y;
+    protected long timeCreated;
+    protected boolean taken = false;
 
-    public double x;
-    public double y;
-    public long timeCreated;
-    public boolean taken = false; // paddle hits the bonus
-
-    public Power(int row, int column, int bonType) {
+    // Constructor with common initialization
+    public Power(int row, int column) {
         x = (column * (Block.getWidth())) + Block.getPaddingH() + (Block.getWidth() / 2) - 15;
         y = (row * (Block.getHeight())) + Block.getPaddingTop() + (Block.getHeight() / 2) - 15;
-        powerType = bonType;
 
         draw();
     }
 
+    // Template method
     private void draw() {
-        choco = new Rectangle();
-        choco.setWidth(30);
-        choco.setHeight(30);
-        choco.setX(x);
-        choco.setY(y);
+        newPowerBlock = new Rectangle();
+        newPowerBlock.setWidth(30);
+        newPowerBlock.setHeight(30);
+        newPowerBlock.setX(x);
+        newPowerBlock.setY(y);
 
-        String url;
-        if (powerType == 1) {
-            if (new Random().nextInt(20) % 2 == 0) {
-                url = "bonus1.png";
-            } else {
-                url = "bonus2.png";
-            }
-        }else if (powerType == 2){
-            url = "invertbonus.png";
-        }else{
-            url="short_bonus.png";
-        }
-
-        choco.setFill(new ImagePattern(new Image(url)));
+        String url=chooseImage();
+        View.gameObjectImageFill(newPowerBlock, url);
     }
 
-
-
+    // Abstract method to be implemented by concrete subclasses
+    protected abstract String chooseImage();
+    protected abstract void powerMessage(Main mainInstance);
 }
+class shortPaddlePower extends Power {
+    public shortPaddlePower(int row, int column) {
+        super(row, column);
+    }
+
+    @Override
+    protected String chooseImage() {
+        String url = "short_bonus.png";
+        return url;
+    }
+    @Override
+    protected void powerMessage(Main mainInstance){
+        new Score().showMessage("CAREFUL! PADDLE CHANGE!", mainInstance);
+    }
+}
+class scorePlusPower extends Power {
+    public scorePlusPower(int row, int column) {
+        super(row, column);
+    }
+
+    @Override
+    protected String chooseImage() {
+        String url;
+        if (new Random().nextInt(20) % 2 == 0) {
+            url = "bonus1.png";
+        } else {
+            url = "bonus2.png";
+        }
+        return url;
+    }
+    @Override
+    protected void powerMessage(Main mainInstance){
+        new Score().show(x, y, 3, mainInstance);
+    }
+}
+
+class invertPower extends Power {
+    public invertPower(int row, int column) {
+        super(row, column);
+    }
+
+    @Override
+    protected String chooseImage() {
+        String url = "invertbonus.png";
+        return url;
+    }
+    @Override
+    protected void powerMessage(Main mainInstance){
+        new Score().showMessage("INVERTED PADDLE CONTROLS :>", mainInstance);
+    }
+}
+class heartPower extends Power {
+    public heartPower(int row, int column) {
+        super(row, column);
+    }
+
+    @Override
+    protected String chooseImage() {
+        String url="pink_heart.png";
+        return url;
+    }
+    @Override
+    protected void powerMessage(Main mainInstance){
+        new Score().showMessage("ONE MORE LIFE!", mainInstance);
+    }
+}
+class goldPower extends Power {
+    public goldPower(int row, int column) {
+        super(row, column);
+    }
+
+    @Override
+    protected String chooseImage() {
+        String url = "gold_star.png";
+        return url;
+    }
+    @Override
+    protected void powerMessage(Main mainInstance){
+        new Score().showMessage("GOLD BALL - FREEZE LIVES :>", mainInstance);
+    }
+}
+

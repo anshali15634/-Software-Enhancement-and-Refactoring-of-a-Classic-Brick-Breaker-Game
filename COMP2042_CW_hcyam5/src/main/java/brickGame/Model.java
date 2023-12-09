@@ -1,12 +1,9 @@
 package brickGame;
 
 import javafx.application.Platform;
-import javafx.scene.image.Image;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Model {
@@ -29,7 +26,7 @@ public class Model {
     private int level=0;// static
     public final static int final_level = 6; // game finishes at level 5// static
     private static int paddleWidth = NORMAL_PADDLE_WIDTH;
-    private static final int halfPaddleWidth = paddleWidth / 2;
+    private static int halfPaddleWidth = paddleWidth / 2;
     public static final int paddleHeight = 30;
 
 
@@ -200,7 +197,7 @@ public class Model {
     public Circle getBall(){
         return ball;
     }
-    public static int getHalfPaddleWidth() {
+    public int getHalfPaddleWidth() {
         return halfPaddleWidth;
     }
     public double getPaddleWidth(){
@@ -308,9 +305,12 @@ public class Model {
     public void updatePaddleWidth(boolean shortPaddle) {
         if (shortPaddle) { // changes the variable's value
             paddleWidth=SHORT_PADDLE_WIDTH;
+            halfPaddleWidth=SHORT_PADDLE_WIDTH/2;
         } else {
             paddleWidth=NORMAL_PADDLE_WIDTH; // Use the initial paddle width when not short
+            halfPaddleWidth=SHORT_PADDLE_WIDTH/2;
         }
+
     }
     protected void resetCollideFlags() {
         collideToPaddle=false;
@@ -321,6 +321,25 @@ public class Model {
         collideToBottomBlock=false;
         collideToLeftBlock=false;
         collideToTopBlock=false;
+    }
+    protected void setHitFlags(int hitCode, Block block){
+        if (hitCode == Block.HIT_RIGHT) {
+            collideToRightBlock =true;
+        } else if (hitCode == Block.HIT_BOTTOM) {
+            collideToBottomBlock=true;
+        } else if (hitCode == Block.HIT_LEFT) {
+            collideToLeftBlock=true;
+        } else if (hitCode == Block.HIT_TOP) {
+            collideToTopBlock=true;
+        }
+    }
+    protected void setPhysicsToBall(Main mainInstance) {
+        moveBall();
+        handleBallYBoundaries(mainInstance); // left in Main class as it is interacting with other classes
+        handleBallPaddleCollision();
+        handleBallXBoundaries();
+        handleBallWallCollisions();
+        handleBallBlockCollision();
     }
     protected void moveBall(){
         Platform.runLater(() -> {
@@ -378,6 +397,30 @@ public class Model {
             collideToLeftWall=true;
         }
     }
+    protected void handleBallYBoundaries(Main mainInstance){
+        if (yBall <= 0) {
+            resetCollideFlags();
+            goDownBall=true;
+            return;
+        }
+
+        if (yBall + (2*ballRadius) >= Model.sceneHeight) {
+            goDownBall=false;
+
+            System.out.printf("\nIS OUT OF BOUNDARY" +goDownBall+ yBall);
+            if (!isGoldStats) {
+                heart--;
+                System.out.println("\nHEART DEDUCT AND NOT GOLD");
+                //new Score().show((int)((double) Model.sceneWidth / 2), (int)((double) Model.sceneHeight / 2), -1, mainInstance);
+                new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, mainInstance);
+
+                if (heart == 0) {
+                    new Score().showGameOver(mainInstance);
+                    engine.stop();
+                }
+            }
+        }
+    }
     protected void handleBallWallCollisions(){
         if (collideToRightWall) {
             goRightBall=false;
@@ -403,5 +446,62 @@ public class Model {
             goDownBall=true;
         }
     }
+    protected void resetFlags(){
+        vX=2.000;
+        invert=false;
+        shortPaddle=false;
+        updatePaddleWidth(shortPaddle);
+        destroyedBlockCount=0;
+        resetCollideFlags();
+        goDownBall=true;
+        isGoldStats=false;
+        isExistHeartBlock=false;
+        hitTime=0;
+        time=0;
+        goldTime=0;
+        blocks.clear();
+        powerArray.clear();
 
+    }
+    protected void movePaddle(final int direction){
+        if (xPaddle == (sceneWidth - paddleWidth) && direction == Main.RIGHT) {
+            return;
+        }
+        if (xPaddle == 0 && direction == Main.LEFT) {
+            return;
+        }
+        if (direction == Main.RIGHT) {
+            xPaddle++;
+        } else {
+            xPaddle--;
+        }
+        centerPaddleX=xPaddle + halfPaddleWidth;
+    }
+    public int checkHitToBlock(double xBall, double yBall, Block block) {
+        if (block.isDestroyed) {
+            return Block.NO_HIT;
+        }
+        double boundary = 5.0; // marks boundary for ball-block collision
+        if (xBall + ballRadius >= block.x - boundary && xBall - ballRadius <= block.x + Block.getWidth() + boundary &&
+                yBall + ballRadius >= block.y - boundary && yBall - ballRadius <= block.y + Block.getHeight() + boundary) {
+            // now just decide which block side was touched by ball
+            if (yBall >= block.y && yBall <= block.y + Block.getHeight()) {
+                if (xBall >= block.x && xBall <= block.x + Block.getWidth()) {
+                    if (yBall <= block.y + boundary) {
+                        return Block.HIT_TOP;
+                    } else if (yBall >= block.y + Block.getHeight() - boundary) {
+                        return Block.HIT_BOTTOM;
+                    }
+                }
+            }
+            if (xBall >= block.x && xBall <= block.x + Block.getWidth()) {
+                if (xBall <= block.x + boundary) {
+                    return Block.HIT_LEFT;
+                } else if (xBall >= block.x + Block.getWidth() - boundary) {
+                    return Block.HIT_RIGHT;
+                }
+            }
+        }
+        return Block.NO_HIT;
+    }
 }

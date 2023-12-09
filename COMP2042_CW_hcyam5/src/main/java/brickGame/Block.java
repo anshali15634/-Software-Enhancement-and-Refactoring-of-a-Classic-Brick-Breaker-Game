@@ -1,15 +1,27 @@
 package brickGame;
 
-
-import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
 
 public class Block implements Serializable {
     private static Block block = new Block(-1, -1, Color.TRANSPARENT, 99);
+    public static int getPaddingTop() {
+        return block.paddingTop;
+    }
+
+    public static int getPaddingH() {
+        return block.paddingH;
+    }
+
+    public static int getHeight() {
+        return block.height;
+    }
+
+    public static int getWidth() {
+        return block.width;
+    }
 
     public int row;
     public int column;
@@ -22,6 +34,7 @@ public class Block implements Serializable {
 
     public int x;
     public int y;
+
 
     private int width = 100;
     private int height = 30;
@@ -49,11 +62,10 @@ public class Block implements Serializable {
         this.column = column;
         this.color = color;
         this.type = type;
-
+        build();
         draw();
     }
-
-    private void draw() {
+    private void build(){
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
 
@@ -62,7 +74,9 @@ public class Block implements Serializable {
         rect.setHeight(height);
         rect.setX(x);
         rect.setY(y);
+    }
 
+    private void draw() {
         if (type == BLOCK_CHOCO) {
             View.gameObjectImageFill(rect, "choco.jpg");
         } else if (type == BLOCK_HEART) {
@@ -75,52 +89,7 @@ public class Block implements Serializable {
             View.gameObjectImageFill(rect, "dark_purple_final_brick.png");
         } else {
             rect.setFill(color);
-            }
         }
-
-    public int checkHitToBlock(double xBall, double yBall) {
-        if (isDestroyed) {
-            return NO_HIT;
-        }
-        double boundary = 5.0; // marks boundary for ball-block collision
-        if (xBall + Model.ballRadius >= x - boundary && xBall - Model.ballRadius <= x + width + boundary &&
-                yBall + Model.ballRadius >= y - boundary && yBall - Model.ballRadius <= y + height + boundary) {
-            // now just decide which block side was touched by ball
-            if (yBall >= y && yBall <= y + height) {
-                if (xBall >= x && xBall <= x + width) {
-                    if (yBall <= y + boundary) {
-                        return HIT_TOP;
-                    } else if (yBall >= y + height - boundary) {
-                        return HIT_BOTTOM;
-                    }
-                }
-            }
-            if (xBall >= x && xBall <= x + width) {
-                if (xBall <= x + boundary) {
-                    return HIT_LEFT;
-                } else if (xBall >= x + width - boundary) {
-                    return HIT_RIGHT;
-                }
-            }
-        }
-        return NO_HIT;
-    }
-
-
-    public static int getPaddingTop() {
-        return block.paddingTop;
-    }
-
-    public static int getPaddingH() {
-        return block.paddingH;
-    }
-
-    public static int getHeight() {
-        return block.height;
-    }
-
-    public static int getWidth() {
-        return block.width;
     }
 
 }
