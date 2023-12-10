@@ -67,6 +67,7 @@ public class Model {
 
 
     public final CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
+    public final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
     public final CopyOnWriteArrayList<Power> powerArray = new CopyOnWriteArrayList<Power>(); // stores bonuses for all blocks
 
     private boolean goDownBall                  = true;
@@ -478,6 +479,7 @@ public class Model {
         time=0;
         goldTime=0;
         blocks.clear();
+        bullets.clear();
         powerArray.clear();
 
     }
@@ -516,6 +518,33 @@ public class Model {
                 if (xBall <= block.x + boundary) {
                     return Block.HIT_LEFT;
                 } else if (xBall >= block.x + Block.getWidth() - boundary) {
+                    return Block.HIT_RIGHT;
+                }
+            }
+        }
+        return Block.NO_HIT;
+    }
+
+    public int checkBulletHitToBlock(double xBullet, double yBullet, Block block){
+        if (block.isDestroyed) {
+            return Block.NO_HIT;
+        }
+        double boundary = 5.0;
+        if (xBullet >= block.x - boundary && xBullet <= block.x + Block.getWidth() + boundary &&
+                yBullet>= block.y - boundary && yBullet<= block.y + Block.getHeight() + boundary) {
+            if (yBullet >= block.y && yBullet <= block.y + Block.getHeight()) {
+                if (xBullet >= block.x && xBullet <= block.x + Block.getWidth()) {
+                    if (yBullet <= block.y + boundary) {
+                        return Block.HIT_TOP;
+                    } else if (yBullet >= block.y + Block.getHeight() - boundary) {
+                        return Block.HIT_BOTTOM;
+                    }
+                }
+            }
+            if (xBullet >= block.x && xBullet <= block.x + Block.getWidth()) {
+                if (xBullet <= block.x + boundary) {
+                    return Block.HIT_LEFT;
+                } else if (xBullet >= block.x + Block.getWidth() - boundary) {
                     return Block.HIT_RIGHT;
                 }
             }

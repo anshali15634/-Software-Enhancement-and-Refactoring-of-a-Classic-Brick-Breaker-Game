@@ -184,6 +184,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                         model.decGunMeter();
                         updateUIMeter(model.getGunMeter());
                         downPress=false;
+                        initBullet();
                     }
                 });
 
@@ -300,6 +301,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }else{
             View.gameObjectImageFill(model.getMeter(), "meterempty.png");
         }
+    }
+    private void initBullet(){
+        Bullet bullet = new Bullet(model.getHalfPaddleWidth()+model.getXPaddle(), model.getYPaddle());
+        model.bullets.add(bullet);
+        root.getChildren().add(bullet);
     }
 
     private void checkDestroyedCount() {
@@ -503,18 +509,25 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 model.getPaddle().setY(model.getYPaddle());
                 model.getBall().setCenterX(model.getXBall());
                 model.getBall().setCenterY(model.getYBall());
-
                 for (Power choco : model.powerArray) {
                     choco.newPowerBlock.setY(choco.y);
                 }
             });
-            //System.out.println("\nCALLED BY ONUPDATE");
             //model.setPhysicsToBall(this);
 
             if (model.getYBall() >= Block.getPaddingTop() && model.getYBall() <= (Block.getHeight() * (model.getLevel() + Model.LAST_BLOCK_ROW)) + Block.getPaddingTop()) {
                 for (final Block block : model.blocks) {
                     int hitCode = model.checkHitToBlock(model.getXBall(), model.getYBall(), block);
                     handleBlockHit(hitCode, block);
+                }
+            }
+            for (final Block block: model.blocks) {
+                for (Bullet bullet : model.bullets) {
+                    if (bullet.getIsDestroyed()) {
+                        continue;
+                    }
+                    int hitCode = model.checkBulletHitToBlock(bullet.getX(), bullet.getY(), block);
+                    handleBlockHit(hitCode,block);
                 }
             }
         }
@@ -602,6 +615,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 power.taken = true;
             }
             power.y += ((model.getTime() - power.timeCreated) / 1000.000) + 1.000;
+        }
+        for (Bullet bullet: model.bullets){
+            if (bullet.getY()<=0){
+                bullet.setVisible(false);
+                bullet.setDestroyed(true);
+                continue;
+            }
+            if (bullet.getIsDestroyed()){
+                continue;
+            }
+            Platform.runLater(() -> bullet.setY(bullet.getY() - 5));
+
         }
     }
 
