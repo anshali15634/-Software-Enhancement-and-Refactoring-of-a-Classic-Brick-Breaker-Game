@@ -87,12 +87,13 @@ public class View {
     }
     // static because we can have multiple views with different button configurations, and each view's visibility
     // depends on the instance.
-    public static void setNotVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle, View view){
+    public static void setNotVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle,Rectangle meter, View view){
         view.scoreLabel.setVisible(false);
         view.heartLabel.setVisible(false);
         view.levelLabel.setVisible(false);
         ball.setVisible(false);
         paddle.setVisible(false);
+        meter.setVisible(false);
         for (Block block : blks) {
             block.rect.setVisible(false);
         }
@@ -101,12 +102,13 @@ public class View {
         view.about.setVisible(true);
         view.exit.setVisible(true);
     }
-    public static void setVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle, View view){
+    public static void setVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle, Rectangle meter,View view){
         view.scoreLabel.setVisible(true);
         view.heartLabel.setVisible(true);
         view.levelLabel.setVisible(true);
         ball.setVisible(true);
         paddle.setVisible(true);
+        meter.setVisible(true);
         for (Block block : blks) {
             block.rect.setVisible(true);
         }

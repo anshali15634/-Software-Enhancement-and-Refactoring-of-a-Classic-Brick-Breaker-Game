@@ -33,6 +33,7 @@ public class LoadSave {
     public double           vX;
     public boolean invert;
     public boolean is_short;
+    public int gunMeter;
     public ArrayList<BlockSerializable> blocks = new ArrayList<>();
 
 
@@ -60,6 +61,7 @@ public class LoadSave {
             heart = inputStream.readInt();
             destroyedBlockCount = inputStream.readInt();
             destroyedBlockCount=0;
+            gunMeter=inputStream.readInt();
         }catch (Exception e){
             e.printStackTrace();
         }

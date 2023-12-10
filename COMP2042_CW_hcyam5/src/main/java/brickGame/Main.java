@@ -25,6 +25,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     public Pane              root2;
     private View view = View.getInstance();
     private Model model = Model.getInstance();
+    private boolean downPress = false; // the gun can only shoot if the down button is pressed (so gun is activated.)
 
 
     Stage  primaryStage;
@@ -73,15 +74,16 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
             initPaddle();
             initBall();
+            initMeter(model.getGunMeter());
         }
         root = new Pane();
         root2 = new Pane();
         View.changeGameBG(gameBG, root);
         view.initLabels(model.getScore(), model.getLevel(), model.getHeart(), Model.sceneHeight, Model.sceneWidth);
         if (!model.getLoadFromSave()) {
-            root.getChildren().addAll(model.getBall(), view.scoreLabel, view.heartLabel, view.levelLabel, view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
+            root.getChildren().addAll(model.getBall(),model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel, view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
         } else {
-            root.getChildren().addAll(model.getBall(), view.scoreLabel, view.heartLabel, view.levelLabel, view.pauseLabel,model.getPaddle());
+            root.getChildren().addAll(model.getBall(), model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel, view.pauseLabel,model.getPaddle());
         }
         for (Block block : model.blocks) {
             root.getChildren().add(block.rect);
@@ -107,14 +109,14 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             block.rect.setVisible(false);
         }
         if (!startGame){
-            View.setNotVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
+            View.setNotVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
         }
         primaryStage.setTitle("BrickBreaker");
         primaryStage.setScene(scene);
         primaryStage.show();
         if (!model.getLoadFromSave()) {
             if (model.getLevel() > 1 && model.getLevel() < Model.final_level) {
-                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
+                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
                 //engine = GameEngine.getInstance();
                 startEngine();
             }
@@ -125,7 +127,8 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     loadGame();
                     model.updatePaddleWidth(model.isShortPaddle());
                     View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
-                    View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
+                    updateUIMeter(model.getGunMeter());
+                    View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
                 }else{
                     view.loadLabel.setVisible(true);
                     View.fadeTransition.play();
@@ -135,7 +138,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 root.setStyle("-fx-background-image: url('bg2.jpg');");
                 //engine = GameEngine.getInstance();
                 startEngine();
-                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), view);
+                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
             });
         } else {
             //engine = GameEngine.getInstance();
@@ -174,14 +177,31 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                     move(RIGHT);
                 }
                 break;
-            case DOWN:
-                //setPhysicsToBall();
+            case UP:
+                Platform.runLater(() -> {
+                    if (model.getGunMeter()>0 && downPress){
+                        View.gameObjectImageFill(model.getPaddle(), "paddle.png");
+                        model.decGunMeter();
+                        updateUIMeter(model.getGunMeter());
+                        downPress=false;
+                        initBullet();
+                    }
+                });
+
                 break;
             case S:
                 saveGame();
                 break;
             case SPACE:
                 togglePause();
+                break;
+            case DOWN:
+                Platform.runLater(() ->{
+                        if (model.getGunMeter()>0) {
+                            View.gameObjectImageFill(model.getPaddle(), "gunpaddle.png");
+                            downPress=true;
+                        }
+                });
                 break;
         }
     }
@@ -263,6 +283,30 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }
     }
+    private void initMeter(int gunMeter){
+        model.getMeter().setWidth(Model.NORMAL_PADDLE_WIDTH-5);
+        model.getMeter().setHeight(Model.paddleHeight-5);
+        model.getMeter().setX(190);
+        model.getPaddle().setY(0);
+        updateUIMeter(model.getGunMeter());
+    }
+
+    private void updateUIMeter(int gunMeter){
+        if (gunMeter==3){
+            View.gameObjectImageFill(model.getMeter(), "meterfull.png");
+        }else if(gunMeter==2){
+            View.gameObjectImageFill(model.getMeter(), "meterhalf.png");
+        }else if (gunMeter==1){
+            View.gameObjectImageFill(model.getMeter(), "meterone.png");
+        }else{
+            View.gameObjectImageFill(model.getMeter(), "meterempty.png");
+        }
+    }
+    private void initBullet(){
+        Bullet bullet = new Bullet(model.getHalfPaddleWidth()+model.getXPaddle(), model.getYPaddle());
+        model.bullets.add(bullet);
+        root.getChildren().add(bullet);
+    }
 
     private void checkDestroyedCount() {
         if (model.getDestroyedBlockCount() == model.blocks.size()) {
@@ -300,6 +344,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         outputStream.writeInt(model.getScore());
         outputStream.writeInt(model.getHeart());
         outputStream.writeInt(model.getDestroyedBlockCount());
+        outputStream.writeInt(model.getGunMeter());
 
         outputStream.writeDouble(model.getXBall());
         outputStream.writeDouble(model.getYBall());
@@ -394,18 +439,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         model.setScore(loadSave.score);
         model.setHeart(loadSave.heart);
         model.setDestroyedBlockCount(loadSave.destroyedBlockCount);
+        model.setGunMeter(loadSave.gunMeter);
         model.setXBall(loadSave.xBall);
         model.setYBall(loadSave.yBall);
         model.setXPaddle(loadSave.xPaddle);
         model.setYPaddle(loadSave.yPaddle);
         model.setCenterPaddleX(loadSave.centerPaddleX);
-        //time = loadSave.time;
-        //goldTime = loadSave.goldTime;
         model.setTime(loadSave.time);
         model.setGoldTime(loadSave.goldTime);
         model.setvX(loadSave.vX);
         model.setInvert(loadSave.invert);
         model.setShortPaddle(loadSave.is_short);
+
         System.out.println("\nFROM FILE SHORTPADDLE: "+ model.isShortPaddle());
     }
 
@@ -440,6 +485,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             model.setLevel(0);
             model.setHeart(3);
             model.setScore(0);
+            model.setGunMeter(3);
             model.resetFlags();
             View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
             gameBG=false;
@@ -463,17 +509,25 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 model.getPaddle().setY(model.getYPaddle());
                 model.getBall().setCenterX(model.getXBall());
                 model.getBall().setCenterY(model.getYBall());
-
                 for (Power choco : model.powerArray) {
                     choco.newPowerBlock.setY(choco.y);
                 }
             });
-            model.setPhysicsToBall(this);
+            //model.setPhysicsToBall(this);
 
             if (model.getYBall() >= Block.getPaddingTop() && model.getYBall() <= (Block.getHeight() * (model.getLevel() + Model.LAST_BLOCK_ROW)) + Block.getPaddingTop()) {
                 for (final Block block : model.blocks) {
                     int hitCode = model.checkHitToBlock(model.getXBall(), model.getYBall(), block);
                     handleBlockHit(hitCode, block);
+                }
+            }
+            for (final Block block: model.blocks) {
+                for (Bullet bullet : model.bullets) {
+                    if (bullet.getIsDestroyed()) {
+                        continue;
+                    }
+                    int hitCode = model.checkBulletHitToBlock(bullet.getX(), bullet.getY(), block);
+                    handleBlockHit(hitCode,block);
                 }
             }
         }
@@ -525,6 +579,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
+        //System.out.println("\nCALLED BY ONPHYSICSUPDATE");
         model.setPhysicsToBall(this);
 
         if (model.getTime() - model.getGoldTime() > 5000) {
@@ -560,6 +615,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 power.taken = true;
             }
             power.y += ((model.getTime() - power.timeCreated) / 1000.000) + 1.000;
+        }
+        for (Bullet bullet: model.bullets){
+            if (bullet.getY()<=0){
+                bullet.setVisible(false);
+                bullet.setDestroyed(true);
+                continue;
+            }
+            if (bullet.getIsDestroyed()){
+                continue;
+            }
+            Platform.runLater(() -> bullet.setY(bullet.getY() - 5));
+
         }
     }
 

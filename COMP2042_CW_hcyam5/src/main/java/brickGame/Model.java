@@ -42,7 +42,7 @@ public class Model {
     private double yPaddle = 640.0f;
 
     private double vX = 2.000;
-    private static final double vY = 2.000;
+    private static final double vY = 5.000;
     private double centerPaddleX;
 
     private int destroyedBlockCount = 0;
@@ -50,7 +50,24 @@ public class Model {
     private boolean loadFromSave = false;
     private GameEngine engine = GameEngine.getInstance();
     private Rectangle paddle = new Rectangle();
+
+    private Rectangle meter = new Rectangle();
+    private int gunMeter = 3;
+
+    public int getGunMeter() {
+        return gunMeter;
+    }
+    public void decGunMeter() {
+        this.gunMeter--;
+    }
+
+    public void setGunMeter(int gm) {
+        this.gunMeter = gm;
+    }
+
+
     public final CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
+    public final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
     public final CopyOnWriteArrayList<Power> powerArray = new CopyOnWriteArrayList<Power>(); // stores bonuses for all blocks
 
     private boolean goDownBall                  = true;
@@ -197,6 +214,9 @@ public class Model {
     public Circle getBall(){
         return ball;
     }
+    public Rectangle getMeter() {
+        return meter;
+    }
     public int getHalfPaddleWidth() {
         return halfPaddleWidth;
     }
@@ -334,12 +354,12 @@ public class Model {
         }
     }
     protected void setPhysicsToBall(Main mainInstance) {
-        moveBall();
-        handleBallYBoundaries(mainInstance); // left in Main class as it is interacting with other classes
-        handleBallPaddleCollision();
-        handleBallXBoundaries();
-        handleBallWallCollisions();
-        handleBallBlockCollision();
+            moveBall();
+            handleBallYBoundaries(mainInstance);
+            handleBallPaddleCollision();
+            handleBallXBoundaries();
+            handleBallWallCollisions();
+            handleBallBlockCollision();
     }
     protected void moveBall(){
         Platform.runLater(() -> {
@@ -406,15 +426,14 @@ public class Model {
 
         if (yBall + (2*ballRadius) >= Model.sceneHeight) {
             goDownBall=false;
-
+            resetCollideFlags();
             System.out.printf("\nIS OUT OF BOUNDARY" +goDownBall+ yBall);
             if (!isGoldStats) {
                 heart--;
                 System.out.println("\nHEART DEDUCT AND NOT GOLD");
-                //new Score().show((int)((double) Model.sceneWidth / 2), (int)((double) Model.sceneHeight / 2), -1, mainInstance);
                 new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, mainInstance);
-
                 if (heart == 0) {
+                    mainInstance.onUpdate();
                     new Score().showGameOver(mainInstance);
                     engine.stop();
                 }
@@ -460,6 +479,7 @@ public class Model {
         time=0;
         goldTime=0;
         blocks.clear();
+        bullets.clear();
         powerArray.clear();
 
     }
@@ -498,6 +518,33 @@ public class Model {
                 if (xBall <= block.x + boundary) {
                     return Block.HIT_LEFT;
                 } else if (xBall >= block.x + Block.getWidth() - boundary) {
+                    return Block.HIT_RIGHT;
+                }
+            }
+        }
+        return Block.NO_HIT;
+    }
+
+    public int checkBulletHitToBlock(double xBullet, double yBullet, Block block){
+        if (block.isDestroyed) {
+            return Block.NO_HIT;
+        }
+        double boundary = 5.0;
+        if (xBullet >= block.x - boundary && xBullet <= block.x + Block.getWidth() + boundary &&
+                yBullet>= block.y - boundary && yBullet<= block.y + Block.getHeight() + boundary) {
+            if (yBullet >= block.y && yBullet <= block.y + Block.getHeight()) {
+                if (xBullet >= block.x && xBullet <= block.x + Block.getWidth()) {
+                    if (yBullet <= block.y + boundary) {
+                        return Block.HIT_TOP;
+                    } else if (yBullet >= block.y + Block.getHeight() - boundary) {
+                        return Block.HIT_BOTTOM;
+                    }
+                }
+            }
+            if (xBullet >= block.x && xBullet <= block.x + Block.getWidth()) {
+                if (xBullet <= block.x + boundary) {
+                    return Block.HIT_LEFT;
+                } else if (xBullet >= block.x + Block.getWidth() - boundary) {
                     return Block.HIT_RIGHT;
                 }
             }
