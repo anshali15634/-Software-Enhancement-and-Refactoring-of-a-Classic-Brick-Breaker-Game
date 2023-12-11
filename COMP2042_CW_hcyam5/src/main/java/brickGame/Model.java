@@ -770,10 +770,8 @@ public class Model {
         if (yBall + (2*ballRadius) >= Model.sceneHeight) {
             goDownBall=false;
             resetCollideFlags();
-            System.out.printf("\nIS OUT OF BOUNDARY" +goDownBall+ yBall);
             if (!isGoldStats) {
                 heart--;
-                System.out.println("\nHEART DEDUCT AND NOT GOLD");
                 new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, controllerInstance);
                 if (heart == 0) {
                     controllerInstance.onUpdate();

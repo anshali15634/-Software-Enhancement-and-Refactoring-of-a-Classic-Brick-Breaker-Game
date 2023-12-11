@@ -681,7 +681,6 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
  */
     private void handlePowerType(Power power){
         if (power instanceof scorePlusPower){
-            System.out.println("You Got it and +3 score for you");
             model.setScore(model.getScore()+3);
             new Score().show(power.x, power.y, 3, this);
         }else if (power instanceof invertPower){
@@ -695,7 +694,6 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }else if (power instanceof goldPower){
             model.setGoldTime(model.getTime());
             View.gameObjectImageFill(model.getBall(),"goldball.png");
-            System.out.println("gold ball");
             model.setIsGoldStats(true);
         }
     }
