@@ -347,7 +347,7 @@ out of the Controller class.
    in an endless loop, does not configure the next level. 
 
    **How the problem was solved:**
-     In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
+     - In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
      run() functions to throw an Interrupted Exception, and then returning from the functions to exit them.
@@ -356,27 +356,27 @@ out of the Controller class.
    the file path "D:/..." but not all devices own a D drive.
 
    **How the problem was solved:**
-     In the main() function in the class Main, right before the start() function is called, I call a function named 
+     - In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
      If the device does not have a D drive, it changes the filepath to the game file's relative directory.
 
 3. **Load button was present in the game code but did not appear in the game screen.**
 
    **How the problem was solved:**
-     load button added to root for the first scene added to primaryStage. The load button functioned as expected.
+     - load button added to root for the first scene added to primaryStage. The load button functioned as expected.
 
 4. **If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
    and ball moves abnormally.**
 
    **How the problem was solved:**
-     There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
+     - There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
      load button to check if the save.mdd file exists. If it does, the file is read to resume that game, else
      the label "No previous games saved :<" appears.
 
 5. **Labels keep freezing on screen.**
 
    **How the problem was solved:**
-     Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
+     - Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
      a built-in animation framework for smoother animations. Instead of manually updating the scale/position of the 
      label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
      FadeTransition for fading.
@@ -385,7 +385,7 @@ out of the Controller class.
    over the collections blocks and bonusArray and making changes to the collections during iteration.
 
    **How the problem was solved:**
-     The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
+     - The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
      cause problems if they are modified while they are being iterated over. Therefore, I declared both arrays as
      concurrent collections of type CopyOnWriteArrayList. This means that it is safe to modify the collections
      while you are iterating over it, so you will not get a ConcurrentModificationException.
@@ -414,7 +414,7 @@ out of the Controller class.
    the paddle glitches.**
 
    **How the problem was solved:**
-     The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
+     - The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
      modified. This ensured that the UI updates occurred in a thread-safe manner. After applying the solution, the game 
      was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
      paddle remained smooth and glitch-free.
@@ -422,5 +422,5 @@ out of the Controller class.
 10. **If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.**
 
     **How the problem was solved:**
-      The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
+      - The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
       this function to check the isGoldStats flag and change the image of the ball appropriately.
