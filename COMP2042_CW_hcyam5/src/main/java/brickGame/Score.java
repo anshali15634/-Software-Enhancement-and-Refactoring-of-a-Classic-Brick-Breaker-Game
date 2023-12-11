@@ -5,25 +5,35 @@ import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.util.Duration;
-//import sun.plugin2.message.Message;
 
+/**
+ * The Score class manages the display of score-related information and animations.
+ */
 public class Score {
-    private static final int ANIMATION_DURATION = 500; // animation duration in ms
+    private static final int ANIMATION_DURATION = 500; // Animation duration in milliseconds
+
+    /**
+     * Displays a score change animation at a specific position on the screen.
+     * @param x           The x-coordinate for the score label.
+     * @param y           The y-coordinate for the score label.
+     * @param score       The score value to be displayed.
+     * @param controller  The instance of the game controller.
+     */
     public void show(final double x, final double y, int score, final Controller controller) {
-        String sign = (score >=0)? "+":"";
+        String sign = (score >= 0) ? "+" : "";
         final Label label = new Label(sign + score);
         label.setTranslateX(x);
         label.setTranslateY(y);
 
         Platform.runLater(() -> controller.root.getChildren().add(label));
 
-        // translation animation (moving up after +score appears)
-        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION),label);
+        // Translation animation (moving up after +score appears)
+        TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
         translateTransition.setToY(y - 50); // Move up
-        translateTransition.setCycleCount(1); // animation only happens once
+        translateTransition.setCycleCount(1); // Animation only happens once
         translateTransition.play();
 
-        // fade transition
+        // Fade transition
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
@@ -31,7 +41,11 @@ public class Score {
         fadeTransition.play();
     }
 
-    // animation for the messages like "Level up :)"
+    /**
+     * Displays an animated message on the screen. Used to display powers' activation messages, like "INVERTED PADDLE CONTROLS :>"
+     * @param message     The message to be displayed.
+     * @param controller  The instance of the game controller.
+     */
     public void showMessage(String message, final Controller controller) {
         final Label label = new Label(message);
         label.setScaleX(2);
@@ -40,20 +54,24 @@ public class Score {
         label.setTranslateX((double) Model.sceneWidth / 2 - 100);
         label.setTranslateY((double) Model.sceneWidth / 2);
         Platform.runLater(() -> controller.root.getChildren().add(label));
-        // translation animation
+        // Translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
         translateTransition.setToY(((double) Model.sceneHeight / 2) - 50); // Move up
         translateTransition.setCycleCount(1);
         translateTransition.play();
-        // fade Animation
+        // Fade animation
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
-        // removes label from scene after animation is over
+        // Removes label from the scene after animation is over
         fadeTransition.setOnFinished(event -> Platform.runLater(() -> controller.root.getChildren().remove(label)));
         fadeTransition.play();
     }
 
+    /**
+     * Displays the "Game Over" message along with a back to menu (restart) button.
+     * @param controller  The instance of the game controller.
+     */
     public void showGameOver(final Controller controller) {
         Platform.runLater(() -> {
             Label label = new Label("Game Over (T_T)");
@@ -62,14 +80,17 @@ public class Score {
             label.setScaleX(2);
             label.setScaleY(2);
 
-            GameButton restart = new GameButton("Back", "back.png",130,380);
+            GameButton restart = new GameButton("Back", "back.png", 130, 380);
             restart.setOnAction(event -> controller.restartGame());
 
             controller.root.getChildren().addAll(label, restart);
-
         });
     }
 
+    /**
+     * Displays the "You Win" message along with a back to menu (restart) button.
+     * @param controller  The instance of the game controller.
+     */
     public void showWin(final Controller controller) {
         Platform.runLater(() -> {
             Label label = new Label("You Win ٩(◕‿◕｡)۶");
@@ -77,14 +98,12 @@ public class Score {
             label.setTranslateY(250);
             label.setScaleX(2);
             label.setScaleY(2);
-            GameButton restart = new GameButton("Back", "back.png",130,380);
+            GameButton restart = new GameButton("Back", "back.png", 130, 380);
             restart.setOnAction(event -> {
                 label.setVisible(false);
                 controller.restartGame();
-            }
-            );
+            });
             controller.root.getChildren().addAll(label, restart);
-
         });
     }
 }

@@ -14,7 +14,9 @@ import javafx.util.Duration;
 import javafx.scene.layout.Pane;
 
 import java.util.concurrent.CopyOnWriteArrayList;
-
+/**
+ * The View class manages the visual representation and animations in the Brick Breaker game.
+ */
 public class View {
     private static View instance;
 
@@ -40,9 +42,17 @@ public class View {
             Color.valueOf("#FF835D")
     };
 
+    /**
+     * Private constructor to prevent instantiation of View class.
+     */
     private View() {
         // private constructor to prevent instantiation
     }
+
+    /**
+     * Gets the singleton instance of the View class.
+     * @return The View instance.
+     */
     public static View getInstance() {
         if (instance == null) {
             instance = new View();
@@ -50,10 +60,22 @@ public class View {
         return instance;
     }
 
+    /**
+     * Sets the game icon for the specified stage.
+     * @param stageName     The stage for which to set the game icon.
+     * @param iconFileName  The filename of the game icon image.
+     */
     public static void setGameIcon(Stage stageName, String iconFileName) {
         Image icon = new Image(iconFileName);
         stageName.getIcons().add(icon);
     }
+
+    /**
+     * Changes the background of the game based on the specified condition.
+     *
+     * @param gameBG  A boolean indicating whether the game background should be applied, or the start menu background
+     * @param root    The root Pane of the game scene.
+     */
     public static void changeGameBG(boolean gameBG, Pane root){
         if (gameBG){ // if nextLevel() calls this start() function, should change bg to game bg
             root.setStyle("-fx-background-image: url('bg2.jpg');");
@@ -62,6 +84,15 @@ public class View {
         }
 
     }
+
+    /**
+     * Initializes various labels used in the game interface.
+     * @param score       The initial score value.
+     * @param level       The initial level value.
+     * @param heart       The initial heart value.
+     * @param sceneheight The height of the game scene.
+     * @param scenewidth  The width of the game scene.
+     */
     public void initLabels(int score, int level, int heart, double sceneheight, double scenewidth) {
         loadLabel = new Label("No previous games saved :<");
         loadLabel.setLayoutX(135);
@@ -82,11 +113,24 @@ public class View {
         heartLabel.setTranslateX(scenewidth - 90);
 
     }
+    /**
+     * Fills the specified shape with the image represented by the given filename. Implemented to remove duplicate blocks of code dedicated to image initialization in the original game code.
+     * @param shape   The shape to be filled.
+     * @param imgName The filename of the image.
+     */
     public static void gameObjectImageFill(Shape shape, String imgName){
         shape.setFill(new ImagePattern(new Image(imgName)));
     }
-    // static because we can have multiple views with different button configurations, and each view's visibility
-    // depends on the instance.
+
+    /**
+     * Sets the visibility of game objects to false and menu buttons to true, making the game objects invisible.
+     *
+     * @param blks   The list of blocks to hide.
+     * @param ball   The ball to hide.
+     * @param paddle The paddle to hide.
+     * @param meter  The meter to hide.
+     * @param view   The instance of the View class.
+     */
     public static void setNotVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle,Rectangle meter, View view){
         view.scoreLabel.setVisible(false);
         view.heartLabel.setVisible(false);
@@ -102,6 +146,16 @@ public class View {
         view.about.setVisible(true);
         view.exit.setVisible(true);
     }
+
+    /**
+     * Sets the visibility of game objects to true and menu buttons to false, making the game objects visible.
+     *
+     * @param blks   The list of blocks to show.
+     * @param ball   The ball to show.
+     * @param paddle The paddle to show.
+     * @param meter  The meter to show.
+     * @param view   The instance of the View class.
+     */
     public static void setVisibleGameObjects(CopyOnWriteArrayList<Block> blks, Circle ball, Rectangle paddle, Rectangle meter,View view){
         view.scoreLabel.setVisible(true);
         view.heartLabel.setVisible(true);
@@ -117,6 +171,12 @@ public class View {
         view.about.setVisible(false);
         view.exit.setVisible(false);
     }
+
+    /**
+     * Updates the visual representation of the paddle width on the UI.
+     * @param paddle The rectangle representing the paddle.
+     * @param pw     The new width of the paddle.
+     */
     public static void updateUIPaddleWidth(Rectangle paddle, double pw){
         Platform.runLater(() -> {
             // Update UI with the new paddle width
