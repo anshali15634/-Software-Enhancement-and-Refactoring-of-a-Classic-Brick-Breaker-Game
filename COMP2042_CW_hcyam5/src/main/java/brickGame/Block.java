@@ -4,6 +4,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.io.Serializable;
+/***
+ * Abstract class representing a block in a game.
+ */
 
 public abstract class Block implements Serializable {
     public static final Block block = new BlockPlain(-1,-1, Color.TRANSPARENT,99);
@@ -33,7 +36,13 @@ public abstract class Block implements Serializable {
     protected int paddingTop = height * 2;
     protected int paddingH = 50;
     protected Rectangle rect;
-
+/**
+ * Constructs a new Block object
+ * @param row The row of the block in the grid.
+ * @param column The column of the block in the grid.
+ * @param color The color of the block.
+ * @param type The type of block (normal, choco, heart, etc)
+ */
     public Block(int row, int column, Color color, int type) {
         this.row = row;
         this.column = column;
@@ -43,6 +52,10 @@ public abstract class Block implements Serializable {
         draw();
     }
 
+    /**
+     * Calculates and sets the x and y coordinates of the Block object on the game screen.
+     * Sets the width and height of the block.
+     */
     protected void build() {
         x = (column * width) + paddingH;
         y = (row * height) + paddingTop;
@@ -53,28 +66,67 @@ public abstract class Block implements Serializable {
         rect.setY(y);
     }
 
+    /**
+     * Checks if the block has been destroyed.
+     * @return True if the block is destroyed, false otherwise.
+     */
     public boolean isDestroyed() {
         return isDestroyed;
     }
+
+    /**
+     * Returns the padding space above the block.
+     * @return The padding space above the block.
+     */
     public static int getPaddingTop() {
         return block.paddingTop;
     }
+
+    /**
+     * Returns the horizontal padding space around the block.
+     * @return The horizontal padding space around the block.
+     */
 
     public static int getPaddingH() {
         return block.paddingH;
     }
 
+    /**
+     * Returns the height of the block.
+     * @return The height of the block.
+     */
+
     public static int getHeight() {
         return block.height;
     }
 
+    /**
+     * Returns the width of the block.
+     * @return The width of the block.
+     */
+
     public static int getWidth() {
         return block.width;
     }
+
+    /**
+     * Draws the block on the screen and sets an image pattern associated to the block type.
+     * This method is abstract and must be implemented by subclasses.
+     */
+
     protected abstract void draw();
+
+    /**
+     * Initializes the Power object associated with the block type.
+     * This method is abstract and must be implemented by subclasses.
+     */
+
     protected abstract void initPower();
 }
 
+/**
+ * Represents a chocolate block that releases a +3 increment to the score if the power is caught by the paddle.
+ */
 class BlockChoco extends Block {
 
     public BlockChoco(int row, int column, Color color, int type) {
@@ -90,6 +142,10 @@ class BlockChoco extends Block {
         pow = new scorePlusPower(row, column);
     }
 }
+
+/**
+ * Represents a heart block that increases lives by 1 if the heart power is caught by the paddle.
+ */
 class BlockHeart extends Block {
 
     public BlockHeart(int row, int column, Color color, int type) {
@@ -105,6 +161,10 @@ class BlockHeart extends Block {
         pow = new heartPower(row, column);
     }
 }
+
+/**
+ * Represents a block that releases the invert power that reverses the controls of the player's paddle
+ */
 class BlockInvert extends Block {
 
     public BlockInvert(int row, int column, Color color, int type) {
@@ -120,6 +180,10 @@ class BlockInvert extends Block {
         pow = new invertPower(row, column);
     }
 }
+
+/**
+ * Represents a normal block that gives a +1 to the score when hit.
+ */
 class BlockPlain extends Block {
 
     public BlockPlain(int row, int column, Color color, int i) {
@@ -135,6 +199,10 @@ class BlockPlain extends Block {
         pow = null;
     }
 }
+
+/**
+ * Represents a block that releases a power that shortens the player's paddle.
+ */
 class BlockShort extends Block {
 
     public BlockShort(int row, int column, Color color, int type) {
@@ -151,6 +219,10 @@ class BlockShort extends Block {
     }
 }
 
+
+/**
+ * Represents a star block that releases a gold power which freezes the player's lives for 5 seconds.
+ */
 class BlockStar extends Block {
 
     public BlockStar(int row, int column, Color color, int type) {

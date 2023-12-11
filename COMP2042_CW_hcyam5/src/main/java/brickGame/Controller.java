@@ -34,7 +34,10 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
 
     Stage  primaryStage;
 
-    // the two following functions are to check if the computer has a d drive and setting the save paths accordingly
+    /**
+     * This function checks if the device contains a D Drive. The original game code assumes the existence of a D Drive for saved game files without checking if it's actually present.
+     * @return True if the D Drive exists, False if otherwise.
+     */
     private static boolean checkForDDrive() {
         File[] drives = File.listRoots();
         for (File drive : drives) {
@@ -44,11 +47,11 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }
         return false;
     }
+    /**
+     * This function uses the checkForDDrive() function and alters the pre-defined save path file directory accordingly.
+     */
     public static void setSavePaths() {
-        // Check if the computer has a D drive for saving game progress
         boolean hasDDrive = checkForDDrive();
-
-        // Set save paths based on the presence of D drive
         if (hasDDrive) {
             savePath = "D:/save/save.mdds";
             savePathDir = "D:/save/";
@@ -124,12 +127,10 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         primaryStage.show();
         if (!model.getLoadFromSave()) {
             if (model.getLevel() > 1 && model.getLevel() < Model.final_level) {
-                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
-                //engine = GameEngine.getInstance();
+                View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);;
                 startEngine();
             }
             view.loadGame.setOnAction(event -> {
-                // check if the save file exists first - else no game to load
                 File file = new File(savePath);
                 if (file.exists()){
                     loadGame();
@@ -149,7 +150,6 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
                 View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
             });
         } else {
-            //engine = GameEngine.getInstance();
             startEngine();
             model.setLoadFromSave(false);
         }
@@ -167,14 +167,16 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
 
 /** This method is the entry point for the BrickBreaker application.
  *  Launches the game logic and user interface.
- * */
+ */
     public static void main(String[] args) {
         setSavePaths();
         launch(args);
     }
 
     /**
-     * This method handles user input events like keyboard presses.
+     * This method handles user input events (keyboard presses).
+     * Original game code only included LEFT,RIGHT and S key events.
+     * This version of the game includes the key events LEFT, RIGHT, S, SPACE, UP and DOWN
      * @param event A KeyEvent object containing information about the user's keyboard press.
      */
     @Override
@@ -237,7 +239,8 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
     /**
      * This method smoothly moves the paddle in the specified direction (LEFT or RIGHT).
-     * @param direction stores either static integer variable LEFT or RIGHT (of the Controller class)
+     * Original game's code for this function included a sleepTime > 0 to
+     * @param direction Stores either LEFT or RIGHT (numeric constants of the Controller class)
      **/
     private void move(final int direction) {
         new Thread(() -> {
@@ -262,12 +265,11 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         Random random = new Random();
         model.setXBall(random.nextInt(Model.sceneWidth) + 1);
         model.setYBall(random.nextInt(Model.sceneHeight - 200) + ((model.getLevel() + 1) * Block.getHeight()) + 15);
-        //ball = new Circle();
         model.getBall().setRadius(Model.ballRadius);
         View.gameObjectImageFill(model.getBall(),"ball.png");
     }
 /***
- * This method initializes the paddle's size, position, and appearance.
+ * This method initializes the paddle's size, position, and appearance, and especially focuses on the paddle width, in case the player has caught a shortPaddlePower.
  */
     private void initPaddle() {
         if (model.isShortPaddle()){
@@ -293,6 +295,11 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
             }
         }
     }
+
+    /**
+     * This function generates a block of random type (could either be a choco block, a star block, a heart block, etc) by randomly generating an integer and assigning it to a block type.
+     * @return A Block object produced by random generation.
+     */
     private int generateBlockType(){
         int r = new Random().nextInt(500)%10;
         switch(r){
@@ -329,8 +336,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         view.updateUIMeter(model.getGunMeter(),model.getMeter());
     }
     /**
-     *  This method creates a new bullet object and initializes its position to the paddle's center and
-     *  sets up its visual representation.
+     *  This method creates a new bullet object and initializes its position to the paddle's center and sets up its visual representation.
      */
     private void initBullet(){
         Bullet bullet = new Bullet(model.getHalfPaddleWidth()+model.getXPaddle(), model.getYPaddle());
@@ -372,9 +378,8 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }).start();
     }
     /**
-     *  This method saves various game information to the specified object output stream,
-     *  enabling them to be restored later when loading the saved game.
-     * @param outputStream represents the object output stream used to write the game state information to a file.
+     *  This method saves various game state information to the specified object output stream, enabling them to be restored later when loading the saved game.
+     * @param outputStream Represents the object output stream used to write the game state information to a file.
      */
     private void saveGameInfo(ObjectOutputStream outputStream) throws IOException {
         outputStream.writeInt(model.getLevel());
@@ -409,7 +414,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
 /**
  * This method saves the information of active blocks in the game state to the specified output stream.
- * @param outputStream represents the object output stream used to write the game state information to a file.
+ * @param outputStream Represents the object output stream used to write the game state information to a file.
  */
     private void saveBlockInfo(ObjectOutputStream outputStream) throws IOException {
         ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
@@ -423,7 +428,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
 /**
  * This method safely closes the provided ObjectOutputStream.
- * @param outputStream represents the object output stream used to write the game state information to a file.
+ * @param outputStream Represents the object output stream used to write the game state information to a file.
  */
     private void closeOutputStream(ObjectOutputStream outputStream) {
         try {
@@ -503,8 +508,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
 
     /**
-     * This method clears existing data (blocks and powers) and copies the information of active blocks from the LoadSave
-     * object to the game model.
+     * This method clears existing blocks and powers, and copies the information of active blocks from the LoadSave object to the game model.
      * @param loadSave stores the game state of a previously saved game.
      */
     private void copyBlockInfo(LoadSave loadSave) {
@@ -557,8 +561,8 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
 
 
     /**
-     * This method updates the game state and performs necessary calculations and
-     * updates during each frame of the game loop.
+     * This method updates the game state variables on display (hearts, score, etc) and performs necessary calculations to track blocks' collisions with bullets or the ball. It also handles the collisions according to the block type.
+     * For example if a collided block was of type BlockHeart, a Power object of type heartPower is created and released onto game screen.
      */
     @Override
     public void onUpdate() {
@@ -575,7 +579,6 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
                     choco.newPowerBlock.setY(choco.y);
                 }
             });
-            //model.setPhysicsToBall(this);
 
             if (model.getYBall() >= Block.getPaddingTop() && model.getYBall() <= (Block.getHeight() * (model.getLevel() + Model.LAST_BLOCK_ROW)) + Block.getPaddingTop()) {
                 for (final Block block : model.blocks) {
@@ -596,7 +599,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
 
     /**
-     * This method handles the logic when the ball collides with a block or bullet.
+     * This method handles the logic when the ball collides with a block or bullet. If collision happened, then game state variables are updated.
      * @param block the Block object to be checked for collisions with a block or bullet.
      */
     private void handleBlockHit(int hitCode, Block block){
@@ -613,7 +616,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     }
     /**
      * This method matches the block's type to its respective type of power and creates a Power object.
-     * @param block the Block object which receives a matching Power object.
+     * @param block the Block object which receives an initialized matching Power object.
      */
     private void handleBlockType(Block block) {
         block.initPower();
@@ -624,20 +627,21 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }
     }
 
-
     @Override
     public void onInit() {
 
     }
 
-    // remains in the Main class as it involves alot of objects from different classes interacting.
     /**
-     * This method is called periodically within the game loop to handle various physics updates and interactions.
+     * This method is called within the game loop to handle various physics updates and interactions.
+     * Checks if all the blocks are destroyed in the given level
+     * Halts the gold power effect (unfreezes lives) by checking if over time limit (5 seconds)
+     * Performs collision detection on the falling powers with the paddle.
+     * Performs collision detection on the bullets with the blocks.
      */
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
-        //System.out.println("\nCALLED BY ONPHYSICSUPDATE");
         model.setPhysicsToBall(this);
 
         if (model.getTime() - model.getGoldTime() > 5000) {
@@ -650,24 +654,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
                 continue; // skip this block and go to next choco
             }
             if (power.y >= model.getYPaddle() && power.y <= model.getYPaddle() + Model.paddleHeight && power.x >= model.getXPaddle() && power.x <= model.getXPaddle() + model.getPaddleWidth()) {
-                if (power instanceof scorePlusPower){
-                    System.out.println("You Got it and +3 score for you");
-                    model.setScore(model.getScore()+3);
-                    new Score().show(power.x, power.y, 3, this);
-                }else if (power instanceof invertPower){
-                    model.setInvert(!model.isInvert());
-                }else if (power instanceof shortPaddlePower){
-                    model.setShortPaddle(!model.isShortPaddle());
-                    model.updatePaddleWidth(model.isShortPaddle());
-                    View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
-                }else if (power instanceof heartPower){
-                    model.incHeart();
-                }else if (power instanceof goldPower){
-                    model.setGoldTime(model.getTime());
-                    View.gameObjectImageFill(model.getBall(),"goldball.png");
-                    System.out.println("gold ball");
-                    model.setIsGoldStats(true);
-                }
+                handlePowerType(power);
                 power.powerMessage(this);
                 power.newPowerBlock.setVisible(false);
                 power.taken = true;
@@ -688,7 +675,34 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }
     }
 
-
+/**
+ * A helper method for the function onPhysicsUpdate(). It executes the power's effects (if the power was caught by the paddle) by updating game state variables.
+ * @param power Informs what type of power was caught by the paddle.
+ */
+    private void handlePowerType(Power power){
+        if (power instanceof scorePlusPower){
+            System.out.println("You Got it and +3 score for you");
+            model.setScore(model.getScore()+3);
+            new Score().show(power.x, power.y, 3, this);
+        }else if (power instanceof invertPower){
+            model.setInvert(!model.isInvert());
+        }else if (power instanceof shortPaddlePower){
+            model.setShortPaddle(!model.isShortPaddle());
+            model.updatePaddleWidth(model.isShortPaddle());
+            View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
+        }else if (power instanceof heartPower){
+            model.incHeart();
+        }else if (power instanceof goldPower){
+            model.setGoldTime(model.getTime());
+            View.gameObjectImageFill(model.getBall(),"goldball.png");
+            System.out.println("gold ball");
+            model.setIsGoldStats(true);
+        }
+    }
+    /**
+     * This function records the current time during the game to the variable time in the Model class.
+     * @param time stores the current time during the game.
+     */
     @Override
     public void onTime(long time) {
         model.setTime(time);

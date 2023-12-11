@@ -228,15 +228,17 @@ inverting the controls.
 - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in
 the Block class uses ballRadius to calculate more accurate ball-block collisions.
 - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
-without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate().
+without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame(), onUpdate() and onPhysicsUpdate.
 - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
-understand.- method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(),
-handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the
-method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
-aspect of the ball's behavior.
-  - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
-  - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
-  - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+understand.
+    - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(),
+  handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the
+  method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
+  aspect of the ball's behavior.
+    - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
+    - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
+    - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+    - method onPhysicsUpdate() has the helper method handlePowerType().
 - As there were multiple duplicate blocks of code for starting the game engine, a function startEngine() was introduced
 and utilised throughout the start() function.
 - functions setSavePaths() and checkForDDrive() was introduced to save the game state into directory as per user's storage facilities.
@@ -288,7 +290,7 @@ The old checkHitToBlock() method checked for exact positions of the ball relativ
 sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
 method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
 - onPhysicsUpdate() was modified to include the new powers (previously called bonuses). Although this is game logic
-and has to be in the Model class, it is interacting with multiple classes (View and Score) therefore it was not moved
+and has to be in the Model class, it is interacting with multiple classes (View and Power) therefore it was not moved
 out of the Controller class.
 
 ### **GameEngine Class:**

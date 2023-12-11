@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+/**
+ * This class handles loading and saving game data.
+ */
 
 public class LoadSave {
     public boolean          isExistHeartBlock;
@@ -36,7 +39,9 @@ public class LoadSave {
     public int gunMeter;
     public ArrayList<BlockSerializable> blocks = new ArrayList<>();
 
-
+    /**
+     * Reads saved game data from a file.
+     */
     public void read() {
         try {
             ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Controller.savePath)));
@@ -54,6 +59,12 @@ public class LoadSave {
         }
     }
 
+
+    /**
+     * Loads game statistics from the input stream.
+     * @param inputStream The object input stream.
+     * @throws IOException If an error occurs while reading data.
+     */
     private void loadGameStats(ObjectInputStream inputStream) throws IOException{
         try {
             level = inputStream.readInt();
@@ -66,7 +77,11 @@ public class LoadSave {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Loads game state variables from the input stream.
+     * @param inputStream The object input stream.
+     * @throws IOException If an error occurs while reading data.
+     */
     private void loadGameObjs(ObjectInputStream inputStream) throws IOException{
         try {
             xBall = inputStream.readDouble();
@@ -82,6 +97,11 @@ public class LoadSave {
         }
     }
 
+    /**
+     * Loads game flags from the input stream.
+     * @param inputStream The object input stream.
+     * @throws IOException If an error occurs while reading data.
+     */
     private void loadGameFlags(ObjectInputStream inputStream) throws IOException{
         try {
             isExistHeartBlock = inputStream.readBoolean();

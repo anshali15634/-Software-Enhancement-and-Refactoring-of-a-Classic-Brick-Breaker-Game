@@ -4,27 +4,28 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+/**
+ * This class customizes buttons with an image and specific styling for the game menu.
+ * The original game code refers to the Button class to initialize the buttons, but this version initializes all the dimensions, locations and images at once to maintain consistency throughout the user interface.
+ */
 public class GameButton extends Button {
+    /**
+     * Constructs a new GameButton object with specified text, image path, and position coordinates.
+     * @param buttonText The text displayed on the button.
+     * @param imagePath The path to the image displayed on the button.
+     * @param x The X coordinate of the button's position.
+     * @param y The Y coordinate of the button's position.
+     */
 
     public GameButton(String buttonText, String imagePath, double x, double y) {
         super(buttonText);
-
-        // Load the button's image
         Image buttonImage = new Image(imagePath);
         ImageView imageView = new ImageView(buttonImage);
-
-        // Set properties for the image
         imageView.setFitHeight(50);
         imageView.setPreserveRatio(true);
-
-        // Set the graphic (image) for the button
         this.setGraphic(imageView);
-
-        // Set additional styles or properties if needed
         this.setPrefSize(30, 10);
         this.setStyle("-fx-background-color: #291741;");
-
-        // Set the translation (X and Y coordinates) for the button
         this.setTranslateX(x);
         this.setTranslateY(y);
     }
