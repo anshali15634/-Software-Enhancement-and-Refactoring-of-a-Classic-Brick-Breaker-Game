@@ -113,50 +113,50 @@ simple factory design pattern implemented BlockFactory pattern.
 ## **Modified Java Classes:**
 _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
 **- Main Class (renamed as Controller class since the MVC pattern was implemented)**
-    - Magic numbers avoided by adding NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH static final class variables.
-    - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
-      colide in it was renamed to collide for clarity.
-    - Variables relating to paddle (breakWidth, breakHeight, halfBreakWidth, xBreak, yBreak, etc) renamed to paddleWidth,
-       paddleHeight, halfPaddleWidth, xPaddle, yPaddle,etc because the word "break" was ambiguous, it was hard to identify
-       that these variables were related to the paddle's game state.
-    - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
-    - choco was also renamed as bonus1, as new bonuses are to be introduced.
-    - Unused variables like v and oldXBreak were removed.
-    - New buttons (Exit, Load, About) were introduced and their actions were defined in the start() function.
-    - vX and vY control the speed of the ball (both stored 1). The speed value was increased.
-    - New scenes were added to the start() function for the new page that displayed the game instructions.
-    - New flags were introduced to change game background for the game start menu page and for the new game page.
-    - in method handle(), the sleepTime was set to 0, because when invert bonus is caught by paddle, it causes a lag in
-      inverting the controls.
-        - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in
-          the Block class uses ballRadius to calculate more accurate ball-block collisions.
-        - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
-          without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate().
-        - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
-          understand.
-            - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(),
-              handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the
-              method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
-              aspect of the ball's behavior.
-            - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
-            - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
-            - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
-      - As there were multiple duplicate blocks of code for starting the game engine, a function startEngine() was introduced
-        and utilised throughout the start() function.
-      - functions setSavePaths() and checkForDDrive() was introduced to save the game state into directory as per user's storage facilities.
-      - new logic for the bullet-block collisions from the gun paddle was added into the onUpdate() function.
-      - function handle() modified to include new functionalities of the paddle (down arrow key to activate gun paddle, up
-        arrow key to shoot), and the pause feature (spacebar).
-      - function togglePause() added to pause game engine and display pause label "Game Paused :)".
-      - initPaddle() function was modified to include the changing of the paddle width
-        (if the paddle caught the short power)
-      - initBoard() was shortened considerably by modularising it into two functions: generateBlockType() which would generate
-        a random block type and using the BlockFactory's createBlock() method to create the block.
-      - new function initMeter() was introduced to initialize the meter which keeps track of how many gun shots the player has left.
-      - initBullet() was introduced to initialize bullets whenever the gun paddle was activated.
-      - functions nextLevel() and restartGame() had similar code, so the duplicate code was modularised into a function called
-        resetFlags() and called into both functions. As resetFlags dealt with altering the game state, it was moved to the Model class.
-
+*     - Magic numbers avoided by adding NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH static final class variables.
+*     - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
+*       colide in it was renamed to collide for clarity.
+*     - Variables relating to paddle (breakWidth, breakHeight, halfBreakWidth, xBreak, yBreak, etc) renamed to paddleWidth,
+*        paddleHeight, halfPaddleWidth, xPaddle, yPaddle,etc because the word "break" was ambiguous, it was hard to identify
+*        that these variables were related to the paddle's game state.
+*     - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
+*     - choco was also renamed as bonus1, as new bonuses are to be introduced.
+*     - Unused variables like v and oldXBreak were removed.
+*     - New buttons (Exit, Load, About) were introduced and their actions were defined in the start() function.
+*     - vX and vY control the speed of the ball (both stored 1). The speed value was increased.
+*     - New scenes were added to the start() function for the new page that displayed the game instructions.
+*     - New flags were introduced to change game background for the game start menu page and for the new game page.
+*     - in method handle(), the sleepTime was set to 0, because when invert bonus is caught by paddle, it causes a lag in
+*       inverting the controls.
+*         - ballRadius's scope was changed from private to public final static, as the altered method checkHitToBlock() in
+*           the Block class uses ballRadius to calculate more accurate ball-block collisions.
+*         - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish
+*           without scrolling. This was not the case for methods setPhysicsToBall(), saveGame(), loadGame() and onUpdate().
+*         - Therefore they were refactored, and have helper methods introduced to make the methods more modular and easier to
+*           understand.
+*             - method setPhysicsToBall() has helper methods moveBall(), handleBallYBoundaries(), handleBallPaddleCollision(),
+*               handleBallXBoundaries(), handleBallWallCollisions() and handleBallBlockCollision(). They are used to make the
+*               method setPhysicsToBall() more maintainable and easy to read. Each helper method is responsible for a specific
+*               aspect of the ball's behavior.
+*             - method saveGame() has helper methods saveGameInfo(), saveBlockInfo() and closeOutputStream().
+*             - method loadGame() has helper methods copyGameInfo() and copyBlockInfo().
+*             - method onUpdate() has helper methods handleBlockHit() and handleBlockType().
+*       - As there were multiple duplicate blocks of code for starting the game engine, a function startEngine() was introduced
+*         and utilised throughout the start() function.
+*       - functions setSavePaths() and checkForDDrive() was introduced to save the game state into directory as per user's storage facilities.
+*       - new logic for the bullet-block collisions from the gun paddle was added into the onUpdate() function.
+*       - function handle() modified to include new functionalities of the paddle (down arrow key to activate gun paddle, up
+*         arrow key to shoot), and the pause feature (spacebar).
+*       - function togglePause() added to pause game engine and display pause label "Game Paused :)".
+*       - initPaddle() function was modified to include the changing of the paddle width
+*         (if the paddle caught the short power)
+*       - initBoard() was shortened considerably by modularising it into two functions: generateBlockType() which would generate
+*         a random block type and using the BlockFactory's createBlock() method to create the block.
+*       - new function initMeter() was introduced to initialize the meter which keeps track of how many gun shots the player has left.
+*       - initBullet() was introduced to initialize bullets whenever the gun paddle was activated.
+*       - functions nextLevel() and restartGame() had similar code, so the duplicate code was modularised into a function called
+*         resetFlags() and called into both functions. As resetFlags dealt with altering the game state, it was moved to the Model class.
+* 
       **- MVC pattern refactoring in the Main Class:** 
           - Variables relating to game state like level, collide flags, sceneWidth, sceneHeight, ball (and its related variables),
           isGoldStats, isExistHeartBlock, ballRadius, destroyedBlockCount, speed variables (vX and vY), heart, score, time-related
