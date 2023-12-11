@@ -1,19 +1,5 @@
 # COMP2042_CW_hcyam5
 
->> checkHitToBlock() moved from Block class to Model because Block was in charge of initializing the blocks and
-block-ball collision detection which violates the Single Class Single Responsibility Principle. Therefore,
-the function was moved to Model as it comes under game logic.
->> goldBlock and heartBlock before get hit and then effect. Now they are power ups.
->> new Powers added: goldPower and heartPower
-
-GOOD POINTS TO MENTION:
-CopyOnWriteArrayList for blocks, bullets, and powerArray a allows concurrent modification and iteration without synchronization issues.
-
-design pattern stuff done:
-singleton pattern on classes game engine and model and view
-template method pattern on power class and block class
-simple factory design pattern implemented BlockFactory pattern.
-
 ## **Game Instructions:**
 **CONTROLS:**
 - Move paddle left: Left Arrow Key
@@ -39,34 +25,43 @@ simple factory design pattern implemented BlockFactory pattern.
 6. The player has to first activate the gun by pressing the down arrow key and then shoot using the up arrow key.
 
 ## **Compilation Instructions:**
+Import project into your IDE.
+Set the Main Class in Run Configurations to brickGame.Controller
+Compile and run the game directly.
 
 ## **Features Implemented and Working Properly:**
-1. Game Icon added
-2. Window size is now fixed (does not extend to full screen).
-3. Exit button added - closes window and exits program.
-4. About button - has how to play instructions.
-5. Separate start screen with game menu implemented.
-6. Invert bonus - (A feature from the original Brick Breaker game) 
-   If ball touches a dark-blue pixel block, it releases an invert bonus. If the paddle touches this bonus, 
+1. Game Icon added to Window - top left of window and application icon displays the BrickBreaker logo.
+2. Window size is now fixed (does not extend to full screen). 
+3. Separate start screen with game menu implemented.
+4. About button added - displays how to play instructions.
+5. Exit button added - closes window and exits program.
+6. Invert power - (A feature from the original Brick Breaker game) 
+   If ball breaks a dark-blue pixel block, it releases an invert power. If the paddle catches this power, 
    the paddle's controls reverse. If paddle's controls were already reversed, catching the bonus 
    again will reverse the paddle controls back to normal.
-7. Short Paddle bonus - (the original Brick Breaker game had a feature that elongates the paddle, I have decided to
+7. Short Paddle power - (the original Brick Breaker game had a power that elongates the paddle, I have decided to
    implement the opposite to make the game harder)
-   if the ball touches the dark-purple pixel block, it releases a short paddle bonus. 
-   If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
-   will reverse the bonus (paddle becomes old size again)
+   if the ball breaks the dark-purple pixel block, it releases a short paddle power. 
+   If paddle catches this power, the paddle shortens. If the paddle is already shortened by catching that power previously,
+   catching the power again will reverse the power (paddle becomes normal size).
 8. Pause feature implemented - press space bar to pause the game, and press space bar again to resume the game.
 9. Gun feature - (a feature from the original BrickBreaker game) shoot blocks by first pressing the down key to 
-   load ammunition, and press up key to shoot.
+   activate the gun paddle, and press up key to shoot. This is only allowed three times throughout the gameplay.
+10. A Gun Meter is located on top of the screen to keep track of how many more gun shots are left for the player.
+11. In the original version of this game, a star block freezes lives, while hitting a heart block increases lives by 1.
+In this version, players need to catch these power-ups with their paddle to activate their effects.
 
 ## **Features Implemented but Not Working Properly:**
 - Gun feature: The bullet should strike only one block and disappear, but the bullet shoots all the blocks
-  in its path before disappearing off-screen. Therefore, I implemented a limit so that it is only useable three
-  times.
+  in its path before disappearing off-screen.
+- Therefore, I implemented a limit so that it is only useable three times.
 
 ## **Features Not Implemented:**
-Difficulty option (Easy, Medium, Hard) - the start() function in the Controller class would have to be changed 
-completely to add an extra page for the menu to display the options. 
+I wanted to implement a surprise feature where the bricks suddenly fall during gameplay, which the player has to dodge 
+or destroy with their gun paddle activation. If the brick falls on the paddle, it is game over.
+However, since there were multiple powers already in the game which make the paddle hard to control (short paddle and 
+inverting paddle controls), it would disrupt the game's balance and make it too difficult, therefore this feature was
+left out.
 
 ## **New Java Classes:**
 ### BlockFactory Class
@@ -135,12 +130,19 @@ completely to add an extra page for the menu to display the options.
 
 ### Model Class
 (is located in the Model.java file)
-  - A singleton class which holds all the variables and functions relating to the game state and logic.
+  - A **singleton** class which holds all the variables and functions relating to the game state and logic.
   - Its purpose is to:
-    - 
+    - separate the data and logic from the user interface (View) and the user input handling (Controller)
+    - store and manage all game-related data (ball position and movement parameters, score and heart count, etc).
+    - implements core game mechanics including:
+      - Ball movement and collision detection 
+      - Paddle movement and collision handling 
+      - Block destruction from ball or bullet and scoring 
+      - Power-up activation and effects 
+      - Level progression and game state changes
   - Reasons why this class was created:
-    -  single point of access to the game state from various parts of your application
-    -  centralizes the game state, making it easier to manage and modify. Particularly useful since multiple components
+    - single point of access to the game state from various parts of your application
+    - centralizes the game state, making it easier to manage and modify. Particularly useful since multiple components
        need to interact with or modify the game state.
     - ensures that there is only one instance of the game state, preventing issues related to multiple instances 
       having different states.
@@ -149,27 +151,27 @@ completely to add an extra page for the menu to display the options.
 (is located in the Block.java file, lines 78-92)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (scorePlusPower) and its block image file.
-- 
+
 ### BlockHeart Subclass
 (is located in the Block.java file, lines 93-107)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (heartPower) and its block image file.
-- 
+
 ### BlockInvert Subclass
 (is located in the Block.java file, lines 108-122)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (invertPower) and its block image file.
-- 
+
 ### BlockShort Subclass
 (is located in the Block.java file, lines 138-152)
 - inherits from abstract class Block
-- - This subclass was created to define the block's own specific power (shortPaddlePower) and its block image file.
-- 
+- This subclass was created to define the block's own specific power (shortPaddlePower) and its block image file.
+
 ### BlockStar Subclass
 (is located in the Block.java file, lines 154-168)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (goldPower) and its block image file.
-- 
+
 ### BlockPlain Subclass
 (is located in the Block.java file, lines 123-137)
 - inherits from abstract class Block
@@ -260,6 +262,9 @@ game state. Private variables were encapsulated using get set functions if they 
 - Class variables like LEFT, RIGHT remained in the Main (now Controller) class as they related to user input.
 - Class variables like NO_HIT, HIT_RIGHT, etc were moved to the Block class as they are related to the block's 
 game state.
+- ArrayLists for blocks, bullets and powers (blocks, bullets and powerArray) were re-defined as type 
+CopyOnWriteArrayList as it allows concurrent modification and iteration without synchronization issues. These arrays 
+were then moved to the Model class as they are a part of the game state.
 - for the buttons, a class GameButton was introduced to reduce the amount of duplicated code for initializing
 the buttons (setting positions, images, dimensions each of the five buttons).
 The initialized buttons were moved to the View class as they dealt with the user interface.
@@ -287,7 +292,7 @@ and has to be in the Model class, it is interacting with multiple classes (View 
 out of the Controller class.
 
 ### **GameEngine Class:**
-  - Since GameEngine is only used once in the Main class, it was converted to a _singleton_ class. The getInstance method 
+  - Since GameEngine is only used once in the Main class, it was converted to a **singleton** class. The getInstance method 
     is synchronized, which is good for ensuring that only one instance of GameEngine class is created even in a 
     multithreaded environment.
   - flag variable 'paused' introduced. Used by most threads in the GameEngine class to ensure the game is not
@@ -326,12 +331,17 @@ out of the Controller class.
     - The Power class was modified to become an **abstract** class. The function chooseImage() is an abstract method to be
        implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower, heartPower,goldPower).
     - Now if new powers are to be added, the code is open for extension but closed for modification.
-    
+
     
 ### **Score Class**
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
 
-  
+
+## **Summary of the design patterns implemented:**
+1. _Singleton Design pattern_ was implemented on the classes GameEngine, Model and View
+2. _Template Method Design pattern_ was implemented on the Power class and Block class
+3. _Factory Design Pattern_ was implemented on the BlockFactory class.
+
 ## **Unexpected Problems:**
 1. **java.lang.UnsupportedOperationException** - happened after level 1, the blocks keep forming,
    in an endless loop, does not configure the next level. 
@@ -404,33 +414,3 @@ out of the Controller class.
     **- How the problem was solved:**
       The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
       this function to check the isGoldStats flag and change the image of the ball appropriately.
-
-## **Implementation of the MVC pattern: Explanation of the separation of the original Main class code**
-The original Main class code had the following purposes:
-- sets up game menu
-- sets up events for each button's press
-- loads, saves, levels up and restarts the game
-- initialize paddle, ball, board
-- handles threads for ball physics and game logic
-- stores the current game state variables (isGoldStats, heart, score, etc)
-- handles different types of collisions (block-ball, block-wall, block-paddle)
-
-After MVC pattern was implemented, the classes Model and View extracted their respective resposibilities
-from the Main class.
-
-> View class carried out the user interface related responsibilities, providing a clear separation of concerns.
-It initialises the game buttons, sets the visibility of game objects, adds images to objects, changes the game 
-background, updates the UI in real time for objects like the paddle, initializes the labels and updates them.
-
-> Model class encapsulates the game state variables like heart, score, etc. This class also contains final class 
-variables that store the measurements to be used consistently by all classes that require them, like sceneHeight,
-ballRadius, etc. It also stores the game logic for moving the ball and paddle, handling collisions and boundaries
-for the ball. 
-
-> However, game logic that depends on user input and interaction with other classes like Model 
-and View were retained in the Main class. For example, the function
-that initializes the paddle depends on the bonus caught by the player, therefore needs to remain in the Main class as
-it is dependent on user input and requires interaction with the View class. The other initialization functions 
-(for the paddle and the ball) also remain in the Main class making it easier for developers (including future 
-maintainers) to follow the sequence of events during game initialization.
-
