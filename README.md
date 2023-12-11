@@ -36,6 +36,7 @@ simple factory design pattern implemented BlockFactory pattern.
    - _Choco Block_ releases a power that increases your score by 3.
 5. The player can use their gun activation to shoot blocks. But the paddle will only shoot thrice throughout the whole
     game. This is kept track of by a Gun Meter, on the top of the screen.
+6. The player has to first activate the gun by pressing the down arrow key and then shoot using the up arrow key.
 
 ## **Compilation Instructions:**
 
@@ -59,18 +60,41 @@ simple factory design pattern implemented BlockFactory pattern.
    load ammunition, and press up key to shoot.
 
 ## **Features Implemented but Not Working Properly:**
-- Gun feature: I wanted the bullet to strike only one block and disappear, but the bullet shoots all the blocks
+- Gun feature: The bullet should strike only one block and disappear, but the bullet shoots all the blocks
   in its path before disappearing off-screen. Therefore, I implemented a limit so that it is only useable three
   times.
 
 ## **Features Not Implemented:**
-1. Difficulty option (Easy, Medium, Hard)
+Difficulty option (Easy, Medium, Hard) - the start() function in the Controller class would have to be changed 
+completely to add an extra page for the menu to display the options. 
 
 ## **New Java Classes:**
+### BlockFactory Class
+(is located in the BlockFactory.java file)
+  - Implements the **Factory Method Design Pattern**
+  - Its purpose is to:
+    - Centralize block creation logic: Instead of having individual classes responsible for creating their own instances, 
+    the BlockFactory acts as a centralized location for this logic. This promotes code reuse and simplifies maintenance.
+    - Dynamic block creation: The factory pattern allows for creating different types of blocks based on a single method
+      call. This makes the code more flexible and adaptable to different game scenarios.
+  - Reasons why this class was created:
+    - Improved code organization.
+    - Flexibility. Adding new block types only requires updating the factory method without modifying existing code.
+    - To reduce duplication of code for block initialization in the Controller class. 
+    - Maintainability. Any changes to the block creation process can be made in one place, simplifying future updates.
 
-- Bullet Class
+### Bullet Class
+(is located in the Bullet.java file)
+  - inherits from the Rectangle class.
+  - Its purpose is to:
+    - Manage the state of the bullet, including whether it has been destroyed, which is crucial for game logic 
+      and collision handling.
+  - Reasons why this class was created:
+    - Improve code clarity and make it easier to understand and maintain the code related to bullets specifically by 
+      separating bullets into their own class.
 
-- GameButton Class
+### GameButton Class
+(is located in the GameButton.java file)
   - It inherits from the existing Button class.
   - Its purpose is to:
     - store the image file name for the button
@@ -86,19 +110,31 @@ simple factory design pattern implemented BlockFactory pattern.
       It encapsulates the common functionality required for creating game buttons in this game, reducing redundancy 
       and promoting code reuseability.
 
-- View Class
-  - It holds all the functions which were in the Main class, that were related to modifying the UI.
+### View Class
+(is located in the View.java file)
+  - It holds all the functions which were in the Main class, which were related to modifying the UI.
+  - This class was made as **a singleton class** as only one View object is required for the game, and this centralizes
+    the configuration of the View class and prevents duplication of resources.
   - Its purpose is to:
-    - 
+    - Manage user interface elements like buttons, labels, and images.
+    - Initialize and update UI components with game state information (score, level, heart).
+    - Set and update visual appearance of game objects (e.g., fill images for bullet, gun meter).
+    - Control visibility of game objects depending on game state (e.g., hide buttons during gameplay).
+    - Access and modify game elements based on user interactions (e.g., updating gun meter).
+    - Add a game icon to the top left corner of the game window.
+    - Ensure smooth UI updates on the JavaFX thread.
+    
   - Reasons why this class was created:
-    - The Main class violates the Single-Class-Single-Responsibility Principle. This is because the modification of the
-      UI, game logic, and storage of data was all executed in a single class. As a solution, I implemented the MVC
-      pattern and therefore the View class was created.
-    - This class handles the changes in the UI, like changing teh game background, initializing the labels for display,
-      setting visibility of the objects, and filling in images for the objects.
-    - This class was made as a singleton class as only one View object is required for the game, and this centralizes
-      the configuration of the View class and prevents duplication of resources.
-- Model Class
+    - The Main class violates the **Single-Class-Single-Responsibility Principle**. This is because the modification of the
+      UI, game logic, and storage of data was all executed in the Main class. As a solution, I implemented the **MVC
+      pattern** and therefore the View class was created to separate the responsibilities.
+    - To create reusable functions for UI, like the gameObjectImageFill() function which prevents duplication of code
+      everytime a new object has to have an image pattern.
+    - Centralized UI management: Manage all UI elements in one place, simplifying code organization and modification.
+
+
+### Model Class
+(is located in the Model.java file)
   - A singleton class which holds all the variables and functions relating to the game state and logic.
   - Its purpose is to:
     - 
@@ -108,7 +144,66 @@ simple factory design pattern implemented BlockFactory pattern.
        need to interact with or modify the game state.
     - ensures that there is only one instance of the game state, preventing issues related to multiple instances 
       having different states.
+  
+### BlockChoco Subclass
+(is located in the Block.java file, lines 78-92)
+- inherits from abstract class Block
+- This subclass was created to define the block's own specific power (scorePlusPower) and its block image file.
+- 
+### BlockHeart Subclass
+(is located in the Block.java file, lines 93-107)
+- inherits from abstract class Block
+- This subclass was created to define the block's own specific power (heartPower) and its block image file.
+- 
+### BlockInvert Subclass
+(is located in the Block.java file, lines 108-122)
+- inherits from abstract class Block
+- This subclass was created to define the block's own specific power (invertPower) and its block image file.
+- 
+### BlockShort Subclass
+(is located in the Block.java file, lines 138-152)
+- inherits from abstract class Block
+- - This subclass was created to define the block's own specific power (shortPaddlePower) and its block image file.
+- 
+### BlockStar Subclass
+(is located in the Block.java file, lines 154-168)
+- inherits from abstract class Block
+- This subclass was created to define the block's own specific power (goldPower) and its block image file.
+- 
+### BlockPlain Subclass
+(is located in the Block.java file, lines 123-137)
+- inherits from abstract class Block
+- This subclass was created to define the block's own specific power (null) and its block image file.
 
+### goldPower Subclass
+(is located in the Power.java file, lines 105-119)
+- inherits from abstract class Power
+- This subclass was created to define the power's image file 
+and its display message "GOLD BALL - FREEZE LIVES :>" when the paddle catches this power.
+
+### heartPower Subclass
+(is located in the Power.java file, lines 90-104)
+- inherits from abstract class Power
+- This subclass was created to define the power's image file
+and its display message "ONE MORE LIFE!" when the paddle catches this power.
+
+### invertPower Subclass
+(is located in the Power.java file, lines 75-89)
+- inherits from abstract class Power
+- This subclass was created to define the power's image file
+and its display message "INVERTED PADDLE CONTROLS :>" when the paddle catches this power.
+
+### scorePlusPower Subclass
+(is located in the Power.java file, lines 54-73)
+- inherits from abstract class Power
+- This subclass was created to define the power's image file
+and its display message "+3" when the paddle catches this power.
+
+### shortPaddlePower Subclass
+(is located in the Power.java file, lines 39-53)
+- inherits from abstract class Power
+- This subclass was created to define the power's image file
+and its display message "CAREFUL! PADDLE CHANGE!" when the paddle catches this power.
 
 ## **Modified Java Classes:**
 _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
@@ -120,11 +215,11 @@ colide in it was renamed to collide for clarity.
 paddleHeight, halfPaddleWidth, xPaddle, yPaddle,etc because the word "break" was ambiguous, it was hard to identify
 that these variables were related to the paddle's game state.
 - chocos array renamed as bonusArray - the name chocos can easily be mistaken as storing the choco blocks.
-- choco was also renamed as bonus1, as new bonuses are to be introduced.
+- choco was also renamed as pow, as new bonuses (now renamed as powers) are to be introduced.
 - Unused variables like v and oldXBreak were removed.
 - New buttons (Exit, Load, About) were introduced and their actions were defined in the start() function.
 - vX and vY control the speed of the ball (both stored 1). The speed value was increased.
-- New scenes were added to the start() function for the new page that displayed the game instructions.
+- New scene were added to the start() function for the new page that displayed the game instructions.
 - New flags were introduced to change game background for the game start menu page and for the new game page.
 - in method handle(), the sleepTime was set to 0, because when invert bonus is caught by paddle, it causes a lag in
 inverting the controls.
@@ -157,6 +252,7 @@ a random block type and using the BlockFactory's createBlock() method to create 
 resetFlags() and called into both functions. As resetFlags dealt with altering the game state, it was moved to the Model class.
 
 **MVC pattern refactoring in the Main Class:** 
+- Class was renamed to Controller.
 - Variables relating to game state like level, collide flags, sceneWidth, sceneHeight, ball (and its related variables),
 isGoldStats, isExistHeartBlock, ballRadius, destroyedBlockCount, speed variables (vX and vY), heart, score, time-related
 variables, engine and arrays for  blocks, bonuses (powers) were shifted to the Model class as they were related to the
@@ -175,16 +271,20 @@ moved to the View class as they dealt with the user interface.
 variables. This movePaddle() function was then moved to the Model class as it dealt with paddle game logic and also
 included the paddle invert power logic.
 - onUpdate() function had multiple responsibilities, updating the score and heart labels, checking for collisions and
-handling any block hits. Therefore helper methods were introduced to make the function more readable  
+handling any block hits. Therefore, helper methods were introduced to make the function more readable  
 and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
-  -  checkHitToBlock() dealt with game logic so it was moved to the Model class
+  -  checkHitToBlock() dealt with game logic, so it was moved to the Model class
   - handleBlockHit() function dealt with the Score class, since it had to interact with another class (Score) it was
   left in the Controller class.
   - handleBlockType() was interacting with the Power class (previously called Bonus class) so it was left in
   the Controller class as well.
-  - onPhysicsUpdate() was modified to include the new powers (previously called bonuses). Although this is game logic
-  and has to be in the Model class, it is interacting with multiple classes (View and Score) therefore it was not moved
-  out of the Controller class.
+- After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions. 
+The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
+sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
+method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
+- onPhysicsUpdate() was modified to include the new powers (previously called bonuses). Although this is game logic
+and has to be in the Model class, it is interacting with multiple classes (View and Score) therefore it was not moved
+out of the Controller class.
 
 ### **GameEngine Class:**
   - Since GameEngine is only used once in the Main class, it was converted to a _singleton_ class. The getInstance method 
@@ -197,14 +297,21 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
 
   
 ### **Block Class**
-  - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
-    The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
-    sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
-    method allows for a range of positions to be considered as hits and adjusts well to the new speed of the ball.
   - new block type called BLOCK_INVERT introduced - when hit by ball, gives the bonus of reversing the controls of 
     the paddle (when left arrow pressed, moves right, and vice versa.)
   - new block type called BLOCK_SHORT was introduced - when hit by the ball, gives the bonus of shortening the paddle.
-
+  - Since each block is associated with a power, the Power object was added to the class as a public variable.
+  - This class violates the **Open-Closed Principle**. Whenever a new type of block needs to be added, the original
+    code has to be modified. The Template Method Design Pattern was implemented to solve this.
+    - The Block class was modified to become an abstract class. The function draw() and initPower() are abstract 
+    methods. 
+    - draw() fills in the block with the appropriate image.
+    - initPower initialises the Power object pow to a concrete class (goldPower, heartPower, etc) according to the 
+      concrete class the block is from (BlockChoco, BlockStar, etc).
+  - There are 6 concrete classes which inherit from the abstract class Block, each representing a block type:
+    BlockChoco, BlockHeart, BlockInvert, BlockPlain, BlockShort, BlockStar.
+  - If new block types need to be added, this class is open for extension and closed for modification.
+    
 ### **LoadSave Class**
   - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
@@ -213,12 +320,13 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
 ### **Power Class (previously called the Bonus class)** 
   - (there are negative and positive powers, therefore the class name bonus was not appropriate)
   - Different powers have different images so the class had to include multiple if statements to decide which
-    image was for each power type. This violated the _Open-Closed principle_. The Power class's draw() function
-    has to be modified everytime a new bonus is added. Therefore, the _Template Method Design Pattern_ was used to modify
+    image was for each power type. This violated the **Open-Closed principle**. The Power class's draw() function
+    has to be modified everytime a new bonus is added. Therefore, the **Template Method Design Pattern** was used to modify
     the class. 
-    - The Power class was modified to become an abstract class. The function chooseImage() is an abstract method to be
-       implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower).
+    - The Power class was modified to become an **abstract** class. The function chooseImage() is an abstract method to be
+       implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower, heartPower,goldPower).
     - Now if new powers are to be added, the code is open for extension but closed for modification.
+    
     
 ### **Score Class**
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
