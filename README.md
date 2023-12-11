@@ -112,7 +112,7 @@ simple factory design pattern implemented BlockFactory pattern.
 
 ## **Modified Java Classes:**
 _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
-**- Main Class (renamed as Controller class since the MVC pattern was implemented)**
+### **Main Class (renamed as Controller class since the MVC pattern was implemented)**
 - Magic numbers avoided by adding NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH static final class variables.
 - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
 colide in it was renamed to collide for clarity.
@@ -156,7 +156,7 @@ a random block type and using the BlockFactory's createBlock() method to create 
 - functions nextLevel() and restartGame() had similar code, so the duplicate code was modularised into a function called
 resetFlags() and called into both functions. As resetFlags dealt with altering the game state, it was moved to the Model class.
 
-**- MVC pattern refactoring in the Main Class:** 
+**MVC pattern refactoring in the Main Class:** 
 - Variables relating to game state like level, collide flags, sceneWidth, sceneHeight, ball (and its related variables),
 isGoldStats, isExistHeartBlock, ballRadius, destroyedBlockCount, speed variables (vX and vY), heart, score, time-related
 variables, engine and arrays for  blocks, bonuses (powers) were shifted to the Model class as they were related to the
@@ -186,7 +186,7 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
   and has to be in the Model class, it is interacting with multiple classes (View and Score) therefore it was not moved
   out of the Controller class.
 
-**- GameEngine Class:**
+### **GameEngine Class:**
   - Since GameEngine is only used once in the Main class, it was converted to a _singleton_ class. The getInstance method 
     is synchronized, which is good for ensuring that only one instance of GameEngine class is created even in a 
     multithreaded environment.
@@ -196,7 +196,7 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
     pause the game.
 
   
-**- Block Class**
+### **Block Class**
   - After doubling the speed of the ball, checkHitToBlock() was changed to increase accuracy of ball-block collisions.
     The old checkHitToBlock() method checked for exact positions of the ball relative to the block, and the ball
     sometimes moved behind the blocks. It was not robust enough to handle higher speeds. The new altered version of the
@@ -205,12 +205,12 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
     the paddle (when left arrow pressed, moves right, and vice versa.)
   - new block type called BLOCK_SHORT was introduced - when hit by the ball, gives the bonus of shortening the paddle.
 
-**- LoadSave Class**
+### **LoadSave Class**
   - According to Bob's Concise Coding Conventions, it should be possible to see the whole method from start to finish,
     without scrolling. The read() method is too big to fit in a screen, therefore helper methods loadGameStats(),
     loadGameObjs() and loadGameFlags() were introduced to make the loading process more modular and easy-to-read.
 
-**- Power Class (previously called the Bonus class)** 
+### **Power Class (previously called the Bonus class)** 
   - (there are negative and positive powers, therefore the class name bonus was not appropriate)
   - Different powers have different images so the class had to include multiple if statements to decide which
     image was for each power type. This violated the _Open-Closed principle_. The Power class's draw() function
@@ -220,7 +220,7 @@ and modular: handleBlockType(), checkHitToBlock() and handleBlockHit().
        implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower).
     - Now if new powers are to be added, the code is open for extension but closed for modification.
     
-**- Score Class**
+### **Score Class**
   - showWin() method altered to include a back button to navigate back to start menu after game is won.
 
   
