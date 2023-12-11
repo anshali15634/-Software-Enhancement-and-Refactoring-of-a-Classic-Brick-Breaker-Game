@@ -2,27 +2,27 @@
 
 ## **Game Instructions:**
 **CONTROLS:**
-- Move paddle left: Left Arrow Key
-- Move paddle right: Right Arrow Key
-- Activate gun paddle: Down Arrow Key
-- Shoot: Up Arrow Key
+- Move paddle left: **Left Arrow Key**
+- Move paddle right: **Right Arrow Key**
+- Activate gun paddle: **Down Arrow Key**
+- Shoot: **Up Arrow Key**
 
 **GAMEPLAY:**
-1. This game has 5 levels.
-2. Break as many blocks as you can by bouncing the ball off the paddle.
-3. Each block you break scores you points.
+1. This game has **5 levels**.
+2. Break as many blocks as you can by **bouncing the ball off the paddle**.
+3. Each block you break scores you **points**.
 4. Watch out for powers that drop when certain blocks get destroyed:
-   - _Star block_ releases a power that freezes your lives for 5 seconds.
-   - _Heart block_ releases a power that increases your lives by one.
+   - _Star block_ releases a power that freezes your lives for **5 seconds**.
+   - _Heart block_ releases a power that increases your lives by **one**.
    - _Purple Pixel Block_ releases a power that shortens your paddle. If you want to remove this power,
-     try to break another _Purple Pixel Block_. Catching the same power again changes
-     your paddle size back to normal.
-   - _Blue Pixel Block_ releases a power that flips your paddle controls. Left becomes right, and vice versa.
-     But like the short paddle power, catching the same power again will reverse your controls back to normal.
+     try to break another _Purple Pixel Block_. Catching the same power **again** changes
+     your paddle size back to **normal**.
+   - _Blue Pixel Block_ releases a power that **flips** your paddle controls. Left becomes right, and vice versa.
+     But like the short paddle power, catching the same power **again** will reverse your controls back to **normal**.
    - _Choco Block_ releases a power that increases your score by 3.
-5. The player can use their gun activation to shoot blocks. But the paddle will only shoot thrice throughout the whole
-    game. This is kept track of by a Gun Meter, on the top of the screen.
-6. The player has to first activate the gun by pressing the down arrow key and then shoot using the up arrow key.
+5. The player can use their **gun activation** to shoot blocks. But the paddle will only shoot **thrice** throughout the whole
+    game. This is kept track of by a **Gun Meter**, on the top of the screen.
+6. The player has to first activate the gun by **pressing the down arrow key** and then shoot using the **up arrow key**.
 
 ## **Compilation Instructions:**
 Import project into your IDE.
@@ -148,61 +148,61 @@ left out.
       having different states.
   
 ### BlockChoco Subclass
-(is located in the Block.java file, lines 78-92)
+(is located in the Block.java file, **lines 78-92**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (scorePlusPower) and its block image file.
 
 ### BlockHeart Subclass
-(is located in the Block.java file, lines 93-107)
+(is located in the Block.java file, **lines 93-107**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (heartPower) and its block image file.
 
 ### BlockInvert Subclass
-(is located in the Block.java file, lines 108-122)
+(is located in the Block.java file, **lines 108-122**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (invertPower) and its block image file.
 
 ### BlockShort Subclass
-(is located in the Block.java file, lines 138-152)
+(is located in the Block.java file, **lines 138-152**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (shortPaddlePower) and its block image file.
 
 ### BlockStar Subclass
-(is located in the Block.java file, lines 154-168)
+(is located in the Block.java file, **lines 154-168**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (goldPower) and its block image file.
 
 ### BlockPlain Subclass
-(is located in the Block.java file, lines 123-137)
+(is located in the Block.java file, **lines 123-137**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (null) and its block image file.
 
 ### goldPower Subclass
-(is located in the Power.java file, lines 105-119)
+(is located in the Power.java file, **lines 105-119**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file 
 and its display message "GOLD BALL - FREEZE LIVES :>" when the paddle catches this power.
 
 ### heartPower Subclass
-(is located in the Power.java file, lines 90-104)
+(is located in the Power.java file, **lines 90-104**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "ONE MORE LIFE!" when the paddle catches this power.
 
 ### invertPower Subclass
-(is located in the Power.java file, lines 75-89)
+(is located in the Power.java file, **lines 75-89**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "INVERTED PADDLE CONTROLS :>" when the paddle catches this power.
 
 ### scorePlusPower Subclass
-(is located in the Power.java file, lines 54-73)
+(is located in the Power.java file, **lines 54-73**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "+3" when the paddle catches this power.
 
 ### shortPaddlePower Subclass
-(is located in the Power.java file, lines 39-53)
+(is located in the Power.java file, **lines 39-53**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "CAREFUL! PADDLE CHANGE!" when the paddle catches this power.
@@ -307,7 +307,7 @@ out of the Controller class.
   - new block type called BLOCK_SHORT was introduced - when hit by the ball, gives the bonus of shortening the paddle.
   - Since each block is associated with a power, the Power object was added to the class as a public variable.
   - This class violates the **Open-Closed Principle**. Whenever a new type of block needs to be added, the original
-    code has to be modified. The Template Method Design Pattern was implemented to solve this.
+    code has to be modified. The **Template Method Design Pattern** was implemented to solve this.
     - The Block class was modified to become an abstract class. The function draw() and initPower() are abstract 
     methods. 
     - draw() fills in the block with the appropriate image.
@@ -345,7 +345,8 @@ out of the Controller class.
 ## **Unexpected Problems:**
 1. **java.lang.UnsupportedOperationException** - happened after level 1, the blocks keep forming,
    in an endless loop, does not configure the next level. 
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
@@ -353,24 +354,28 @@ out of the Controller class.
 
 2. **When saving the game using (S), there was a FileNotFound Exception.** This was due to the filepath storing in 
    the file path "D:/..." but not all devices own a D drive.
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      In the main() function in the class Main, right before the start() function is called, I call a function named 
      setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
      If the device does not have a D drive, it changes the filepath to the game file's relative directory.
 
 3. **Load button was present in the game code but did not appear in the game screen.**
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      load button added to root for the first scene added to primaryStage. The load button functioned as expected.
 
 4. **If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
    and ball moves abnormally.**
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
      load button to check if the save.mdd file exists. If it does, the file is read to resume that game, else
      the label "No previous games saved :<" appears.
 
 5. **Labels keep freezing on screen.**
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
      a built-in animation framework for smoother animations. Instead of manually updating the scale/position of the 
      label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
@@ -378,7 +383,8 @@ out of the Controller class.
 
 6. **Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException -** occurs when iterating
    over the collections blocks and bonusArray and making changes to the collections during iteration.
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
      cause problems if they are modified while they are being iterated over. Therefore, I declared both arrays as
      concurrent collections of type CopyOnWriteArrayList. This means that it is safe to modify the collections
@@ -386,14 +392,16 @@ out of the Controller class.
 
 7. **when the player loses all their lives, when Game Over is displayed, the hearts label is not updated to 0, remains at
    old value.**
-   **- How problem was solved:**
+
+   **How problem was solved:**
      - In function handleBallYBoundaries(), in the if statement that confirms that the game is over, the program was
        altered to call the function onUpdate() for the last time to update the game screen before the game engine
        halts.
 
 8. **When playing a loaded game, after all bricks are broken, sometimes the game continues without moving to the next 
    level.** 
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
       - A logical error was present. This is because, in the read file we read the destroyedBlockCount value and the 
       blocks array stores only the blocks which have not been destroyed. If for example the player starts with 12 bricks, 
       and he breaks 7 bricks and saves the game, destroyedBlockCount stores 7, but when he reloads the game, the blocks 
@@ -404,13 +412,15 @@ out of the Controller class.
 
 9. **After incorporating the short paddle bonus, if there were many short paddle powers being caught by the paddle,
    the paddle glitches.**
-   **- How the problem was solved:**
+
+   **How the problem was solved:**
      The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
      modified. This ensured that the UI updates occurred in a thread-safe manner. After applying the solution, the game 
      was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
      paddle remained smooth and glitch-free.
 
 10. **If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.**
-    **- How the problem was solved:**
+
+    **How the problem was solved:**
       The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
       this function to check the isGoldStats flag and change the image of the ball appropriately.
