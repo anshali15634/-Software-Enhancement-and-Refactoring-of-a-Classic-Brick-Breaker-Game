@@ -9,13 +9,13 @@ import javafx.util.Duration;
 
 public class Score {
     private static final int ANIMATION_DURATION = 500; // animation duration in ms
-    public void show(final double x, final double y, int score, final Main main) {
+    public void show(final double x, final double y, int score, final Controller controller) {
         String sign = (score >=0)? "+":"";
         final Label label = new Label(sign + score);
         label.setTranslateX(x);
         label.setTranslateY(y);
 
-        Platform.runLater(() ->main.root.getChildren().add(label));
+        Platform.runLater(() -> controller.root.getChildren().add(label));
 
         // translation animation (moving up after +score appears)
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION),label);
@@ -27,19 +27,19 @@ public class Score {
         FadeTransition fadeTransition = new FadeTransition(Duration.millis(ANIMATION_DURATION), label);
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
-        fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+        fadeTransition.setOnFinished(event -> Platform.runLater(() -> controller.root.getChildren().remove(label)));
         fadeTransition.play();
     }
 
     // animation for the messages like "Level up :)"
-    public void showMessage(String message, final Main main) {
+    public void showMessage(String message, final Controller controller) {
         final Label label = new Label(message);
         label.setScaleX(2);
         label.setScaleY(2);
         // Center the label in the middle of the screen
         label.setTranslateX((double) Model.sceneWidth / 2 - 100);
         label.setTranslateY((double) Model.sceneWidth / 2);
-        Platform.runLater(() -> main.root.getChildren().add(label));
+        Platform.runLater(() -> controller.root.getChildren().add(label));
         // translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
         translateTransition.setToY(((double) Model.sceneHeight / 2) - 50); // Move up
@@ -50,11 +50,11 @@ public class Score {
         fadeTransition.setToValue(0); // Fade out
         fadeTransition.setCycleCount(1);
         // removes label from scene after animation is over
-        fadeTransition.setOnFinished(event -> Platform.runLater(() -> main.root.getChildren().remove(label)));
+        fadeTransition.setOnFinished(event -> Platform.runLater(() -> controller.root.getChildren().remove(label)));
         fadeTransition.play();
     }
 
-    public void showGameOver(final Main main) {
+    public void showGameOver(final Controller controller) {
         Platform.runLater(() -> {
             Label label = new Label("Game Over (T_T)");
             label.setTranslateX(200);
@@ -63,14 +63,14 @@ public class Score {
             label.setScaleY(2);
 
             GameButton restart = new GameButton("Back", "back.png",130,380);
-            restart.setOnAction(event -> main.restartGame());
+            restart.setOnAction(event -> controller.restartGame());
 
-            main.root.getChildren().addAll(label, restart);
+            controller.root.getChildren().addAll(label, restart);
 
         });
     }
 
-    public void showWin(final Main main) {
+    public void showWin(final Controller controller) {
         Platform.runLater(() -> {
             Label label = new Label("You Win ٩(◕‿◕｡)۶");
             label.setTranslateX(200);
@@ -80,10 +80,10 @@ public class Score {
             GameButton restart = new GameButton("Back", "back.png",130,380);
             restart.setOnAction(event -> {
                 label.setVisible(false);
-                main.restartGame();
+                controller.restartGame();
             }
             );
-            main.root.getChildren().addAll(label, restart);
+            controller.root.getChildren().addAll(label, restart);
 
         });
     }

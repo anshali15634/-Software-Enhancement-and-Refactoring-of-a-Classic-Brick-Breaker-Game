@@ -34,7 +34,7 @@ public abstract class Power implements Serializable {
 
     // Abstract method to be implemented by concrete subclasses
     protected abstract String chooseImage();
-    protected abstract void powerMessage(Main mainInstance);
+    protected abstract void powerMessage(Controller controllerInstance);
 }
 class shortPaddlePower extends Power {
     public shortPaddlePower(int row, int column) {
@@ -47,8 +47,8 @@ class shortPaddlePower extends Power {
         return url;
     }
     @Override
-    protected void powerMessage(Main mainInstance){
-        new Score().showMessage("CAREFUL! PADDLE CHANGE!", mainInstance);
+    protected void powerMessage(Controller controllerInstance){
+        new Score().showMessage("CAREFUL! PADDLE CHANGE!", controllerInstance);
     }
 }
 class scorePlusPower extends Power {
@@ -67,8 +67,8 @@ class scorePlusPower extends Power {
         return url;
     }
     @Override
-    protected void powerMessage(Main mainInstance){
-        new Score().show(x, y, 3, mainInstance);
+    protected void powerMessage(Controller controllerInstance){
+        new Score().show(x, y, 3, controllerInstance);
     }
 }
 
@@ -83,8 +83,8 @@ class invertPower extends Power {
         return url;
     }
     @Override
-    protected void powerMessage(Main mainInstance){
-        new Score().showMessage("INVERTED PADDLE CONTROLS :>", mainInstance);
+    protected void powerMessage(Controller controllerInstance){
+        new Score().showMessage("INVERTED PADDLE CONTROLS :>", controllerInstance);
     }
 }
 class heartPower extends Power {
@@ -98,8 +98,8 @@ class heartPower extends Power {
         return url;
     }
     @Override
-    protected void powerMessage(Main mainInstance){
-        new Score().showMessage("ONE MORE LIFE!", mainInstance);
+    protected void powerMessage(Controller controllerInstance){
+        new Score().showMessage("ONE MORE LIFE!", controllerInstance);
     }
 }
 class goldPower extends Power {
@@ -113,8 +113,8 @@ class goldPower extends Power {
         return url;
     }
     @Override
-    protected void powerMessage(Main mainInstance){
-        new Score().showMessage("GOLD BALL - FREEZE LIVES :>", mainInstance);
+    protected void powerMessage(Controller controllerInstance){
+        new Score().showMessage("GOLD BALL - FREEZE LIVES :>", controllerInstance);
     }
 }
 

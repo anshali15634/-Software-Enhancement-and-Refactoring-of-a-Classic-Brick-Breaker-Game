@@ -39,7 +39,7 @@ public class LoadSave {
 
     public void read() {
         try {
-            ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Main.savePath)));
+            ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(new File(Controller.savePath)));
             loadGameStats(inputStream);
             loadGameObjs(inputStream);
             loadGameFlags(inputStream);

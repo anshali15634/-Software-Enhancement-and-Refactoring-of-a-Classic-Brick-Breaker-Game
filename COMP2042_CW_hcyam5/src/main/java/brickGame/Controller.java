@@ -5,6 +5,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -12,8 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
-public class Main extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
+/**
+ *  This class serves as the main controller for the Brick Breaker game.
+ *  It handles game initialization, gameplay logic which depends on interactions with other classes and
+ *  also handles interactions with the user interface.
+ */
+public class Controller extends Application implements EventHandler<KeyEvent>, GameEngine.OnAction {
     private boolean          startGame = false;
     public boolean           gameBG = false;
 
@@ -55,14 +60,16 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
-
+/**
+ * This method initializes the game window, loads resources, and starts the game engine.
+ * @param primaryStage It is the main window on which the game will be displayed.
+ **/
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.primaryStage = primaryStage;
         primaryStage.setResizable(false);
         View.setGameIcon(primaryStage, "game_icon.png" );
         if (!model.getLoadFromSave()) {
-            System.out.println("current level, level after final: "+model.getLevel()+" "+Model.final_level);
             model.incLevel();
             if (model.getLevel() >1 && model.getLevel()<Model.final_level){
                 new Score().showMessage("Level Up (๑˃ᴗ˂)ﻭ", this);
@@ -74,16 +81,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             initBoard();
             initPaddle();
             initBall();
-            initMeter(model.getGunMeter());
+            initMeter();
         }
         root = new Pane();
         root2 = new Pane();
         View.changeGameBG(gameBG, root);
         view.initLabels(model.getScore(), model.getLevel(), model.getHeart(), Model.sceneHeight, Model.sceneWidth);
         if (!model.getLoadFromSave()) {
-            root.getChildren().addAll(model.getBall(),model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel, view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
+            root.getChildren().addAll(model.getBall(),model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel,
+                    view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
         } else {
-            root.getChildren().addAll(model.getBall(), model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel, view.pauseLabel,model.getPaddle());
+            root.getChildren().addAll(model.getBall(), model.getMeter(), view.scoreLabel, view.heartLabel,
+                    view.levelLabel, view.pauseLabel,model.getPaddle());
         }
         for (Block block : model.blocks) {
             root.getChildren().add(block.rect);
@@ -147,6 +156,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    /**
+     * This method starts the game engine, sets its frame rate, and registers the controller as an action listener to receive updates.
+     */
     private void startEngine(){
         model.getGameEngine().setOnAction(this);
         model.getGameEngine().setFps(120);
@@ -154,12 +166,18 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
-
+/** This method is the entry point for the BrickBreaker application.
+ *  Launches the game logic and user interface.
+ * */
     public static void main(String[] args) {
         setSavePaths();
         launch(args);
     }
 
+    /**
+     * This method handles user input events like keyboard presses.
+     * @param event A KeyEvent object containing information about the user's keyboard press.
+     */
     @Override
     public void handle(KeyEvent event) {
         switch (event.getCode()) {
@@ -205,6 +223,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 break;
         }
     }
+    /**
+     * This method toggles the pause state of the game.
+     */
     private void togglePause() {
         model.setIsPaused(!model.getIsPaused());
         if (model.getIsPaused()) {
@@ -215,6 +236,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             model.getGameEngine().resume();
         }
     }
+    /**
+     * This method smoothly moves the paddle in the specified direction (LEFT or RIGHT).
+     * @param direction stores either static integer variable LEFT or RIGHT (of the Controller class)
+     **/
     private void move(final int direction) {
         new Thread(() -> {
             int sleepTime = 0;
@@ -231,7 +256,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }).start();
     }
-
+/***
+ * This method initializes the ball's position and appearance.
+ */
     private void initBall() {
         Random random = new Random();
         model.setXBall(random.nextInt(Model.sceneWidth) + 1);
@@ -240,7 +267,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         model.getBall().setRadius(Model.ballRadius);
         View.gameObjectImageFill(model.getBall(),"ball.png");
     }
-
+/***
+ * This method initializes the paddle's size, position, and appearance.
+ */
     private void initPaddle() {
         if (model.isShortPaddle()){
             model.getPaddle().setWidth(Model.SHORT_PADDLE_WIDTH);
@@ -252,6 +281,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         model.getPaddle().setY(model.getYPaddle());
         View.gameObjectImageFill(model.getPaddle(),"paddle.png");
     }
+    /**
+     *This method initializes the game's board with blocks of various types.
+     * */
     private void initBoard() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < model.getLevel() + Model.LAST_BLOCK_ROW; j++) {
@@ -262,35 +294,48 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 int type;
                 if (r % 10 == 1) {
                     type = Block.BLOCK_CHOCO;
+                    model.blocks.add(new BlockChoco(j, i, Color.TRANSPARENT, type));
                 } else if (r % 10 == 2) {
                     if (!model.isIsExistHeartBlock()) {
                         type = Block.BLOCK_HEART;
+                        model.blocks.add(new BlockHeart(j, i, Color.TRANSPARENT, type));
                         model.setIsExistHeartBlock(true);
                     } else {
                         type = Block.BLOCK_NORMAL;
+                        model.blocks.add(new BlockPlain(j, i, Color.TRANSPARENT, type));
                     }
                 } else if (r % 10 == 3) {
                     type = Block.BLOCK_STAR;
+                    model.blocks.add(new BlockStar(j, i, Color.TRANSPARENT, type));
                 }else if (r % 10 == 4){
                     type = Block.BLOCK_INVERT;
+                    model.blocks.add(new BlockInvert(j, i, Color.TRANSPARENT, type));
                 }else if (r % 10 == 6){
                     type = Block.BLOCK_SHORT;
+                    model.blocks.add(new BlockShort(j, i, Color.TRANSPARENT, type));
                 } else {
                     type = Block.BLOCK_NORMAL;
+                    model.blocks.add(new BlockPlain(j, i, View.colors[r % View.colors.length], type));
                 }
-                model.blocks.add(new Block(j, i, View.colors[r % (View.colors.length)], type));
 
             }
         }
     }
-    private void initMeter(int gunMeter){
+
+    /**
+     *This method initializes the visual representation of the gun meter.
+     */
+    private void initMeter(){
         model.getMeter().setWidth(Model.NORMAL_PADDLE_WIDTH-5);
         model.getMeter().setHeight(Model.paddleHeight-5);
         model.getMeter().setX(190);
         model.getPaddle().setY(0);
         updateUIMeter(model.getGunMeter());
     }
-
+/**
+ * This method updates the visual representation of the gun meter based on the remaining charges.
+ * @param gunMeter stores the number of shots left for the player (the gun can only be used thrice)
+ */
     private void updateUIMeter(int gunMeter){
         if (gunMeter==3){
             View.gameObjectImageFill(model.getMeter(), "meterfull.png");
@@ -302,20 +347,27 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             View.gameObjectImageFill(model.getMeter(), "meterempty.png");
         }
     }
+    /**
+     *  This method creates a new bullet object and initializes its position to the paddle's center and
+     *  sets up its visual representation.
+     */
     private void initBullet(){
         Bullet bullet = new Bullet(model.getHalfPaddleWidth()+model.getXPaddle(), model.getYPaddle());
         model.bullets.add(bullet);
         root.getChildren().add(bullet);
     }
-
+    /**
+     *  This method performs a check if all the blocks are broken, and validates entry to the next level.
+     */
     private void checkDestroyedCount() {
         if (model.getDestroyedBlockCount() == model.blocks.size()) {
-            //TODO win level todo...
             nextLevel();
         }
 
     }
-
+    /**
+     * This method saves the current game state to a file in a separate thread.
+     */
     private void saveGame() {
         new Thread(() -> {
             new File(savePathDir).mkdirs();
@@ -327,7 +379,7 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
                 saveGameInfo(outputStream);
                 saveBlockInfo(outputStream);
 
-                new Score().showMessage("Game Saved", Main.this);
+                new Score().showMessage("Game Saved", Controller.this);
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -338,7 +390,11 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         }).start();
     }
-
+    /**
+     *  This method saves various game information to the specified object output stream,
+     *  enabling them to be restored later when loading the saved game.
+     * @param outputStream represents the object output stream used to write the game state information to a file.
+     */
     private void saveGameInfo(ObjectOutputStream outputStream) throws IOException {
         outputStream.writeInt(model.getLevel());
         outputStream.writeInt(model.getScore());
@@ -370,7 +426,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         outputStream.writeBoolean(model.isInvert());
         outputStream.writeBoolean(model.isShortPaddle());
     }
-
+/**
+ * This method saves the information of active blocks in the game state to the specified output stream.
+ * @param outputStream represents the object output stream used to write the game state information to a file.
+ */
     private void saveBlockInfo(ObjectOutputStream outputStream) throws IOException {
         ArrayList<BlockSerializable> blockSerializables = new ArrayList<>();
         for (Block block : model.blocks) {
@@ -381,7 +440,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
         outputStream.writeObject(blockSerializables);
     }
-
+/**
+ * This method safely closes the provided ObjectOutputStream.
+ * @param outputStream represents the object output stream used to write the game state information to a file.
+ */
     private void closeOutputStream(ObjectOutputStream outputStream) {
         try {
             if (outputStream != null) {
@@ -393,6 +455,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    /***
+     *  This method loads a previously saved game state and resumes the game from that point.
+     */
     private void loadGame() {
         LoadSave loadSave = new LoadSave();
         loadSave.read();
@@ -407,7 +472,19 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            newBlocks.add(new Block(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
+            if (ser.type == Block.BLOCK_NORMAL){
+                newBlocks.add(new BlockPlain(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
+            }else if (ser.type == Block.BLOCK_HEART){
+                newBlocks.add(new BlockHeart(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_STAR){
+                newBlocks.add(new BlockStar(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_SHORT){
+                newBlocks.add(new BlockShort(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_INVERT){
+                newBlocks.add(new BlockInvert(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_CHOCO){
+                newBlocks.add(new BlockChoco(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }
         }
 
         model.blocks.addAll(newBlocks);
@@ -422,6 +499,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    /**
+     * This method copies various game information from a LoadSave object to the game model.
+     * @param loadSave stores the game state of a previously saved game.
+     */
     private void copyGameInfo(LoadSave loadSave) {
         model.setIsExistHeartBlock(loadSave.isExistHeartBlock);
         model.setIsGoldStats(loadSave.isGoldStats);
@@ -450,20 +531,39 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         model.setvX(loadSave.vX);
         model.setInvert(loadSave.invert);
         model.setShortPaddle(loadSave.is_short);
-
-        System.out.println("\nFROM FILE SHORTPADDLE: "+ model.isShortPaddle());
     }
 
+    /**
+     * This method clears existing data (blocks and powers) and copies the information of active blocks from the LoadSave
+     * object to the game model.
+     * @param loadSave stores the game state of a previously saved game.
+     */
     private void copyBlockInfo(LoadSave loadSave) {
         model.blocks.clear();
         model.powerArray.clear();
 
         for (BlockSerializable ser : loadSave.blocks) {
             int r = new Random().nextInt(200);
-            model.blocks.add(new Block(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
+            if (ser.type == Block.BLOCK_NORMAL){
+                model.blocks.add(new BlockPlain(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
+            }else if (ser.type == Block.BLOCK_HEART){
+                model.blocks.add(new BlockHeart(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_STAR){
+                model.blocks.add(new BlockStar(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_SHORT){
+                model.blocks.add(new BlockShort(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_INVERT){
+                model.blocks.add(new BlockInvert(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }else if (ser.type == Block.BLOCK_CHOCO){
+                model.blocks.add(new BlockChoco(ser.row, ser.j, Color.TRANSPARENT, ser.type));
+            }
         }
     }
 
+    /**
+     * This method prepares the game for the next level after the current level is completed.
+     * Restarts the game loop with the updated level information.
+     */
     private void nextLevel() {
         Platform.runLater(() -> {
             try {
@@ -478,7 +578,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             }
         });
     }
-
+    /**
+     * This method restarts the game from the beginning, resetting various game parameters and initiating a new gameplay session.
+     */
     public void restartGame() {
 
         try {
@@ -497,7 +599,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 
-
+    /**
+     * This method updates the game state and performs necessary calculations and
+     * updates during each frame of the game loop.
+     */
     @Override
     public void onUpdate() {
         if (!model.getIsPaused()) {
@@ -533,6 +638,10 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
         }
     }
 
+    /**
+     * This method handles the logic when the ball collides with a block or bullet.
+     * @param block the Block object to be checked for collisions with a block or bullet.
+     */
     private void handleBlockHit(int hitCode, Block block){
         if (hitCode != Block.NO_HIT) {
             model.incScore();
@@ -542,30 +651,19 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
             model.setDestroyedBlockCount(model.getDestroyedBlockCount()+1);
             model.resetCollideFlags();
             handleBlockType(block);
-            model.setHitFlags(hitCode, block);
+            model.setHitFlags(hitCode);
         }
     }
+    /**
+     * This method matches the block's type to its respective type of power and creates a Power object.
+     * @param block the Block object which receives a matching Power object.
+     */
     private void handleBlockType(Block block) {
-        Power pow1;
-
-        if (block.type == Block.BLOCK_CHOCO) {
-            pow1 = new scorePlusPower(block.row, block.column);
-        } else if (block.type == Block.BLOCK_INVERT) {
-            pow1 = new invertPower(block.row, block.column);
-        } else if (block.type == Block.BLOCK_SHORT) {
-            pow1 = new shortPaddlePower(block.row, block.column);
-        } else if (block.type == Block.BLOCK_STAR) {
-            pow1 = new goldPower(block.row, block.column);
-        } else if (block.type == Block.BLOCK_HEART) {
-            pow1 = new heartPower(block.row, block.column);
-        } else {
-            pow1 = null;
-        }
-
-        if (pow1 != null) {
-            pow1.timeCreated = model.getTime();
-            Platform.runLater(() -> root.getChildren().add(pow1.newPowerBlock));
-            model.powerArray.add(pow1);
+        block.initPower();
+        if (block.pow != null) {
+            block.pow.timeCreated = model.getTime();
+            Platform.runLater(() -> root.getChildren().add(block.pow.newPowerBlock));
+            model.powerArray.add(block.pow);
         }
     }
 
@@ -576,6 +674,9 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
     // remains in the Main class as it involves alot of objects from different classes interacting.
+    /**
+     * This method is called periodically within the game loop to handle various physics updates and interactions.
+     */
     @Override
     public void onPhysicsUpdate() {
         checkDestroyedCount();
@@ -637,3 +738,4 @@ public class Main extends Application implements EventHandler<KeyEvent>, GameEng
     }
 
 }
+

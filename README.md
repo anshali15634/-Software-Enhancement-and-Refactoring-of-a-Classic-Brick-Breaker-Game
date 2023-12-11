@@ -6,15 +6,35 @@ the function was moved to Model as it comes under game logic.
 >> goldBlock and heartBlock before get hit and then effect. Now they are power ups.
 >> new Powers added: goldPower and heartPower
 
+GOOD POINTS TO MENTION:
+g CopyOnWriteArrayList for blocks, bullets, and powerArray a allows concurrent modification and iteration without synchronization issues.
+
 design pattern stuff done:
 singleton pattern on classes game engine and model and view
-template method pattern on power class
+template method pattern on power class and block class
 
 ## **Game Instructions:**
-- choco block gives +3 score
-- heart block gives lives
-- gold star block -> gold ball -> freezes lives for _ seconds
-- s -> saves game
+**CONTROLS:**
+- Move paddle left: Left Arrow Key
+- Move paddle right: Right Arrow Key
+- Activate gun paddle: Down Arrow Key
+- Shoot: Up Arrow Key
+
+**GAMEPLAY:**
+1. This game has 5 levels.
+2. Break as many blocks as you can by bouncing the ball off the paddle.
+3. Each block you break scores you points.
+4. Watch out for powers that drop when certain blocks get destroyed:
+   - _Star block_ releases a power that freezes your lives for 5 seconds.
+   - _Heart block_ releases a power that increases your lives by one.
+   - _Purple Pixel Block_ releases a power that shortens your paddle. If you want to remove this power,
+     try to break another _Purple Pixel Block_. Catching the same power again changes
+     your paddle size back to normal.
+   - _Blue Pixel Block_ releases a power that flips your paddle controls. Left becomes right, and vice versa.
+     But like the short paddle power, catching the same power again will reverse your controls back to normal.
+   - _Choco Block_ releases a power that increases your score by 3.
+5. The player can use their gun activation to shoot blocks. But the paddle will only shoot thrice throughout the whole
+    game. This is kept track of by a Gun Meter, on the top of the screen.
 
 ## **Compilation Instructions:**
 
@@ -34,14 +54,20 @@ template method pattern on power class
    If paddle touches this bonus, the paddle shortens. If the paddle is already shortened catching the bonus again
    will reverse the bonus (paddle becomes old size again)
 8. Pause feature implemented - press space bar to pause the game, and press space bar again to resume the game.
+9. Gun feature - (a feature from the original BrickBreaker game) shoot blocks by first pressing the down key to 
+   load ammunition, and press up key to shoot.
 
 ## **Features Implemented but Not Working Properly:**
+- Gun feature: I wanted the bullet to strike only one block and disappear, but the bullet shoots all the blocks
+  in its path before disappearing off-screen. Therefore, I implemented a limit so that it is only useable three
+  times.
 
-## **Features Not Implemented(Yet):**
-1. New bonus power - laser shooting to bricks to break them
-
+## **Features Not Implemented:**
+1. Difficulty option (Easy, Medium, Hard)
 
 ## **New Java Classes:**
+
+- Bullet Class
 
 - GameButton Class
   - It inherits from the existing Button class.
@@ -85,7 +111,7 @@ template method pattern on power class
 
 ## **Modified Java Classes:**
 _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes were replaced with lambda expressions._
-**- Main Class**
+**- Main Class (renamed as Controller class since the MVC pattern was implemented)**
     - Magic numbers avoided by adding NORMAL_PADDLE_WIDTH and SHORT_PADDLE_WIDTH static final class variables.
     - isGoldStauts renamed as isGoldStats, sceneHeigt renamed as sceneHeight, and variables and functions with the word
       colide in it was renamed to collide for clarity.
@@ -144,7 +170,7 @@ _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes w
   - function startEngine() added to remove duplicate blocks of code used to initialise the engine settings.
 
 **- GameEngine Class:**
-  - Since GameEngine is only used once in the Main class, it was converted to a singleton class. The getInstance method 
+  - Since GameEngine is only used once in the Main class, it was converted to a _singleton_ class. The getInstance method 
     is synchronized, which is good for ensuring that only one instance of GameEngine class is created even in a 
     multithreaded environment.
   - flag variable 'paused' introduced. Used by most threads in the GameEngine class to ensure the game is not
@@ -171,7 +197,7 @@ _Note: Any Runnable() functions and EventHandler<ActionEvent>() in all classes w
   - (there are negative and positive powers, therefore the class name bonus was not appropriate)
   - Different powers have different images so the class had to include multiple if statements to decide which
     image was for each power type. This violated the _Open-Closed principle_. The Power class's draw() function
-    has to be modified everytime a new bonus is added. Therefore, the _Template Method Pattern_ was used to modify
+    has to be modified everytime a new bonus is added. Therefore, the _Template Method Design Pattern_ was used to modify
     the class. 
     - The Power class was modified to become an abstract class. The function chooseImage() is an abstract method to be
        implemented by the new concrete classes (scorePlusPower, invertPower, shortPaddlePower).

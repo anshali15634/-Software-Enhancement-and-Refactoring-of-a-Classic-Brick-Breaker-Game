@@ -68,7 +68,7 @@ public class Model {
 
     public final CopyOnWriteArrayList<Block> blocks = new CopyOnWriteArrayList<>();
     public final CopyOnWriteArrayList<Bullet> bullets = new CopyOnWriteArrayList<>();
-    public final CopyOnWriteArrayList<Power> powerArray = new CopyOnWriteArrayList<Power>(); // stores bonuses for all blocks
+    public final CopyOnWriteArrayList<Power> powerArray = new CopyOnWriteArrayList<>(); // stores bonuses for all blocks
 
     private boolean goDownBall                  = true;
     private boolean goRightBall                 = true;
@@ -92,9 +92,6 @@ public class Model {
         vX = v;
     }
 
-    public static double getvY() {
-        return vY;
-    }
     public boolean isGoDownBall() {
         return goDownBall;
     }
@@ -185,14 +182,6 @@ public class Model {
 
     private boolean isExistHeartBlock = false;
 
-    public long getHitTime() {
-        return hitTime;
-    }
-
-    public void setHitTime(long ht) {
-        hitTime = ht;
-    }
-
     public long getGoldTime() {
         return goldTime;
     }
@@ -222,9 +211,6 @@ public class Model {
     }
     public double getPaddleWidth(){
         return paddleWidth;
-    }
-    public void setPaddleWidth(int pw){
-        paddleWidth=pw;
     }
 
     public double getCenterPaddleX(){
@@ -295,9 +281,6 @@ public class Model {
     public void setHeart(int h){
         heart = h;
     }
-    public void decHeart(){
-        heart--;
-    }
     public void incHeart(){
         heart++;
     }
@@ -325,11 +308,10 @@ public class Model {
     public void updatePaddleWidth(boolean shortPaddle) {
         if (shortPaddle) { // changes the variable's value
             paddleWidth=SHORT_PADDLE_WIDTH;
-            halfPaddleWidth=SHORT_PADDLE_WIDTH/2;
         } else {
             paddleWidth=NORMAL_PADDLE_WIDTH; // Use the initial paddle width when not short
-            halfPaddleWidth=SHORT_PADDLE_WIDTH/2;
         }
+        halfPaddleWidth=SHORT_PADDLE_WIDTH/2;
 
     }
     protected void resetCollideFlags() {
@@ -342,7 +324,7 @@ public class Model {
         collideToLeftBlock=false;
         collideToTopBlock=false;
     }
-    protected void setHitFlags(int hitCode, Block block){
+    protected void setHitFlags(int hitCode){
         if (hitCode == Block.HIT_RIGHT) {
             collideToRightBlock =true;
         } else if (hitCode == Block.HIT_BOTTOM) {
@@ -353,9 +335,9 @@ public class Model {
             collideToTopBlock=true;
         }
     }
-    protected void setPhysicsToBall(Main mainInstance) {
+    protected void setPhysicsToBall(Controller controllerInstance) {
             moveBall();
-            handleBallYBoundaries(mainInstance);
+            handleBallYBoundaries(controllerInstance);
             handleBallPaddleCollision();
             handleBallXBoundaries();
             handleBallWallCollisions();
@@ -417,7 +399,7 @@ public class Model {
             collideToLeftWall=true;
         }
     }
-    protected void handleBallYBoundaries(Main mainInstance){
+    protected void handleBallYBoundaries(Controller controllerInstance){
         if (yBall <= 0) {
             resetCollideFlags();
             goDownBall=true;
@@ -431,10 +413,10 @@ public class Model {
             if (!isGoldStats) {
                 heart--;
                 System.out.println("\nHEART DEDUCT AND NOT GOLD");
-                new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, mainInstance);
+                new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, controllerInstance);
                 if (heart == 0) {
-                    mainInstance.onUpdate();
-                    new Score().showGameOver(mainInstance);
+                    controllerInstance.onUpdate();
+                    new Score().showGameOver(controllerInstance);
                     engine.stop();
                 }
             }
@@ -484,13 +466,13 @@ public class Model {
 
     }
     protected void movePaddle(final int direction){
-        if (xPaddle == (sceneWidth - paddleWidth) && direction == Main.RIGHT) {
+        if (xPaddle == (sceneWidth - paddleWidth) && direction == Controller.RIGHT) {
             return;
         }
-        if (xPaddle == 0 && direction == Main.LEFT) {
+        if (xPaddle == 0 && direction == Controller.LEFT) {
             return;
         }
-        if (direction == Main.RIGHT) {
+        if (direction == Controller.RIGHT) {
             xPaddle++;
         } else {
             xPaddle--;

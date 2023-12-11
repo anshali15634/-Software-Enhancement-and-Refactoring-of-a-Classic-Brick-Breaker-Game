@@ -22,7 +22,7 @@ public class View {
     protected GameButton loadGame = new GameButton("Load Game", "load_button.png", 130, 470);
     protected GameButton about = new GameButton("About", "how_to_play.png", 130, 380);
     protected GameButton exit = new GameButton("Exit", "exit_button.png", 130, 560);
-    protected GameButton back = new GameButton("Back", "back.png",0,300);
+    protected GameButton back = new GameButton("Back", "back.png",0,630);
 
     protected Label loadLabel;
     protected Label pauseLabel;
