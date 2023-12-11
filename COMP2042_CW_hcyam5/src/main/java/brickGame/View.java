@@ -123,5 +123,20 @@ public class View {
             paddle.setWidth(pw);
         });
     }
+    /**
+     * This method updates the visual representation of the gun meter based on the remaining charges.
+     * @param gunMeter stores the number of shots left for the player (the gun can only be used thrice)
+     */
+    protected void updateUIMeter(int gunMeter, Rectangle meter){
+        if (gunMeter==3){
+            View.gameObjectImageFill(meter, "meterfull.png");
+        }else if(gunMeter==2){
+            View.gameObjectImageFill(meter, "meterhalf.png");
+        }else if (gunMeter==1){
+            View.gameObjectImageFill(meter, "meterone.png");
+        }else{
+            View.gameObjectImageFill(meter, "meterempty.png");
+        }
+    }
 
 }

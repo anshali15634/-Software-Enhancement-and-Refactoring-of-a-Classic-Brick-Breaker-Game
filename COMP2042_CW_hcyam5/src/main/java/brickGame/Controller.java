@@ -135,7 +135,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
                     loadGame();
                     model.updatePaddleWidth(model.isShortPaddle());
                     View.updateUIPaddleWidth(model.getPaddle(), model.getPaddleWidth());
-                    updateUIMeter(model.getGunMeter());
+                    view.updateUIMeter(model.getGunMeter(),model.getMeter());
                     View.setVisibleGameObjects(model.blocks, model.getBall(), model.getPaddle(), model.getMeter(), view);
                 }else{
                     view.loadLabel.setVisible(true);
@@ -199,7 +199,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
                     if (model.getGunMeter()>0 && downPress){
                         View.gameObjectImageFill(model.getPaddle(), "paddle.png");
                         model.decGunMeter();
-                        updateUIMeter(model.getGunMeter());
+                        view.updateUIMeter(model.getGunMeter(),model.getMeter());
                         downPress=false;
                         initBullet();
                     }
@@ -326,22 +326,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         model.getMeter().setHeight(Model.paddleHeight-5);
         model.getMeter().setX(190);
         model.getPaddle().setY(0);
-        updateUIMeter(model.getGunMeter());
-    }
-/**
- * This method updates the visual representation of the gun meter based on the remaining charges.
- * @param gunMeter stores the number of shots left for the player (the gun can only be used thrice)
- */
-    private void updateUIMeter(int gunMeter){
-        if (gunMeter==3){
-            View.gameObjectImageFill(model.getMeter(), "meterfull.png");
-        }else if(gunMeter==2){
-            View.gameObjectImageFill(model.getMeter(), "meterhalf.png");
-        }else if (gunMeter==1){
-            View.gameObjectImageFill(model.getMeter(), "meterone.png");
-        }else{
-            View.gameObjectImageFill(model.getMeter(), "meterempty.png");
-        }
+        view.updateUIMeter(model.getGunMeter(),model.getMeter());
     }
     /**
      *  This method creates a new bullet object and initializes its position to the paddle's center and
