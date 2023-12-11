@@ -5,7 +5,6 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.*;
@@ -287,38 +286,35 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
     private void initBoard() {
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < model.getLevel() + Model.LAST_BLOCK_ROW; j++) {
-                int r = new Random().nextInt(500);
-                if (r % 5 == 0) {
-                    continue;
+                int blockType = generateBlockType();
+                if (blockType!=-1){
+                    model.blocks.add(BlockFactory.createBlock(blockType,j,i));
                 }
-                int type;
-                if (r % 10 == 1) {
-                    type = Block.BLOCK_CHOCO;
-                    model.blocks.add(new BlockChoco(j, i, Color.TRANSPARENT, type));
-                } else if (r % 10 == 2) {
-                    if (!model.isIsExistHeartBlock()) {
-                        type = Block.BLOCK_HEART;
-                        model.blocks.add(new BlockHeart(j, i, Color.TRANSPARENT, type));
-                        model.setIsExistHeartBlock(true);
-                    } else {
-                        type = Block.BLOCK_NORMAL;
-                        model.blocks.add(new BlockPlain(j, i, Color.TRANSPARENT, type));
-                    }
-                } else if (r % 10 == 3) {
-                    type = Block.BLOCK_STAR;
-                    model.blocks.add(new BlockStar(j, i, Color.TRANSPARENT, type));
-                }else if (r % 10 == 4){
-                    type = Block.BLOCK_INVERT;
-                    model.blocks.add(new BlockInvert(j, i, Color.TRANSPARENT, type));
-                }else if (r % 10 == 6){
-                    type = Block.BLOCK_SHORT;
-                    model.blocks.add(new BlockShort(j, i, Color.TRANSPARENT, type));
-                } else {
-                    type = Block.BLOCK_NORMAL;
-                    model.blocks.add(new BlockPlain(j, i, View.colors[r % View.colors.length], type));
-                }
-
             }
+        }
+    }
+    private int generateBlockType(){
+        int r = new Random().nextInt(500)%10;
+        switch(r){
+            case (0):
+                return -1;
+            case (1):
+                return Block.BLOCK_CHOCO;
+            case (2):
+                if (!model.isIsExistHeartBlock()) {
+                    model.setIsExistHeartBlock(true);
+                    return Block.BLOCK_HEART;
+                } else {
+                    return Block.BLOCK_NORMAL;
+                }
+            case (3):
+                return Block.BLOCK_STAR;
+            case (4):
+                return Block.BLOCK_INVERT;
+            case (6):
+                return Block.BLOCK_SHORT;
+            default:
+                return Block.BLOCK_NORMAL;
         }
     }
 
@@ -471,20 +467,8 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         List<Block> newBlocks = new ArrayList<>();
 
         for (BlockSerializable ser : loadSave.blocks) {
-            int r = new Random().nextInt(200);
-            if (ser.type == Block.BLOCK_NORMAL){
-                newBlocks.add(new BlockPlain(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
-            }else if (ser.type == Block.BLOCK_HEART){
-                newBlocks.add(new BlockHeart(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_STAR){
-                newBlocks.add(new BlockStar(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_SHORT){
-                newBlocks.add(new BlockShort(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_INVERT){
-                newBlocks.add(new BlockInvert(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_CHOCO){
-                newBlocks.add(new BlockChoco(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }
+            Block newBlock=BlockFactory.createBlock(ser.type,ser.row,ser.j);
+            newBlocks.add(newBlock);
         }
 
         model.blocks.addAll(newBlocks);
@@ -543,20 +527,8 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         model.powerArray.clear();
 
         for (BlockSerializable ser : loadSave.blocks) {
-            int r = new Random().nextInt(200);
-            if (ser.type == Block.BLOCK_NORMAL){
-                model.blocks.add(new BlockPlain(ser.row, ser.j, View.colors[r % View.colors.length], ser.type));
-            }else if (ser.type == Block.BLOCK_HEART){
-                model.blocks.add(new BlockHeart(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_STAR){
-                model.blocks.add(new BlockStar(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_SHORT){
-                model.blocks.add(new BlockShort(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_INVERT){
-                model.blocks.add(new BlockInvert(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }else if (ser.type == Block.BLOCK_CHOCO){
-                model.blocks.add(new BlockChoco(ser.row, ser.j, Color.TRANSPARENT, ser.type));
-            }
+            Block newBlock = BlockFactory.createBlock(ser.type, ser.row, ser.j);
+            model.blocks.add(newBlock);
         }
     }
 
