@@ -25,9 +25,12 @@
 6. The player has to first activate the gun by **pressing the down arrow key** and then shoot using the **up arrow key**.
 
 ## **Compilation Instructions:**
-Import project into your IDE.
-Set the Main Class in Run Configurations to brickGame.Controller
-Compile and run the game directly.
+Ensure you have the JDK 2021 version, and the SDK 2021 version.
+Verify the JavaFX project library. Ensure the dependencies are available.
+Import project into your Intellij IDE and select Maven as your project type.
+Ensure that the resources folder containing the game images is marked as the Resources Root.
+Set the Main Class in Run Configurations to brickGame.Controller.
+Run the program directly.
 
 ## **Features Implemented and Working Properly:**
 1. Game Icon added to Window - top left of window and application icon displays the BrickBreaker logo.
@@ -148,61 +151,61 @@ left out.
       having different states.
   
 ### BlockChoco Subclass
-(is located in the Block.java file, **lines 78-92**)
+(is located in the Block.java file, **lines 130-144**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (scorePlusPower) and its block image file.
 
 ### BlockHeart Subclass
-(is located in the Block.java file, **lines 93-107**)
+(is located in the Block.java file, **lines 149-163**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (heartPower) and its block image file.
 
 ### BlockInvert Subclass
-(is located in the Block.java file, **lines 108-122**)
+(is located in the Block.java file, **lines 168-182**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (invertPower) and its block image file.
 
 ### BlockShort Subclass
-(is located in the Block.java file, **lines 138-152**)
+(is located in the Block.java file, **lines 206-220**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (shortPaddlePower) and its block image file.
 
 ### BlockStar Subclass
-(is located in the Block.java file, **lines 154-168**)
+(is located in the Block.java file, **lines 226-240**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (goldPower) and its block image file.
 
 ### BlockPlain Subclass
-(is located in the Block.java file, **lines 123-137**)
+(is located in the Block.java file, **lines 187-201**)
 - inherits from abstract class Block
 - This subclass was created to define the block's own specific power (null) and its block image file.
 
 ### goldPower Subclass
-(is located in the Power.java file, **lines 105-119**)
+(is located in the Power.java file, **lines 164-184**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file 
 and its display message "GOLD BALL - FREEZE LIVES :>" when the paddle catches this power.
 
 ### heartPower Subclass
-(is located in the Power.java file, **lines 90-104**)
+(is located in the Power.java file, **lines 139-159**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "ONE MORE LIFE!" when the paddle catches this power.
 
 ### invertPower Subclass
-(is located in the Power.java file, **lines 75-89**)
+(is located in the Power.java file, **lines 114-134**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "INVERTED PADDLE CONTROLS :>" when the paddle catches this power.
 
 ### scorePlusPower Subclass
-(is located in the Power.java file, **lines 54-73**)
+(is located in the Power.java file, **lines 84-109**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "+3" when the paddle catches this power.
 
 ### shortPaddlePower Subclass
-(is located in the Power.java file, **lines 39-53**)
+(is located in the Power.java file, **lines 59-79**)
 - inherits from abstract class Power
 - This subclass was created to define the power's image file
 and its display message "CAREFUL! PADDLE CHANGE!" when the paddle catches this power.
@@ -349,7 +352,7 @@ out of the Controller class.
    in an endless loop, does not configure the next level. 
 
    **How the problem was solved:**
-     - In the stop() function of the Game Engine class previously used .stop() to terminate the threads.
+     - In the stop() function [lines 113-120] of the Game Engine class previously used .stop() to terminate the threads.
      This method is deprecated in Java as it may leave the application in an inconsistent state.
      I used .interrupt() to make the respective threads' (updateThread, timeThread and PhysicsThread)
      run() functions to throw an Interrupted Exception, and then returning from the functions to exit them.
@@ -358,14 +361,14 @@ out of the Controller class.
    the file path "D:/..." but not all devices own a D drive.
 
    **How the problem was solved:**
-     - In the main() function in the class Main, right before the start() function is called, I call a function named 
-     setSavePaths(). It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
+     - In the main() function in the class Controller, right before the start() function is called, I call a function named 
+     setSavePaths() [lines 53-62]. It checks if the device has a D drive and alters the variables savePath and savePathDir accordingly.
      If the device does not have a D drive, it changes the filepath to the game file's relative directory.
 
 3. **Load button was present in the game code but did not appear in the game screen.**
 
    **How the problem was solved:**
-     - load button added to root for the first scene added to primaryStage. The load button functioned as expected.
+     - load button added to root for the first scene added to primaryStage. The load button functioned as expected [line 92, Controller Class].
 
 4. **If there was no saved game progress and "load game" button is pressed, the paddle moves to the top left of the screen
    and ball moves abnormally.**
@@ -373,7 +376,7 @@ out of the Controller class.
    **How the problem was solved:**
      - There is game progress saved only if the save.mdd file exists. Therefore, I altered the setOnAction function for the 
      load button to check if the save.mdd file exists. If it does, the file is read to resume that game, else
-     the label "No previous games saved :<" appears.
+     the label "No previous games saved :<" appears. [lines 133-144, Controller class]
 
 5. **Labels keep freezing on screen.**
 
@@ -381,7 +384,7 @@ out of the Controller class.
      - Thread.sleep(15) for animations is not the most efficient way to achieve animations on JavaFX, therefore I used 
      a built-in animation framework for smoother animations. Instead of manually updating the scale/position of the 
      label with a for loop to make animations with threading, I utilized TranslateTransition for movement and 
-     FadeTransition for fading.
+     FadeTransition for fading. [lines 31-41, Score class]
 
 6. **Exception in thread "JavaFX Application Thread" java.util.ConcurrentModificationException -** occurs when iterating
    over the collections blocks and bonusArray and making changes to the collections during iteration.
@@ -389,7 +392,7 @@ out of the Controller class.
    **How the problem was solved:**
      - The ArrayLists blocks and bonusArray are declared as normal collections, which are not thread-safe and can
      cause problems if they are modified while they are being iterated over. Therefore, I declared both arrays as
-     concurrent collections of type CopyOnWriteArrayList. This means that it is safe to modify the collections
+     concurrent collections of type CopyOnWriteArrayList. [lines 95-97, Model class] This means that it is safe to modify the collections
      while you are iterating over it, so you will not get a ConcurrentModificationException.
 
 7. **when the player loses all their lives, when Game Over is displayed, the hearts label is not updated to 0, remains at
@@ -398,7 +401,7 @@ out of the Controller class.
    **How problem was solved:**
      - In function handleBallYBoundaries(), in the if statement that confirms that the game is over, the program was
        altered to call the function onUpdate() for the last time to update the game screen before the game engine
-       halts.
+       halts. [lines 763-783, Model class]
 
 8. **When playing a loaded game, after all bricks are broken, sometimes the game continues without moving to the next 
    level.** 
@@ -410,13 +413,13 @@ out of the Controller class.
       array size is now 5, as destroyed bricks are not loaded. We compare destroyedBlockCount and blocks array size (if they are equal) 
       to call nextLevel, but these values will never be the same.
       - in the function loadGameStats(), I overwrite destroyedBlockCount to 0. If destroyed blocks are not loaded into
-      the game, there is no need to store the player's previous destroyedBlockCount.
+      the game, there is no need to store the player's previous destroyedBlockCount. [lines 68-79, LoadSave class]
 
 9. **After incorporating the short paddle bonus, if there were many short paddle powers being caught by the paddle,
    the paddle glitches.**
 
    **How the problem was solved:**
-     - The code responsible for changing the paddle width was updated to use `Platform.runLater()` each time the width was
+     - The code responsible for changing the paddle width was updated to use `Platform.runLater()` [lines 180-185, View class] each time the width was
      modified. This ensured that the UI updates occurred in a thread-safe manner. After applying the solution, the game 
      was tested, and the glitch associated with frequent paddle resizing was no longer observed. The movement of the 
      paddle remained smooth and glitch-free.
@@ -424,5 +427,5 @@ out of the Controller class.
 10. **If the game was saved while the ball was in gold form, the loaded game does not show the ball with gold ball image.**
 
     **How the problem was solved:**
-      - The function which frequently updated the ball's features was the moveBall() function. Therefore, I modified
+      - The function which frequently updated the ball's features was the moveBall() function [lines 695-715, Model class]. Therefore, I modified
       this function to check the isGoldStats flag and change the image of the ball appropriately.

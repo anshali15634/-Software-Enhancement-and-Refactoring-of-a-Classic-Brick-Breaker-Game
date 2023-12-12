@@ -30,8 +30,7 @@ public class Bullet extends Rectangle {
         return isDestroyed;
     }
     /**
-     * This function alters the state of the private variable isDestroyed.
-     */
+     * This function alters the state of the private variable isDestroyed.    */
     public void setDestroyed(boolean destroyed) {
         isDestroyed = destroyed;
     }

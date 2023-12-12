@@ -33,17 +33,17 @@ public class Model {
         }
         return instance;
     }
-    public static final int sceneWidth = 500; // static
-    public static final int sceneHeight = 700;// static
+    public static final int SCENE_WIDTH = 500; // static
+    public static final int SCENE_HEIGHT = 700;// static
     public static final int SHORT_PADDLE_WIDTH = 90;// static
     public static final int NORMAL_PADDLE_WIDTH = 130;// static
     public static final int LAST_BLOCK_ROW=2; // decides how many rows of blocks per level // static
-    public static final int ballRadius = 10;// static
+    public static final int BALL_RADIUS = 10;// static
     private int level=0;// static
     public final static int final_level = 6; // game finishes at level 5// static
     private static int paddleWidth = NORMAL_PADDLE_WIDTH;
     private static int halfPaddleWidth = paddleWidth / 2;
-    public static final int paddleHeight = 30;
+    public static final int PADDLE_HEIGHT = 30;
 
 
     private Circle ball = new Circle();
@@ -719,7 +719,7 @@ public class Model {
      * Updates the ball's velocity and direction based on the collision point.
      */
     protected void handleBallPaddleCollision(){
-        if (yBall >= yPaddle - ballRadius) {
+        if (yBall >= yPaddle - BALL_RADIUS) {
             if (xBall >= xPaddle && xBall <= xPaddle + paddleWidth) {
                 hitTime=time;
                 resetCollideFlags();
@@ -745,7 +745,7 @@ public class Model {
      * Updates the ball's direction and collision flags accordingly.
      */
     protected void handleBallXBoundaries(){
-        if (xBall >= sceneWidth) {
+        if (xBall >= SCENE_WIDTH) {
             resetCollideFlags();
             collideToRightWall=true;
         }
@@ -767,12 +767,12 @@ public class Model {
             return;
         }
 
-        if (yBall + (2*ballRadius) >= Model.sceneHeight) {
+        if (yBall + (2* BALL_RADIUS) >= Model.SCENE_HEIGHT) {
             goDownBall=false;
             resetCollideFlags();
             if (!isGoldStats) {
                 heart--;
-                new Score().show(Model.sceneWidth / 2,Model.sceneHeight / 2, -1, controllerInstance);
+                new Score().show(Model.SCENE_WIDTH / 2,Model.SCENE_HEIGHT / 2, -1, controllerInstance);
                 if (heart == 0) {
                     controllerInstance.onUpdate();
                     new Score().showGameOver(controllerInstance);
@@ -840,7 +840,7 @@ public class Model {
      * @param direction The direction to move the paddle (Controller.LEFT or Controller.RIGHT)
      */
     protected void movePaddle(final int direction){
-        if (xPaddle == (sceneWidth - paddleWidth) && direction == Controller.RIGHT) {
+        if (xPaddle == (SCENE_WIDTH - paddleWidth) && direction == Controller.RIGHT) {
             return;
         }
         if (xPaddle == 0 && direction == Controller.LEFT) {
@@ -866,8 +866,8 @@ public class Model {
             return Block.NO_HIT;
         }
         double boundary = 5.0; // marks boundary for ball-block collision
-        if (xBall + ballRadius >= block.x - boundary && xBall - ballRadius <= block.x + Block.getWidth() + boundary &&
-                yBall + ballRadius >= block.y - boundary && yBall - ballRadius <= block.y + Block.getHeight() + boundary) {
+        if (xBall + BALL_RADIUS >= block.x - boundary && xBall - BALL_RADIUS <= block.x + Block.getWidth() + boundary &&
+                yBall + BALL_RADIUS >= block.y - boundary && yBall - BALL_RADIUS <= block.y + Block.getHeight() + boundary) {
             // now just decide which block side was touched by ball
             if (yBall >= block.y && yBall <= block.y + Block.getHeight()) {
                 if (xBall >= block.x && xBall <= block.x + Block.getWidth()) {

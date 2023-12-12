@@ -88,7 +88,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         root = new Pane();
         root2 = new Pane();
         View.changeGameBG(gameBG, root);
-        view.initLabels(model.getScore(), model.getLevel(), model.getHeart(), Model.sceneHeight, Model.sceneWidth);
+        view.initLabels(model.getScore(), model.getLevel(), model.getHeart(), Model.SCENE_HEIGHT, Model.SCENE_WIDTH);
         if (!model.getLoadFromSave()) {
             root.getChildren().addAll(model.getBall(),model.getMeter(), view.scoreLabel, view.heartLabel, view.levelLabel,
                     view.newGame, view.about, view.exit, view.loadGame,view.loadLabel,view.pauseLabel,model.getPaddle());
@@ -101,12 +101,12 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }
 
         // set up the main scene for gameplay
-        Scene scene = new Scene(root, Model.sceneWidth, Model.sceneHeight);
+        Scene scene = new Scene(root, Model.SCENE_WIDTH, Model.SCENE_HEIGHT);
         scene.getStylesheets().add("style.css");
         scene.setOnKeyPressed(this);
 
         // set up scene for showing game instructions
-        Scene scene2 = new Scene(root2, Model.sceneWidth, Model.sceneHeight);
+        Scene scene2 = new Scene(root2, Model.SCENE_WIDTH, Model.SCENE_HEIGHT);
         root2.getChildren().add(view.back);
         root2.setStyle("-fx-background-image: url('how_To_play_bg.png')");
 
@@ -263,9 +263,9 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
  */
     private void initBall() {
         Random random = new Random();
-        model.setXBall(random.nextInt(Model.sceneWidth) + 1);
-        model.setYBall(random.nextInt(Model.sceneHeight - 200) + ((model.getLevel() + 1) * Block.getHeight()) + 15);
-        model.getBall().setRadius(Model.ballRadius);
+        model.setXBall(random.nextInt(Model.SCENE_WIDTH) + 1);
+        model.setYBall(random.nextInt(Model.SCENE_HEIGHT - 200) + ((model.getLevel() + 1) * Block.getHeight()) + 15);
+        model.getBall().setRadius(Model.BALL_RADIUS);
         View.gameObjectImageFill(model.getBall(),"ball.png");
     }
 /***
@@ -277,7 +277,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }else{
             model.getPaddle().setWidth(Model.NORMAL_PADDLE_WIDTH);
         }
-        model.getPaddle().setHeight(Model.paddleHeight);
+        model.getPaddle().setHeight(Model.PADDLE_HEIGHT);
         model.getPaddle().setX(model.getXPaddle());
         model.getPaddle().setY(model.getYPaddle());
         View.gameObjectImageFill(model.getPaddle(),"paddle.png");
@@ -330,7 +330,7 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
      */
     private void initMeter(){
         model.getMeter().setWidth(Model.NORMAL_PADDLE_WIDTH-5);
-        model.getMeter().setHeight(Model.paddleHeight-5);
+        model.getMeter().setHeight(Model.PADDLE_HEIGHT -5);
         model.getMeter().setX(190);
         model.getPaddle().setY(0);
         view.updateUIMeter(model.getGunMeter(),model.getMeter());
@@ -634,10 +634,10 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
 
     /**
      * This method is called within the game loop to handle various physics updates and interactions.
-     * Checks if all the blocks are destroyed in the given level
-     * Halts the gold power effect (unfreezes lives) by checking if over time limit (5 seconds)
-     * Performs collision detection on the falling powers with the paddle.
-     * Performs collision detection on the bullets with the blocks.
+     * It checks if all the blocks are destroyed in the given level
+     * It halts the gold power effect (unfreezes lives) by checking if over time limit (5 seconds)
+     * It performs collision detection on the falling powers with the paddle.
+     * It performs collision detection on the bullets with the blocks.
      */
     @Override
     public void onPhysicsUpdate() {
@@ -650,10 +650,10 @@ public class Controller extends Application implements EventHandler<KeyEvent>, G
         }
         // all bonuses are run through
         for (Power power : model.powerArray) {
-            if (power.y > Model.sceneHeight || power.taken) {
+            if (power.y > Model.SCENE_HEIGHT || power.taken) {
                 continue; // skip this block and go to next choco
             }
-            if (power.y >= model.getYPaddle() && power.y <= model.getYPaddle() + Model.paddleHeight && power.x >= model.getXPaddle() && power.x <= model.getXPaddle() + model.getPaddleWidth()) {
+            if (power.y >= model.getYPaddle() && power.y <= model.getYPaddle() + Model.PADDLE_HEIGHT && power.x >= model.getXPaddle() && power.x <= model.getXPaddle() + model.getPaddleWidth()) {
                 handlePowerType(power);
                 power.powerMessage(this);
                 power.newPowerBlock.setVisible(false);

@@ -51,12 +51,12 @@ public class Score {
         label.setScaleX(2);
         label.setScaleY(2);
         // Center the label in the middle of the screen
-        label.setTranslateX((double) Model.sceneWidth / 2 - 100);
-        label.setTranslateY((double) Model.sceneWidth / 2);
+        label.setTranslateX((double) Model.SCENE_WIDTH / 2 - 100);
+        label.setTranslateY((double) Model.SCENE_WIDTH / 2);
         Platform.runLater(() -> controller.root.getChildren().add(label));
         // Translation animation
         TranslateTransition translateTransition = new TranslateTransition(Duration.millis(ANIMATION_DURATION), label);
-        translateTransition.setToY(((double) Model.sceneHeight / 2) - 50); // Move up
+        translateTransition.setToY(((double) Model.SCENE_HEIGHT / 2) - 50); // Move up
         translateTransition.setCycleCount(1);
         translateTransition.play();
         // Fade animation
