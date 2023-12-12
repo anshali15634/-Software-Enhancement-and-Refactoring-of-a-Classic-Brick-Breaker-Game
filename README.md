@@ -25,9 +25,11 @@
 6. The player has to first activate the gun by **pressing the down arrow key** and then shoot using the **up arrow key**.
 
 ## **Compilation Instructions:**
+Open the Intellij IDE.
 Ensure you have the JDK 2021 version, and the SDK 2021 version.
 Verify the JavaFX project library. Ensure the dependencies are available.
 Import project into your Intellij IDE and select Maven as your project type.
+Open the pom.xml file to ensure that the necessary dependencies are downloaded.
 Ensure that the resources folder containing the game images is marked as the Resources Root.
 Set the Main Class in Run Configurations to brickGame.Controller.
 Run the program directly.
